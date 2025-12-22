@@ -1,17 +1,24 @@
 {
   "expo": {
     "name": "mambo",
-    "slug": "mambo",
-    "version": "1.0.0",
+    "slug": "mambo-fitness",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mambo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.mambo.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Esta app necesita acceso a tu cámara para tomar fotos de tus comidas.",
+        "NSPhotoLibraryUsageDescription": "Esta app necesita acceso a tus fotos para seleccionar imágenes de tus comidas.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.mambo.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -19,7 +26,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "output": "static",
@@ -27,6 +39,8 @@
     },
     "plugins": [
       "expo-router",
+      "expo-sensors",
+      "expo-av",
       [
         "expo-splash-screen",
         {
@@ -43,6 +57,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ff718aa3-8694-4dc3-90a9-e399f33df233"
+      }
+    },
+    "owner": "mambooooo"
   }
 }
