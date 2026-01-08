@@ -73,11 +73,10 @@
       [
         "@sentry/react-native/expo",
         {
-          "organization": "mambo-fitness",
-          "project": "mambo-react-native"
+          "organization": "eviecore",
+          "project": "javascript-react"
         }
       ],
-      "@sentry/react-native",
       "expo-web-browser"
     ],
     "experiments": {
