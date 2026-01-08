@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Icon } from './ui/Icon';
 import { Card } from './ui/Card';
-import { WorkoutSet } from '@/store/activeWorkoutStore';
+import { WorkoutSet } from '@/types/schema';
 import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { calculateOneRM } from '@/utils/workoutMath';
+import { AccessibleText } from './ui/AccessibleText';
 
 interface SetRowProps {
     set: WorkoutSet;
@@ -14,17 +17,20 @@ interface SetRowProps {
     onOpenCalc?: (weight: number) => void;
     previousSet?: { weight: number; reps: number };
     show1RM?: boolean;
+    onRemove?: () => void;
 }
 
-const SET_TYPES = [
-    { key: 'warmup', label: 'Calentamiento', color: Colors.warning },
-    { key: 'normal', label: 'Normal', color: Colors.primary },
-    { key: 'dropset', label: 'Drop Set', color: Colors.error },
-    { key: 'failure', label: 'Al Fallo', color: Colors.secondary },
-    { key: 'rest_pause', label: 'Rest-Pause', color: Colors.success },
-] as const;
+export default function SetRow({ set, index, onUpdate, onToggle, onTypeChange, onOpenCalc, previousSet, show1RM, onRemove }: SetRowProps) {
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
 
-export default function SetRow({ set, index, onUpdate, onToggle, onTypeChange, onOpenCalc, previousSet, show1RM }: SetRowProps) {
+    const SET_TYPES = [
+        { key: 'warmup', label: 'Calentamiento', color: colors.warning },
+        { key: 'normal', label: 'Normal', color: colors.primary },
+        { key: 'dropset', label: 'Drop Set', color: colors.error },
+        { key: 'failure', label: 'Al Fallo', color: colors.secondary },
+        { key: 'rest_pause', label: 'Rest-Pause', color: colors.success },
+    ] as const;
     const [weight, setWeight] = useState(set.weight > 0 ? set.weight.toString() : '');
     const [reps, setReps] = useState(set.reps > 0 ? set.reps.toString() : '');
     const [rir, setRir] = useState(set.rir > 0 ? set.rir.toString() : '');
@@ -86,87 +92,96 @@ export default function SetRow({ set, index, onUpdate, onToggle, onTypeChange, o
     return (
         <View className="mb-1.5">
             <Card
-                variant={set.completed ? 'default' : 'glass'}
+                variant={set.completed ? 'solid' : 'glass'}
                 className={`p-3 border ${set.completed ? 'bg-success/20 border-success/30' : 'border-white/5'}`}
             >
                 <View className="flex-row items-center">
                     {/* Set Number */}
                     <View className="w-10 items-center">
-                        <Text className={`font-black text-sm ${set.completed ? 'text-success' : 'text-text-secondary'}`}>
+                        <AccessibleText className={`font-black text-sm ${set.completed ? 'text-success' : 'text-text-secondary'}`}>
                             {index + 1}
-                        </Text>
+                        </AccessibleText>
                         {previousSet && (
-                            <Text className="text-[10px] text-text-muted font-bold mt-0.5">
+                            <AccessibleText className="text-[10px] text-text-muted font-bold mt-0.5">
                                 {previousSet.weight}x{previousSet.reps}
-                            </Text>
+                            </AccessibleText>
                         )}
                     </View>
 
                     {/* Set Type Selector */}
                     <TouchableOpacity
                         onPress={() => setShowTypeSelector(!showTypeSelector)}
-                        className="w-8 h-8 rounded-lg items-center justify-center mr-2 border border-white/5"
+                        className="w-11 h-11 rounded-xl items-center justify-center mr-2 border border-white/5"
                         style={{ backgroundColor: currentType.color + '20' }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Tipo de serie: ${currentType.label}`}
+                        accessibilityHint="Toca para cambiar el tipo de serie (calentamiento, drop set, etc.)"
                     >
-                        <Text className="text-[10px] font-black" style={{ color: currentType.color }}>
+                        <AccessibleText className="text-xs font-black" style={{ color: currentType.color }}>
                             {currentType.label.slice(0, 1).toUpperCase()}
-                        </Text>
+                        </AccessibleText>
                     </TouchableOpacity>
 
                     {/* Weight Input */}
                     <View className="flex-1 px-1">
                         <TextInput
-                            className={`text-text p-2 rounded-xl text-center font-black text-base ${set.completed
+                            className={`text-text p-2 rounded-xl text-center font-black text-lg h-11 ${set.completed
                                 ? 'bg-success/10 border-transparent'
                                 : 'bg-surface-highlight/50 border border-white/5 focus:border-primary/50'
                                 }`}
                             placeholder={previousSet ? previousSet.weight.toString() : "-"}
-                            placeholderTextColor={Colors.textMuted}
+                            placeholderTextColor={colors.textMuted}
                             keyboardType="decimal-pad"
                             value={weight}
                             onChangeText={setWeight}
                             onBlur={handleBlur}
                             editable={!set.completed}
                             selectTextOnFocus
+                            accessibilityLabel={`Peso para la serie ${index + 1}`}
+                            accessibilityHint="Ingresa el peso en kilogramos"
                         />
                     </View>
 
                     {/* Reps Input */}
                     <View className="flex-1 px-1">
                         <TextInput
-                            className={`text-text p-2 rounded-xl text-center font-black text-base ${set.completed
+                            className={`text-text p-2 rounded-xl text-center font-black text-lg h-11 ${set.completed
                                 ? 'bg-success/10 border-transparent'
                                 : 'bg-surface-highlight/50 border border-white/5 focus:border-primary/50'
                                 }`}
                             placeholder={previousSet ? previousSet.reps.toString() : "-"}
-                            placeholderTextColor={Colors.textMuted}
+                            placeholderTextColor={colors.textMuted}
                             keyboardType="number-pad"
                             value={reps}
                             onChangeText={setReps}
                             onBlur={handleBlur}
                             editable={!set.completed}
                             selectTextOnFocus
+                            accessibilityLabel={`Repeticiones para la serie ${index + 1}`}
+                            accessibilityHint="Ingresa el número de repeticiones realizadas"
                         />
                     </View>
 
                     {/* RIR Input */}
                     <View className="flex-1 px-1 relative">
                         <TextInput
-                            className={`text-text p-2 rounded-xl text-center font-black text-base ${set.completed
+                            className={`text-text p-2 rounded-xl text-center font-black text-lg h-11 ${set.completed
                                 ? 'bg-success/10 border-transparent'
                                 : 'bg-surface-highlight/50 border border-white/5 focus:border-primary/50'
                                 }`}
                             placeholder="-"
-                            placeholderTextColor={Colors.textMuted}
+                            placeholderTextColor={colors.textMuted}
                             keyboardType="decimal-pad"
                             value={rir}
                             onChangeText={setRir}
                             onBlur={handleBlur}
                             editable={!set.completed}
                             selectTextOnFocus
+                            accessibilityLabel={`RIR para la serie ${index + 1}`}
+                            accessibilityHint="Repeticiones en reserva. Cuántas más podrías haber hecho."
                         />
                         {!set.completed && (
-                            <View className="absolute top-1 right-1">
+                            <View className="absolute top-1 right-1" pointerEvents="none">
                                 <Icon name="flash" size={10} variant="warning" />
                             </View>
                         )}
@@ -175,65 +190,85 @@ export default function SetRow({ set, index, onUpdate, onToggle, onTypeChange, o
                     {/* 1RM Estimate (Small Badge) */}
                     {show1RM && !set.completed && parseFloat(weight) > 0 && parseInt(reps) > 0 && (
                         <View className="absolute -top-2 right-14 bg-accent px-1.5 py-0.5 rounded-md z-10">
-                            <Text className="text-[8px] font-black text-white uppercase">
-                                1RM: {Math.round(parseFloat(weight) * (1 + parseInt(reps) / 30))}
-                            </Text>
+                            <AccessibleText className="text-[8px] font-black text-white uppercase">
+                                1RM: {calculateOneRM(parseFloat(weight), parseInt(reps))}
+                            </AccessibleText>
                         </View>
                     )}
 
-                    {/* Plate Calculator Button */}
-                    {onOpenCalc && !set.completed && (
+
+
+                    {/* Delete Button */}
+                    {onRemove && !set.completed && (
                         <TouchableOpacity
-                            onPress={() => onOpenCalc(parseFloat(weight) || 0)}
-                            className="w-8 h-8 rounded-lg items-center justify-center bg-primary/20 border border-primary/30 ml-1"
+                            onPress={() => {
+                                Alert.alert(
+                                    'Eliminar Serie',
+                                    '¿Estás seguro?',
+                                    [
+                                        { text: 'Cancelar', style: 'cancel' },
+                                        { text: 'Eliminar', onPress: onRemove, style: 'destructive' }
+                                    ]
+                                );
+                            }}
+                            className="w-11 h-11 rounded-xl items-center justify-center bg-error/20 border border-error/30 ml-1"
+                            accessibilityRole="button"
+                            accessibilityLabel={`Eliminar serie ${index + 1}`}
                         >
-                            <Icon name="calculator-outline" size={16} variant="primary" />
+                            <Icon name="trash-outline" size={20} color={colors.error} />
                         </TouchableOpacity>
                     )}
-
                     {/* Check Button */}
                     <TouchableOpacity
                         onPress={handleToggle}
                         disabled={!isReady && !set.completed}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                         className={`w-10 h-10 rounded-xl items-center justify-center ml-2 shadow-sm ${set.completed
                             ? 'bg-success shadow-success/20'
                             : isReady
                                 ? 'bg-primary shadow-primary/20 active:bg-primary/80'
                                 : 'bg-surface-highlight/50 border border-white/5'
                             }`}
+                        accessibilityRole="button"
+                        accessibilityLabel={set.completed ? "Marcar como no completada" : "Marcar como completada"}
+                        accessibilityState={{ checked: set.completed }}
                     >
                         <Icon
                             name={set.completed ? "checkmark-sharp" : "checkmark-outline"}
                             size={20}
-                            color={set.completed ? 'white' : isReady ? 'white' : Colors.textMuted}
+                            color={set.completed ? 'white' : isReady ? 'white' : colors.textMuted}
                         />
                     </TouchableOpacity>
                 </View>
-            </Card>
+            </Card >
 
             {/* Type Selector */}
-            {showTypeSelector && (
-                <Card variant="glass" className="mt-2 p-2 border-white/10">
-                    <View className="flex-row flex-wrap gap-1.5">
-                        {SET_TYPES.map((type) => (
-                            <TouchableOpacity
-                                key={type.key}
-                                onPress={() => {
-                                    onTypeChange?.(type.key as WorkoutSet['type']);
-                                    setShowTypeSelector(false);
-                                }}
-                                className="flex-1 min-w-[30%] p-2 rounded-xl items-center border border-white/5"
-                                style={{ backgroundColor: type.color + '20' }}
-                            >
-                                <Text className="text-[10px] font-black uppercase tracking-widest text-center" style={{ color: type.color }}>
-                                    {type.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </Card>
-            )}
-        </View>
+            {
+                showTypeSelector && (
+                    <Card variant="glass" className="mt-2 p-2 border-white/10">
+                        <View className="flex-row flex-wrap gap-1.5">
+                            {SET_TYPES.map((type) => (
+                                <TouchableOpacity
+                                    key={type.key}
+                                    onPress={() => {
+                                        onTypeChange?.(type.key as WorkoutSet['type']);
+                                        setShowTypeSelector(false);
+                                    }}
+                                    className="flex-1 min-w-[30%] p-2 rounded-xl items-center border border-white/5"
+                                    style={{ backgroundColor: type.color + '20' }}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={type.label}
+                                >
+                                    <AccessibleText className="text-[10px] font-black uppercase tracking-widest text-center" style={{ color: type.color }}>
+                                        {type.label}
+                                    </AccessibleText>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </Card>
+                )
+            }
+        </View >
     );
 }
 

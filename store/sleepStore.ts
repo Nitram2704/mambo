@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocalDateString } from '@/utils/dateUtils';
+import { supabase } from '@/lib/supabase';
 
 export type SleepQuality = 1 | 2 | 3 | 4 | 5;
 export type SleepTag = 'restless' | 'dreams' | 'interrupted' | 'refreshed';
@@ -51,6 +52,8 @@ interface SleepState {
     calculateAndSaveScore: (date: string, noiseEvents?: number) => void;
     updateChronotype: () => void;
     calculateSleepDebt: () => void;
+    fetchSleepLogs: () => Promise<void>;
+    clearData: () => void;
 }
 
 export const useSleepStore = create<SleepState>()(
@@ -65,7 +68,10 @@ export const useSleepStore = create<SleepState>()(
             chronotype: 'Bear',
             sleepDebt: 0,
 
-            logSleep: (sleepData) => {
+            logSleep: async (sleepData) => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
                 // Calculate duration in minutes
                 const bedTime = new Date(sleepData.bedTime);
                 const wakeTime = new Date(sleepData.wakeTime);
@@ -83,48 +89,102 @@ export const useSleepStore = create<SleepState>()(
                     createdAt: new Date(),
                 };
 
+                // Optimistic update
                 set((state) => ({
                     sleepLogs: {
                         ...state.sleepLogs,
                         [sleepData.date]: newLog,
                     },
                 }));
+
+                // Sync to Supabase
+                const { error } = await supabase
+                    .from('sleep_logs')
+                    .upsert({
+                        user_id: user.id,
+                        date: sleepData.date,
+                        bed_time: sleepData.bedTime.toISOString(),
+                        wake_time: sleepData.wakeTime.toISOString(),
+                        duration: Math.round(duration),
+                        quality: sleepData.quality,
+                        notes: sleepData.notes,
+                        tags: sleepData.tags,
+                    });
+
+                if (error) {
+                    console.error('Error syncing sleep log:', error);
+                }
             },
 
-            updateSleep: (id, updates) => {
-                set((state) => {
-                    const updatedLogs = { ...state.sleepLogs };
-                    const logEntry = Object.values(updatedLogs).find((log) => log.id === id);
+            updateSleep: async (id, updates) => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
 
-                    if (logEntry) {
-                        const date = logEntry.date;
-                        updatedLogs[date] = { ...logEntry, ...updates };
+                const state = get();
+                const updatedLogs = { ...state.sleepLogs };
+                const logEntry = Object.values(updatedLogs).find((log) => log.id === id);
 
-                        // Recalculate duration if times changed
-                        if (updates.bedTime || updates.wakeTime) {
-                            const bedTime = new Date(updates.bedTime || logEntry.bedTime);
-                            const wakeTime = new Date(updates.wakeTime || logEntry.wakeTime);
-                            let duration = (wakeTime.getTime() - bedTime.getTime()) / (1000 * 60);
-                            if (duration < 0) duration += 24 * 60;
-                            updatedLogs[date].duration = Math.round(duration);
-                        }
+                if (logEntry) {
+                    const date = logEntry.date;
+                    const newLog = { ...logEntry, ...updates };
+
+                    // Recalculate duration if times changed
+                    if (updates.bedTime || updates.wakeTime) {
+                        const bedTime = new Date(newLog.bedTime);
+                        const wakeTime = new Date(newLog.wakeTime);
+                        let duration = (wakeTime.getTime() - bedTime.getTime()) / (1000 * 60);
+                        if (duration < 0) duration += 24 * 60;
+                        newLog.duration = Math.round(duration);
                     }
 
-                    return { sleepLogs: updatedLogs };
-                });
+                    // Optimistic update
+                    updatedLogs[date] = newLog;
+                    set({ sleepLogs: updatedLogs });
+
+                    // Sync to Supabase
+                    const { error } = await supabase
+                        .from('sleep_logs')
+                        .upsert({
+                            user_id: user.id,
+                            date: date,
+                            bed_time: newLog.bedTime.toISOString(),
+                            wake_time: newLog.wakeTime.toISOString(),
+                            duration: newLog.duration,
+                            quality: newLog.quality,
+                            notes: newLog.notes,
+                            tags: newLog.tags,
+                            daily_score: newLog.dailyScore,
+                            noise_events: newLog.noiseEvents,
+                        });
+
+                    if (error) {
+                        console.error('Error updating sleep log in Supabase:', error);
+                    }
+                }
             },
 
-            deleteSleep: (id) => {
-                set((state) => {
-                    const updatedLogs = { ...state.sleepLogs };
-                    const dateToDelete = Object.keys(updatedLogs).find(
-                        (date) => updatedLogs[date].id === id
-                    );
-                    if (dateToDelete) {
-                        delete updatedLogs[dateToDelete];
+            deleteSleep: async (id) => {
+                const state = get();
+                const updatedLogs = { ...state.sleepLogs };
+                const dateToDelete = Object.keys(updatedLogs).find(
+                    (date) => updatedLogs[date].id === id
+                );
+
+                if (dateToDelete) {
+                    const logToDelete = updatedLogs[dateToDelete];
+                    delete updatedLogs[dateToDelete];
+                    set({ sleepLogs: updatedLogs });
+
+                    // Delete from Supabase
+                    const { error } = await supabase
+                        .from('sleep_logs')
+                        .delete()
+                        .eq('date', dateToDelete);
+
+                    if (error) {
+                        console.error('Error deleting sleep log from Supabase:', error);
                     }
-                    return { sleepLogs: updatedLogs };
-                });
+                }
             },
 
             getTodaySleep: () => {
@@ -133,10 +193,25 @@ export const useSleepStore = create<SleepState>()(
             },
 
             getLastNightSleep: () => {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayStr = getLocalDateString(yesterday);
-                return get().sleepLogs[yesterdayStr] || null;
+                const logs = Object.values(get().sleepLogs);
+                if (logs.length === 0) return null;
+
+                // Sort by wake time descending to get the most recent one
+                const sortedLogs = [...logs].sort((a, b) =>
+                    new Date(b.wakeTime).getTime() - new Date(a.wakeTime).getTime()
+                );
+
+                const mostRecent = sortedLogs[0];
+                const now = new Date();
+                const wakeTime = new Date(mostRecent.wakeTime);
+
+                // If the most recent sleep ended in the last 24 hours, it's "last night"
+                const diffHours = (now.getTime() - wakeTime.getTime()) / (1000 * 60 * 60);
+                if (diffHours < 24) {
+                    return mostRecent;
+                }
+
+                return null;
             },
 
             getWeekSleep: () => {
@@ -238,6 +313,54 @@ export const useSleepStore = create<SleepState>()(
 
                 set({ sleepDebt: Math.max(0, debt) });
             },
+
+            fetchSleepLogs: async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
+                const { data, error } = await supabase
+                    .from('sleep_logs')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('date', { ascending: false });
+
+                if (error) {
+                    console.error('Error fetching sleep logs:', error);
+                    return;
+                }
+
+                if (data) {
+                    const logs: Record<string, SleepLog> = {};
+                    data.forEach((item) => {
+                        logs[item.date] = {
+                            id: item.id,
+                            date: item.date,
+                            bedTime: new Date(item.bed_time),
+                            wakeTime: new Date(item.wake_time),
+                            duration: item.duration,
+                            quality: item.quality,
+                            notes: item.notes,
+                            tags: item.tags,
+                            dailyScore: item.daily_score,
+                            noiseEvents: item.noise_events,
+                            createdAt: new Date(item.created_at),
+                        };
+                    });
+                    set({ sleepLogs: logs });
+                }
+            },
+
+            clearData: () =>
+                set({
+                    sleepLogs: {},
+                    sleepGoals: {
+                        targetHours: 8,
+                        targetBedtime: '23:00',
+                        targetWakeTime: '07:00',
+                    },
+                    chronotype: 'Bear',
+                    sleepDebt: 0,
+                }),
         }),
         {
             name: 'sleep-storage',

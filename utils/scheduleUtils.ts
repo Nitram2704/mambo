@@ -13,11 +13,17 @@
 export function getMondayOfWeek(date: Date): Date {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
-    const day = d.getDay();
-    // Sunday = 0, Monday = 1, etc.
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff);
-    return d;
+    const day = d.getDay(); // 0 = Sunday, 1 = Monday, ...
+
+    // Calculate difference to Monday
+    // If it's Sunday (0), we want to go back 6 days
+    // If it's Monday (1), we want to go back 0 days
+    // If it's Tuesday (2), we want to go back 1 day
+    const diff = day === 0 ? -6 : 1 - day;
+
+    const monday = new Date(d);
+    monday.setDate(d.getDate() + diff);
+    return monday;
 }
 
 /**
@@ -93,6 +99,8 @@ export function generateSmartSchedule(config: ScheduleConfig): ScheduledWorkout[
             scheduleDate.setDate(monday.getDate() + (week * 7) + dayOffset);
 
             // For the first week, skip days that have already passed
+
+
             if (week === 0 && dayOffset < todayDayOfWeek) {
                 continue;
             }

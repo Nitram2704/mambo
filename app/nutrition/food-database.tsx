@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, FlatList, ActivityIndicator, Image } from 'react-native';
+import { View, TextInput, TouchableOpacity, ScrollView, FlatList, ActivityIndicator, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,12 +11,14 @@ import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 import { Card } from '@/components/ui/Card';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PaywallModal } from '@/components/PaywallModal';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 
 export default function FoodDatabaseScreen() {
     const router = useRouter();
     const { t } = useTranslation();
-    const theme = useAppTheme() as 'light' | 'dark';
-    const isDark = theme === 'dark';
+    const { theme, isDark } = useAppTheme();
     const params = useLocalSearchParams<{ fromLogMeal?: string; mealType?: string }>();
     const fromLogMeal = params.fromLogMeal === 'true';
     const mealType = params.mealType;
@@ -29,6 +31,10 @@ export default function FoodDatabaseScreen() {
     const [searchMode, setSearchMode] = useState<'local' | 'online'>('local');
     const [onlineResults, setOnlineResults] = useState<FoodItem[]>([]);
     const [isSearching, setIsSearching] = useState(false);
+
+    // Subscription & Paywall
+    const { checkPermission, getRemainingCredits } = useSubscriptionStore();
+    const [paywallVisible, setPaywallVisible] = useState(false);
 
     const categories: (FoodItem['category'] | 'all' | 'favorites')[] = [
         'all', 'favorites', 'protein', 'carbs', 'fats', 'vegetables', 'dairy', 'fruits', 'snacks', 'beverages'
@@ -113,10 +119,10 @@ export default function FoodDatabaseScreen() {
                     <Ionicons name="arrow-back" size={24} color={Colors[theme].text} />
                 </TouchableOpacity>
                 <View className="flex-1 ml-3">
-                    <Text className="text-xl font-bold" style={{ color: Colors[theme].text }}>{t('nutrition.foodDatabaseScreen.title')}</Text>
-                    <Text className="text-xs" style={{ color: Colors[theme].textMuted }}>
+                    <AccessibleText variant="h3" weight="bold" className="text-text">{t('nutrition.foodDatabaseScreen.title')}</AccessibleText>
+                    <AccessibleText variant="caption" className="text-text-secondary">
                         {searchMode === 'local' ? t('nutrition.foodDatabaseScreen.localDesc') : t('nutrition.foodDatabaseScreen.onlineDesc')}
-                    </Text>
+                    </AccessibleText>
                 </View>
                 <TouchableOpacity
                     onPress={() => router.push('/nutrition/add-custom-food')}
@@ -133,14 +139,14 @@ export default function FoodDatabaseScreen() {
                         onPress={() => setSearchMode('local')}
                         className={`flex-1 py-2 rounded-lg items-center ${searchMode === 'local' ? (isDark ? 'bg-gray-700' : 'bg-white shadow-sm') : ''}`}
                     >
-                        <Text className={`font-bold ${searchMode === 'local' ? (isDark ? 'text-white' : 'text-gray-900') : 'text-gray-400'}`}>{t('nutrition.foodDatabaseScreen.local')}</Text>
+                        <AccessibleText weight="bold" className={searchMode === 'local' ? (isDark ? 'text-white' : 'text-gray-900') : 'text-gray-400'}>{t('nutrition.foodDatabaseScreen.local')}</AccessibleText>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => setSearchMode('online')}
                         className={`flex-1 py-2 rounded-lg items-center ${searchMode === 'online' ? 'bg-blue-600' : ''}`}
                     >
                         <View className="flex-row items-center gap-2">
-                            <Text className={`font-bold ${searchMode === 'online' ? 'text-white' : 'text-gray-400'}`}>{t('nutrition.foodDatabaseScreen.online')}</Text>
+                            <AccessibleText weight="bold" className={searchMode === 'online' ? 'text-white' : 'text-gray-400'}>{t('nutrition.foodDatabaseScreen.online')}</AccessibleText>
                             <Ionicons name="globe-outline" size={14} color={searchMode === 'online' ? 'white' : '#9ca3af'} />
                         </View>
                     </TouchableOpacity>
@@ -173,10 +179,16 @@ export default function FoodDatabaseScreen() {
                 </View>
 
                 <TouchableOpacity
-                    onPress={() => router.push({
-                        pathname: '/nutrition/scan-barcode',
-                        params: { mealType }
-                    })}
+                    onPress={() => {
+                        if (!checkPermission('barcodeScanner')) {
+                            setPaywallVisible(true);
+                            return;
+                        }
+                        router.push({
+                            pathname: '/nutrition/scan-barcode',
+                            params: { mealType }
+                        });
+                    }}
                     className="w-12 justify-center items-center rounded-xl border"
                     style={{ backgroundColor: isDark ? 'rgba(31, 41, 55, 0.5)' : 'rgba(255, 255, 255, 0.8)', borderColor: Colors[theme].border }}
                 >
@@ -209,11 +221,12 @@ export default function FoodDatabaseScreen() {
                                             borderColor: selectedCategory === category ? '#fb923c' : Colors[theme].border
                                         }}
                                     >
-                                        <Text
-                                            className={`font-semibold text-xs ${selectedCategory === category ? 'text-white' : (isDark ? 'text-gray-400' : 'text-gray-600')}`}
+                                        <AccessibleText
+                                            weight="semibold"
+                                            className={`text-xs ${selectedCategory === category ? 'text-white' : (isDark ? 'text-gray-400' : 'text-gray-600')}`}
                                         >
                                             {getCategoryLabel(category)}
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
                                 </TouchableOpacity>
                             ))}
@@ -226,7 +239,7 @@ export default function FoodDatabaseScreen() {
             {isSearching && searchMode === 'online' && (
                 <View className="py-10 items-center">
                     <ActivityIndicator size="large" color="#3b82f6" />
-                    <Text style={{ color: Colors[theme].textMuted }} className="mt-4">{t('nutrition.foodDatabaseScreen.searchingOnline')}</Text>
+                    <AccessibleText className="text-text-secondary mt-4">{t('nutrition.foodDatabaseScreen.searchingOnline')}</AccessibleText>
                 </View>
             )}
 
@@ -252,27 +265,27 @@ export default function FoodDatabaseScreen() {
                                     />
                                 )}
                                 <View className="flex-1 mr-3">
-                                    <Text className="font-bold text-base mb-1" style={{ color: Colors[theme].text }}>{item.name}</Text>
+                                    <AccessibleText weight="bold" className="text-text text-base mb-1">{item.name}</AccessibleText>
                                     <View className="flex-row flex-wrap gap-2 mb-1">
                                         {item.brand && (
                                             <View className="bg-blue-500/20 self-start px-2 py-0.5 rounded-md">
-                                                <Text className="text-blue-400 text-xs font-semibold">{item.brand}</Text>
+                                                <AccessibleText weight="bold" className="text-blue-400 text-xs">{item.brand}</AccessibleText>
                                             </View>
                                         )}
                                         {item.isGeneric && (
                                             <View className="bg-green-500/20 self-start px-2 py-0.5 rounded-md">
-                                                <Text className="text-green-400 text-xs font-semibold">{t('nutrition.foodDatabaseScreen.generic')}</Text>
+                                                <AccessibleText weight="bold" className="text-green-400 text-xs">{t('nutrition.foodDatabaseScreen.generic')}</AccessibleText>
                                             </View>
                                         )}
                                         {item.budgetLevel && (
                                             <View className="bg-purple-500/20 self-start px-2 py-0.5 rounded-md">
-                                                <Text className="text-purple-400 text-xs font-semibold">
+                                                <AccessibleText weight="bold" className="text-purple-400 text-xs">
                                                     {t(`nutrition.foodDatabaseScreen.${item.budgetLevel}`)}
-                                                </Text>
+                                                </AccessibleText>
                                             </View>
                                         )}
                                     </View>
-                                    <Text className="text-xs" style={{ color: Colors[theme].textMuted }}>{t('nutrition.foodDatabaseScreen.portion')}: {item.servingSize}</Text>
+                                    <AccessibleText variant="caption" className="text-text-secondary">{t('nutrition.foodDatabaseScreen.portion')}: {item.servingSize}</AccessibleText>
                                 </View>
                                 <View className="flex-row items-center gap-2">
                                     {searchMode === 'local' && (
@@ -291,27 +304,27 @@ export default function FoodDatabaseScreen() {
                                         </TouchableOpacity>
                                     )}
                                     <View className="bg-orange-500/20 px-2.5 py-1 rounded-lg">
-                                        <Text className="text-orange-400 text-xs font-bold">
+                                        <AccessibleText weight="bold" className="text-orange-400 text-xs">
                                             {item.calories}
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
                                 </View>
                             </View>
 
                             <View className="flex-row justify-between rounded-xl p-3 border" style={{ backgroundColor: isDark ? 'rgba(31, 41, 55, 0.5)' : 'rgba(249, 250, 251, 0.8)', borderColor: Colors[theme].border }}>
                                 <View className="items-center flex-1">
-                                    <Text className="text-xs mb-1" style={{ color: Colors[theme].textMuted }}>{t('nutrition.protein')}</Text>
-                                    <Text className="text-blue-400 font-bold text-sm">{item.protein}g</Text>
+                                    <AccessibleText variant="caption" className="text-text-secondary mb-1">{t('nutrition.protein')}</AccessibleText>
+                                    <AccessibleText weight="bold" className="text-blue-400 text-sm">{item.protein}g</AccessibleText>
                                 </View>
                                 <View className="w-px" style={{ backgroundColor: Colors[theme].border }} />
                                 <View className="items-center flex-1">
-                                    <Text className="text-xs mb-1" style={{ color: Colors[theme].textMuted }}>{t('nutrition.carbs')}</Text>
-                                    <Text className="text-green-400 font-bold text-sm">{item.carbs}g</Text>
+                                    <AccessibleText variant="caption" className="text-text-secondary mb-1">{t('nutrition.carbs')}</AccessibleText>
+                                    <AccessibleText weight="bold" className="text-green-400 text-sm">{item.carbs}g</AccessibleText>
                                 </View>
                                 <View className="w-px" style={{ backgroundColor: Colors[theme].border }} />
                                 <View className="items-center flex-1">
-                                    <Text className="text-xs mb-1" style={{ color: Colors[theme].textMuted }}>{t('nutrition.fats')}</Text>
-                                    <Text className="text-yellow-400 font-bold text-sm">{item.fats}g</Text>
+                                    <AccessibleText variant="caption" className="text-text-secondary mb-1">{t('nutrition.fats')}</AccessibleText>
+                                    <AccessibleText weight="bold" className="text-yellow-400 text-sm">{item.fats}g</AccessibleText>
                                 </View>
                             </View>
                         </Card>
@@ -322,19 +335,26 @@ export default function FoodDatabaseScreen() {
                         <View className="w-20 h-20 rounded-full items-center justify-center mb-4" style={{ backgroundColor: isDark ? 'rgba(31, 41, 55, 0.5)' : 'rgba(243, 244, 246, 0.8)' }}>
                             <Ionicons name={searchMode === 'online' ? "globe-outline" : "search"} size={36} color={Colors[theme].textMuted} />
                         </View>
-                        <Text className="text-base font-medium" style={{ color: Colors[theme].textMuted }}>
+                        <AccessibleText weight="medium" className="text-text-secondary text-base">
                             {searchMode === 'online' && !searchQuery
                                 ? t('nutrition.foodDatabaseScreen.writeToSearchOnline')
                                 : t('nutrition.foodDatabaseScreen.noFoodsFound')}
-                        </Text>
-                        <Text className="text-sm mt-2" style={{ color: isDark ? '#4b5563' : '#9ca3af' }}>
+                        </AccessibleText>
+                        <AccessibleText variant="caption" className="text-text-muted mt-2">
                             {searchMode === 'online'
                                 ? t('nutrition.foodDatabaseScreen.searchByBrand')
                                 : t('nutrition.foodDatabaseScreen.tryAnotherTerm')}
-                        </Text>
+                        </AccessibleText>
                     </View>
                 )}
                 contentContainerStyle={{ paddingBottom: 20 }}
+            />
+
+            <PaywallModal
+                visible={paywallVisible}
+                onClose={() => setPaywallVisible(false)}
+                triggerFeature="Barcode Scanner"
+                requiredTier="PRO"
             />
         </ScreenWrapper>
     );

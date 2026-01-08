@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,10 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { useUserProfileStore } from '@/store/userProfileStore';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { a11y } from '@/utils/accessibility';
+import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/use-app-theme';
 
 interface FitnessProfileProps {
     onNext: () => void;
@@ -17,6 +21,58 @@ interface FitnessProfileProps {
 export default function FitnessProfile({ onNext, onBack }: FitnessProfileProps) {
     const { t } = useTranslation();
     const { profile, updateProfile } = useUserProfileStore();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
+
+    const [formData, setFormData] = React.useState({
+        experienceLevel: profile?.experienceLevel,
+        fitnessGoal: profile?.fitnessGoal,
+        workoutDaysPerWeek: profile?.workoutDaysPerWeek || 3,
+        minutesPerSession: profile?.minutesPerSession || 60,
+        availableEquipment: profile?.availableEquipment,
+        physicalRestrictions: profile?.physicalRestrictions || ''
+    });
+
+    React.useEffect(() => {
+        if (profile) {
+            setFormData(prev => ({
+                ...prev,
+                experienceLevel: prev.experienceLevel || profile.experienceLevel,
+                fitnessGoal: prev.fitnessGoal || profile.fitnessGoal,
+                workoutDaysPerWeek: prev.workoutDaysPerWeek === 3 ? (profile.workoutDaysPerWeek || 3) : prev.workoutDaysPerWeek,
+                minutesPerSession: prev.minutesPerSession === 60 ? (profile.minutesPerSession || 60) : prev.minutesPerSession,
+                availableEquipment: prev.availableEquipment || profile.availableEquipment,
+                physicalRestrictions: prev.physicalRestrictions || profile.physicalRestrictions || ''
+            }));
+        }
+    }, [profile]);
+
+    const saveChanges = async () => {
+        await updateProfile({
+            experienceLevel: formData.experienceLevel,
+            fitnessGoal: formData.fitnessGoal,
+            workoutDaysPerWeek: formData.workoutDaysPerWeek,
+            minutesPerSession: formData.minutesPerSession,
+            availableEquipment: formData.availableEquipment,
+            physicalRestrictions: formData.physicalRestrictions
+        });
+    };
+
+    const handleNext = async () => {
+        if (formData.experienceLevel && formData.fitnessGoal && formData.availableEquipment) {
+            await saveChanges();
+            onNext();
+        }
+    };
+
+    const handleBack = async () => {
+        await saveChanges();
+        onBack();
+    };
+
+    const updateField = (field: keyof typeof formData, value: any) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
 
     const experienceLevels = [
         { id: 'sedentary', name: t('onboarding.fitnessProfile.experienceSedentary'), desc: t('onboarding.fitnessProfile.experienceSedentaryDesc'), icon: 'bed-outline' },
@@ -40,42 +96,73 @@ export default function FitnessProfile({ onNext, onBack }: FitnessProfileProps) 
     ];
 
     return (
-        <ScreenWrapper scrollable contentContainerClassName="px-6 pt-8 pb-32">
+        <ScreenWrapper
+            scrollable
+            contentContainerClassName="px-6 pt-8 pb-8"
+            footer={
+                <View className="px-6 pt-2 pb-4 flex-row gap-4 bg-background">
+                    <Button
+                        variant="secondary"
+                        label={t('common.back')}
+                        onPress={handleBack}
+                        className="flex-1"
+                        icon={<Ionicons name="chevron-back" size={20} color="white" />}
+                        accessibilityLabel={t('common.back')}
+                        accessibilityHint="Vuelve al paso anterior"
+                    />
+                    <Button
+                        variant="primary"
+                        label={t('common.continue')}
+                        onPress={handleNext}
+                        className="flex-[2]"
+                        icon={<Ionicons name="arrow-forward" size={20} color="white" />}
+                        iconPosition="right"
+                        accessibilityLabel={t('common.continue')}
+                        accessibilityHint="Guarda tu perfil de fitness y continúa al siguiente paso"
+                    />
+                </View>
+            }
+        >
             {/* Header */}
-            <View className="mb-10">
-                <Text className="text-white text-3xl font-bold mb-2">
+            <View className="mb-10" {...a11y.header(t('onboarding.fitnessProfile.title'))}>
+                <AccessibleText variant="h1" weight="bold" className="text-text text-3xl mb-2">
                     {t('onboarding.fitnessProfile.title')}
-                </Text>
-                <Text className="text-text-secondary text-lg">
+                </AccessibleText>
+                <AccessibleText variant="body" className="text-text-secondary text-lg">
                     {t('onboarding.fitnessProfile.subtitle')}
-                </Text>
+                </AccessibleText>
             </View>
 
             {/* Experience Level */}
             <View className="mb-8">
-                <Text className="text-white text-lg font-semibold mb-4">{t('onboarding.fitnessProfile.experienceLabel')}</Text>
+                <AccessibleText variant="h3" weight="semibold" className="text-text mb-4">{t('onboarding.fitnessProfile.experienceLabel')}</AccessibleText>
                 <View className="gap-3">
                     {experienceLevels.map((level) => (
                         <TouchableOpacity
                             key={level.id}
-                            onPress={() => updateProfile({ experienceLevel: level.id as any })}
+                            onPress={() => updateField('experienceLevel', level.id)}
+                            {...a11y.button(
+                                `${level.name}. ${level.desc}`,
+                                `Selecciona nivel de experiencia ${level.name}`,
+                                { selected: formData.experienceLevel === level.id }
+                            )}
                         >
                             <Card
-                                variant={profile?.experienceLevel === level.id ? 'solid' : 'outline'}
-                                className={`flex-row items-center p-4 ${profile?.experienceLevel === level.id ? 'bg-primary border-primary' : ''}`}
+                                variant="glass"
+                                className={`flex-row items-center p-4 ${formData.experienceLevel === level.id ? 'bg-primary border-primary' : 'border-border/10'}`}
                             >
                                 <Ionicons
                                     name={level.icon as any}
                                     size={24}
-                                    color={profile?.experienceLevel === level.id ? 'white' : '#94a3b8'}
+                                    color={formData.experienceLevel === level.id ? 'white' : colors.textMuted}
                                 />
                                 <View className="ml-4 flex-1">
-                                    <Text className={`font-bold ${profile?.experienceLevel === level.id ? 'text-white' : 'text-white'}`}>
+                                    <AccessibleText weight="bold" className={`${formData.experienceLevel === level.id ? 'text-white' : 'text-text'}`}>
                                         {level.name}
-                                    </Text>
-                                    <Text className={`text-sm ${profile?.experienceLevel === level.id ? 'text-white/80' : 'text-text-secondary'}`}>
+                                    </AccessibleText>
+                                    <AccessibleText variant="caption" className={`${formData.experienceLevel === level.id ? 'text-white/80' : 'text-text-secondary'}`}>
                                         {level.desc}
-                                    </Text>
+                                    </AccessibleText>
                                 </View>
                             </Card>
                         </TouchableOpacity>
@@ -85,26 +172,31 @@ export default function FitnessProfile({ onNext, onBack }: FitnessProfileProps) 
 
             {/* Main Goal */}
             <View className="mb-8">
-                <Text className="text-white text-lg font-semibold mb-4">{t('onboarding.fitnessProfile.goalLabel')}</Text>
+                <AccessibleText variant="h3" weight="semibold" className="text-text mb-4">{t('onboarding.fitnessProfile.goalLabel')}</AccessibleText>
                 <View className="flex-row flex-wrap gap-3">
                     {goals.map((goal) => (
                         <TouchableOpacity
                             key={goal.id}
-                            onPress={() => updateProfile({ fitnessGoal: goal.id as any })}
+                            onPress={() => updateField('fitnessGoal', goal.id)}
                             className="flex-1 min-w-[45%]"
+                            {...a11y.button(
+                                goal.name,
+                                `Selecciona objetivo ${goal.name}`,
+                                { selected: formData.fitnessGoal === goal.id }
+                            )}
                         >
                             <Card
-                                variant={profile?.fitnessGoal === goal.id ? 'solid' : 'outline'}
-                                className={`p-4 items-center ${profile?.fitnessGoal === goal.id ? goal.color : ''}`}
+                                variant="glass"
+                                className={`p-4 items-center ${formData.fitnessGoal === goal.id ? goal.color : 'border-border/10'}`}
                             >
                                 <Ionicons
                                     name={goal.icon as any}
                                     size={32}
-                                    color="white"
+                                    color={formData.fitnessGoal === goal.id ? 'white' : colors.textMuted}
                                 />
-                                <Text className="text-white font-bold mt-2 text-center">
+                                <AccessibleText weight="bold" className={`${formData.fitnessGoal === goal.id ? 'text-white' : 'text-text'} mt-2 text-center`}>
                                     {goal.name}
-                                </Text>
+                                </AccessibleText>
                             </Card>
                         </TouchableOpacity>
                     ))}
@@ -113,59 +205,76 @@ export default function FitnessProfile({ onNext, onBack }: FitnessProfileProps) 
 
             {/* Workout Days */}
             <View className="mb-8">
-                <Text className="text-white text-lg font-semibold mb-2">
-                    {t('onboarding.fitnessProfile.daysLabel')}: <Text className="text-primary">{profile?.workoutDaysPerWeek || 3}</Text>
-                </Text>
+                <AccessibleText variant="h3" weight="semibold" className="text-text mb-2">
+                    {t('onboarding.fitnessProfile.daysLabel')}: <AccessibleText weight="bold" className="text-primary">{formData.workoutDaysPerWeek}</AccessibleText>
+                </AccessibleText>
                 <Slider
                     minimumValue={1}
                     maximumValue={7}
                     step={1}
-                    value={profile?.workoutDaysPerWeek || 3}
-                    onValueChange={(val) => updateProfile({ workoutDaysPerWeek: val })}
-                    minimumTrackTintColor="#3b82f6"
-                    maximumTrackTintColor="#334155"
-                    thumbTintColor="#3b82f6"
+                    value={formData.workoutDaysPerWeek}
+                    onValueChange={(val) => updateField('workoutDaysPerWeek', val)}
+                    minimumTrackTintColor={colors.primary}
+                    maximumTrackTintColor={colors.surfaceHighlight}
+                    thumbTintColor={colors.primary}
+                    {...a11y.adjustable(
+                        t('onboarding.fitnessProfile.daysLabel'),
+                        formData.workoutDaysPerWeek,
+                        1,
+                        7
+                    )}
                 />
             </View>
 
             {/* Duration */}
             <View className="mb-8">
-                <Text className="text-white text-lg font-semibold mb-2">
-                    {t('onboarding.fitnessProfile.durationLabel')}: <Text className="text-primary">{profile?.minutesPerSession || 60} min</Text>
-                </Text>
+                <AccessibleText variant="h3" weight="semibold" className="text-text mb-2">
+                    {t('onboarding.fitnessProfile.durationLabel')}: <AccessibleText weight="bold" className="text-primary">{formData.minutesPerSession} min</AccessibleText>
+                </AccessibleText>
                 <Slider
                     minimumValue={15}
                     maximumValue={120}
                     step={15}
-                    value={profile?.minutesPerSession || 60}
-                    onValueChange={(val) => updateProfile({ minutesPerSession: val })}
-                    minimumTrackTintColor="#3b82f6"
-                    maximumTrackTintColor="#334155"
-                    thumbTintColor="#3b82f6"
+                    value={formData.minutesPerSession}
+                    onValueChange={(val) => updateField('minutesPerSession', val)}
+                    minimumTrackTintColor={colors.primary}
+                    maximumTrackTintColor={colors.surfaceHighlight}
+                    thumbTintColor={colors.primary}
+                    {...a11y.adjustable(
+                        t('onboarding.fitnessProfile.durationLabel'),
+                        formData.minutesPerSession,
+                        15,
+                        120
+                    )}
                 />
             </View>
 
             {/* Equipment */}
             <View className="mb-8">
-                <Text className="text-white text-lg font-semibold mb-4">{t('onboarding.fitnessProfile.equipmentLabel')}</Text>
+                <AccessibleText variant="h3" weight="semibold" className="text-text mb-4">{t('onboarding.fitnessProfile.equipmentLabel')}</AccessibleText>
                 <View className="gap-3">
                     {equipmentOptions.map((eq) => (
                         <TouchableOpacity
                             key={eq.id}
-                            onPress={() => updateProfile({ availableEquipment: eq.id as any })}
+                            onPress={() => updateField('availableEquipment', eq.id)}
+                            {...a11y.button(
+                                eq.name,
+                                `Selecciona equipamiento ${eq.name}`,
+                                { selected: formData.availableEquipment === eq.id }
+                            )}
                         >
                             <Card
-                                variant={profile?.availableEquipment === eq.id ? 'solid' : 'outline'}
-                                className={`flex-row items-center p-4 ${profile?.availableEquipment === eq.id ? 'bg-primary border-primary' : ''}`}
+                                variant="glass"
+                                className={`flex-row items-center p-4 ${formData.availableEquipment === eq.id ? 'bg-primary border-primary' : 'border-border/10'}`}
                             >
                                 <Ionicons
                                     name={eq.icon as any}
                                     size={24}
-                                    color={profile?.availableEquipment === eq.id ? 'white' : '#94a3b8'}
+                                    color={formData.availableEquipment === eq.id ? 'white' : colors.textMuted}
                                 />
-                                <Text className={`ml-4 font-bold ${profile?.availableEquipment === eq.id ? 'text-white' : 'text-white'}`}>
+                                <AccessibleText weight="bold" className={`ml-4 ${formData.availableEquipment === eq.id ? 'text-white' : 'text-text'}`}>
                                     {eq.name}
-                                </Text>
+                                </AccessibleText>
                             </Card>
                         </TouchableOpacity>
                     ))}
@@ -176,33 +285,14 @@ export default function FitnessProfile({ onNext, onBack }: FitnessProfileProps) 
             <Input
                 label={t('onboarding.fitnessProfile.restrictionsLabel')}
                 placeholder={t('onboarding.fitnessProfile.restrictionsPlaceholder')}
-                value={profile?.physicalRestrictions || ''}
-                onChangeText={(text) => updateProfile({ physicalRestrictions: text })}
+                value={formData.physicalRestrictions}
+                onChangeText={(text) => updateField('physicalRestrictions', text)}
                 multiline
                 numberOfLines={3}
                 icon="warning-outline"
+                accessibilityHint="Describe cualquier lesión o limitación física que debamos tener en cuenta"
             />
 
-            {/* Fixed Footer */}
-            <View className="absolute bottom-0 left-0 right-0 bg-background/80 border-t border-white/5">
-                <View className="px-6 py-6 flex-row gap-4">
-                    <Button
-                        variant="secondary"
-                        label={t('common.back')}
-                        onPress={onBack}
-                        className="flex-1"
-                        icon={<Ionicons name="chevron-back" size={20} color="white" />}
-                    />
-                    <Button
-                        variant="primary"
-                        label={t('common.continue')}
-                        onPress={onNext}
-                        className="flex-[2]"
-                        icon={<Ionicons name="arrow-forward" size={20} color="white" />}
-                        iconPosition="right"
-                    />
-                </View>
-            </View>
         </ScreenWrapper>
     );
 }

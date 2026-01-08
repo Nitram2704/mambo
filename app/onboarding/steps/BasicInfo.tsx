@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useUserProfileStore } from '@/store/userProfileStore';
 import { Ionicons } from '@expo/vector-icons';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { a11y } from '@/utils/accessibility';
 
 interface BasicInfoProps {
     onNext: () => void;
@@ -15,24 +17,78 @@ export default function BasicInfo({ onNext }: BasicInfoProps) {
     const { t } = useTranslation();
     const { profile, updateProfile } = useUserProfileStore();
 
-    const handleNext = () => {
-        if (profile?.name && profile?.age && profile?.weight && profile?.height) {
+    // Local state to prevent DB updates on every keystroke
+    const [formData, setFormData] = React.useState({
+        name: profile?.name || '',
+        age: profile?.age?.toString() || '',
+        gender: profile?.gender || '',
+        weight: profile?.weight?.toString() || '',
+        height: profile?.height?.toString() || ''
+    });
+
+    // Update local state when profile loads (if needed)
+    React.useEffect(() => {
+        if (profile) {
+            setFormData(prev => ({
+                ...prev,
+                name: prev.name || profile.name || '',
+                age: prev.age || profile.age?.toString() || '',
+                gender: prev.gender || profile.gender || '',
+                weight: prev.weight || profile.weight?.toString() || '',
+                height: prev.height || profile.height?.toString() || ''
+            }));
+        }
+    }, [profile]);
+
+    const handleNext = async () => {
+        const age = parseInt(formData.age) || 0;
+        const weight = parseFloat(formData.weight) || 0;
+        const height = parseFloat(formData.height) || 0;
+
+        if (formData.name && age && weight && height) {
+            await updateProfile({
+                name: formData.name,
+                age,
+                gender: formData.gender as any,
+                weight,
+                height
+            });
             onNext();
         }
     };
 
-    const isStepValid = !!(profile?.name && profile?.age && profile?.weight && profile?.height);
+    const isStepValid = !!(formData.name && formData.age && formData.weight && formData.height);
+
+    const updateField = (field: keyof typeof formData, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
 
     return (
-        <ScreenWrapper scrollable contentContainerClassName="px-6 pt-8 pb-32">
+        <ScreenWrapper
+            scrollable
+            contentContainerClassName="px-6 pt-8 pb-8"
+            footer={
+                <View className="px-6 pt-2 pb-4 bg-background">
+                    <Button
+                        label={t('common.continue')}
+                        onPress={handleNext}
+                        disabled={!isStepValid}
+                        icon={<Ionicons name="arrow-forward" size={20} color="white" />}
+                        iconPosition="right"
+                        accessibilityLabel={t('common.continue')}
+                        accessibilityHint="Guarda tu información básica y continúa al siguiente paso"
+                    />
+                </View>
+            }
+        >
             {/* Header */}
-            <View className="mb-10">
-                <Text className="text-white text-3xl font-bold mb-2">
+            <View className="mb-10" {...a11y.header(t('onboarding.basicInfo.title'))}>
+                <AccessibleText variant="h1" weight="bold" className="text-text text-3xl mb-2">
                     {t('onboarding.basicInfo.title')}
-                </Text>
-                <Text className="text-text-secondary text-lg">
+                </AccessibleText>
+                <AccessibleText variant="body" className="text-text-secondary text-lg">
                     {t('onboarding.basicInfo.subtitle')}
-                </Text>
+                </AccessibleText>
             </View>
 
             {/* Form */}
@@ -40,9 +96,10 @@ export default function BasicInfo({ onNext }: BasicInfoProps) {
                 <Input
                     label={t('onboarding.basicInfo.nameLabel')}
                     placeholder={t('onboarding.basicInfo.namePlaceholder')}
-                    value={profile?.name || ''}
-                    onChangeText={(text) => updateProfile({ name: text })}
+                    value={formData.name}
+                    onChangeText={(text) => updateField('name', text)}
                     icon="person-outline"
+                    accessibilityHint="Ingresa tu nombre completo"
                 />
 
                 <View className="flex-row gap-4">
@@ -50,19 +107,21 @@ export default function BasicInfo({ onNext }: BasicInfoProps) {
                         <Input
                             label={t('onboarding.basicInfo.ageLabel')}
                             placeholder="25"
-                            value={profile?.age?.toString() || ''}
-                            onChangeText={(text) => updateProfile({ age: parseInt(text) || 0 })}
+                            value={formData.age}
+                            onChangeText={(text) => updateField('age', text)}
                             keyboardType="numeric"
                             icon="calendar-outline"
+                            accessibilityHint="Ingresa tu edad en años"
                         />
                     </View>
                     <View className="flex-1">
                         <Input
                             label={t('onboarding.basicInfo.genderLabel')}
                             placeholder="M / F"
-                            value={profile?.gender || ''}
-                            onChangeText={(text) => updateProfile({ gender: text as any })}
+                            value={formData.gender}
+                            onChangeText={(text) => updateField('gender', text)}
                             icon="male-female-outline"
+                            accessibilityHint="Ingresa tu género (M para masculino, F para femenino)"
                         />
                     </View>
                 </View>
@@ -72,37 +131,27 @@ export default function BasicInfo({ onNext }: BasicInfoProps) {
                         <Input
                             label={t('onboarding.basicInfo.weightLabel')}
                             placeholder="70"
-                            value={profile?.weight?.toString() || ''}
-                            onChangeText={(text) => updateProfile({ weight: parseFloat(text) || 0 })}
+                            value={formData.weight}
+                            onChangeText={(text) => updateField('weight', text)}
                             keyboardType="numeric"
                             icon="speedometer-outline"
+                            accessibilityHint="Ingresa tu peso actual en kilogramos"
                         />
                     </View>
                     <View className="flex-1">
                         <Input
                             label={t('onboarding.basicInfo.heightLabel')}
                             placeholder="175"
-                            value={profile?.height?.toString() || ''}
-                            onChangeText={(text) => updateProfile({ height: parseFloat(text) || 0 })}
+                            value={formData.height}
+                            onChangeText={(text) => updateField('height', text)}
                             keyboardType="numeric"
                             icon="resize-outline"
+                            accessibilityHint="Ingresa tu altura en centímetros"
                         />
                     </View>
                 </View>
             </View>
 
-            {/* Fixed Footer */}
-            <View className="absolute bottom-0 left-0 right-0 bg-background/80 border-t border-white/5">
-                <View className="px-6 py-6">
-                    <Button
-                        label={t('common.continue')}
-                        onPress={handleNext}
-                        disabled={!isStepValid}
-                        icon={<Ionicons name="arrow-forward" size={20} color="white" />}
-                        iconPosition="right"
-                    />
-                </View>
-            </View>
         </ScreenWrapper>
     );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { getLocalDateString, parseLocalDate } from '@/utils/dateUtils';
 
 interface ScheduleConfiguratorProps {
     initialSchedule?: {
@@ -23,7 +24,7 @@ export function ScheduleConfigurator({ initialSchedule, onScheduleChange, enable
     const [scheduleType, setScheduleType] = useState<'specific_days' | 'interval'>(initialSchedule?.type || 'specific_days');
     const [selectedDays, setSelectedDays] = useState<number[]>(initialSchedule?.days || []);
     const [intervalDays, setIntervalDays] = useState<string>(initialSchedule?.interval?.toString() || '4');
-    const [startDate, setStartDate] = useState(initialSchedule?.startDate ? new Date(initialSchedule.startDate) : new Date());
+    const [startDate, setStartDate] = useState(initialSchedule?.startDate ? parseLocalDate(initialSchedule.startDate) : new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     const weekDays = [
@@ -42,7 +43,7 @@ export function ScheduleConfigurator({ initialSchedule, onScheduleChange, enable
                 type: scheduleType,
                 days: scheduleType === 'specific_days' ? selectedDays : undefined,
                 interval: scheduleType === 'interval' ? parseInt(intervalDays) : undefined,
-                startDate: startDate.toISOString().split('T')[0]
+                startDate: getLocalDateString(startDate)
             });
         } else {
             onScheduleChange(null);
@@ -124,7 +125,8 @@ export function ScheduleConfigurator({ initialSchedule, onScheduleChange, enable
                             <Text className="text-gray-400 text-sm mb-2">Repetir cada:</Text>
                             <View className="flex-row items-center gap-3">
                                 <TextInput
-                                    className="bg-gray-900 text-white p-3 rounded-lg text-center text-lg border border-gray-600 w-20"
+                                    className="bg-gray-900 text-white p-3 rounded-lg text-center text-lg border border-gray-600"
+                                    style={{ width: 80 }}
                                     keyboardType="number-pad"
                                     value={intervalDays}
                                     onChangeText={setIntervalDays}

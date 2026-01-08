@@ -1,0 +1,22 @@
+
+> mambo@1.1.0 test
+> jest utils/__tests__/WeaknessAnalyzer.test.ts --verbose
+
+FAIL utils/__tests__/WeaknessAnalyzer.test.ts
+  ÔùÅ Test suite failed to run
+
+    store/analyticsStore.ts:2:34 - error TS2459: Module '"./workoutHistoryStore"' declares 'CompletedWorkout' locally, but it is not exported.
+
+    2 import { useWorkoutHistoryStore, CompletedWorkout } from './workoutHistoryStore';
+                                       ~~~~~~~~~~~~~~~~
+
+      store/workoutHistoryStore.ts:5:10
+        5 import { CompletedWorkout, ExerciseSession, WorkoutSet } from '@/types/schema';
+                   ~~~~~~~~~~~~~~~~
+        'CompletedWorkout' is declared here.
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        8.022 s
+Ran all test suites matching utils/__tests__/WeaknessAnalyzer.test.ts.

@@ -1,13 +1,18 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 
 const TRACKED_EXERCISES = ['Squat', 'Bench Press', 'Deadlift', 'Overhead Press'];
 
 export const OneRMChart = () => {
     const { workouts } = useWorkoutHistoryStore();
     const [selectedExercise, setSelectedExercise] = useState('Bench Press');
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
 
     const chartData = useMemo(() => {
         const dataPoints: { date: string; oneRM: number }[] = [];
@@ -48,9 +53,9 @@ export const OneRMChart = () => {
     }, [workouts, selectedExercise]);
 
     return (
-        <View className="bg-gray-800 p-4 rounded-xl mb-4 border border-gray-700">
+        <View className="bg-surface p-4 rounded-xl mb-4 border border-border/10">
             <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-white text-lg font-bold">Progreso 1RM Estimado</Text>
+                <AccessibleText weight="bold" className="text-text text-lg">Progreso 1RM Estimado</AccessibleText>
             </View>
 
             {/* Exercise Selector */}
@@ -59,22 +64,21 @@ export const OneRMChart = () => {
                     <TouchableOpacity
                         key={ex}
                         onPress={() => setSelectedExercise(ex)}
-                        className={`px-4 py-2 rounded-full mr-2 ${selectedExercise === ex ? 'bg-blue-600' : 'bg-gray-700'
+                        className={`px-4 py-2 rounded-full mr-2 ${selectedExercise === ex ? 'bg-primary' : 'bg-surface-highlight'
                             }`}
                     >
-                        <Text className={`font-bold ${selectedExercise === ex ? 'text-white' : 'text-gray-300'
-                            }`}>
+                        <AccessibleText weight="bold" className={selectedExercise === ex ? 'text-white' : 'text-text-secondary'}>
                             {ex}
-                        </Text>
+                        </AccessibleText>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
 
             {chartData.length < 2 ? (
                 <View className="h-48 items-center justify-center">
-                    <Text className="text-gray-500 text-center">
+                    <AccessibleText className="text-text-muted text-center">
                         No hay suficientes datos para {selectedExercise}
-                    </Text>
+                    </AccessibleText>
                 </View>
             ) : (
                 <LineChart
@@ -89,12 +93,12 @@ export const OneRMChart = () => {
                     yAxisLabel=""
                     yAxisSuffix="kg"
                     chartConfig={{
-                        backgroundColor: '#1f2937',
-                        backgroundGradientFrom: '#1f2937',
-                        backgroundGradientTo: '#1f2937',
+                        backgroundColor: colors.surface,
+                        backgroundGradientFrom: colors.surface,
+                        backgroundGradientTo: colors.surface,
                         decimalPlaces: 0,
                         color: (opacity = 1) => `rgba(34, 197, 94, ${opacity})`, // Green
-                        labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
+                        labelColor: (opacity = 1) => colors.textMuted,
                         style: {
                             borderRadius: 16
                         },

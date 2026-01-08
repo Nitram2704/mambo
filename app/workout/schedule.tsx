@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useWeeklyScheduleStore, ScheduledWorkout } from '@/store/weeklyScheduleStore';
@@ -12,12 +12,16 @@ import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 import { Card } from '@/components/ui/Card';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { a11y } from '@/utils/accessibility';
 
 export default function WorkoutScheduleScreen() {
     const router = useRouter();
     const { t } = useTranslation();
     const { theme } = useAppTheme();
     const isDark = theme === 'dark';
+    const colors = Colors[theme];
     const { schedule, rescheduleWorkout, removeWorkoutFromSchedule, getWeeklyProgress } = useWeeklyScheduleStore();
     const { routines } = useSavedRoutinesStore();
 
@@ -144,7 +148,7 @@ export default function WorkoutScheduleScreen() {
     };
 
     return (
-        <ScreenWrapper headerTitle={t('workout.schedule.title', 'Mi Agenda')}>
+        <ScreenWrapper headerTitle={t('workout.schedule.title', 'Mi Agenda')} scrollable={true}>
             <View className="p-4">
                 {/* Weekly Progress Mini */}
                 {weeklyProgress.scheduled > 0 && (
@@ -159,18 +163,18 @@ export default function WorkoutScheduleScreen() {
                                         <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
                                     </View>
                                     <View>
-                                        <Text className="text-xs font-medium" style={{ color: Colors[theme].textSecondary }}>
+                                        <AccessibleText variant="caption" weight="medium" className="text-text-secondary">
                                             {t('workout.schedule.weeklyProgress', 'Progreso Semanal')}
-                                        </Text>
-                                        <Text className="text-xl font-bold" style={{ color: Colors[theme].text }}>
+                                        </AccessibleText>
+                                        <AccessibleText variant="h3" weight="bold" className="text-text">
                                             {weeklyProgress.completed} / {weeklyProgress.scheduled}
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
                                 </View>
                                 <View className="items-end">
-                                    <Text className="text-sm font-bold text-green-500">
+                                    <AccessibleText weight="bold" className="text-green-500">
                                         {Math.round((weeklyProgress.completed / (weeklyProgress.scheduled || 1)) * 100)}%
-                                    </Text>
+                                    </AccessibleText>
                                 </View>
                             </View>
                         </LinearGradient>
@@ -178,32 +182,24 @@ export default function WorkoutScheduleScreen() {
                 )}
 
                 {groupedSchedule.length === 0 ? (
-                    <View className="flex-1 items-center justify-center py-20">
-                        <Ionicons name="calendar-outline" size={80} color={isDark ? '#4b5563' : '#cbd5e1'} />
-                        <Text className="text-lg mt-4 text-center font-bold" style={{ color: Colors[theme].text }}>
-                            {t('workout.schedule.emptyTitle', 'No tienes entrenamientos agendados.')}
-                        </Text>
-                        <Text className="text-sm mt-2 text-center px-10" style={{ color: Colors[theme].textSecondary }}>
-                            {t('workout.schedule.emptySubtitle', 'Adopta un plan predefinido o genera uno nuevo.')}
-                        </Text>
-                        <TouchableOpacity
-                            onPress={() => router.push('/workout/plans')}
-                            className="bg-blue-600 px-8 py-4 rounded-2xl mt-8 shadow-lg shadow-blue-500/30"
-                        >
-                            <Text className="text-white font-bold text-lg">{t('workout.schedule.viewPlans', 'Ver Planes')}</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <EmptyState
+                        icon="calendar-outline"
+                        title={t('workout.schedule.emptyTitle', 'No tienes entrenamientos agendados.')}
+                        description={t('workout.schedule.emptySubtitle', 'Adopta un plan predefinido o genera uno nuevo para ver tu agenda aquí.')}
+                        actionLabel={t('workout.schedule.viewPlans', 'Ver Planes')}
+                        onAction={() => router.push('/workout/plans')}
+                    />
                 ) : (
                     groupedSchedule.map(([weekStart, workouts], index) => (
                         <View key={weekStart} className="mb-8">
                             <View className="flex-row items-center mb-4 px-1">
-                                <View className="bg-blue-500 w-1.5 h-6 rounded-full mr-3" />
-                                <Text className="font-bold text-lg uppercase tracking-widest" style={{ color: Colors[theme].primary }}>
+                                <View className="bg-primary w-1.5 h-6 rounded-full mr-3" />
+                                <AccessibleText weight="bold" variant="h3" className="text-primary uppercase tracking-widest">
                                     {t('workout.schedule.week', 'Semana')} {index + 1}
-                                </Text>
-                                <Text className="text-xs ml-auto" style={{ color: Colors[theme].textMuted }}>
+                                </AccessibleText>
+                                <AccessibleText variant="caption" className="text-text-muted ml-auto">
                                     {t('workout.schedule.starts', 'Inicia')}: {formatSpanishDate(weekStart, { day: 'numeric', month: 'short' })}
-                                </Text>
+                                </AccessibleText>
                             </View>
 
                             {workouts.map((workout) => {
@@ -213,11 +209,15 @@ export default function WorkoutScheduleScreen() {
                                 return (
                                     <Card
                                         key={workout.id}
-                                        className={`mb-4 overflow-hidden border-0 ${isToday ? 'ring-2 ring-blue-500/50' : ''}`}
+                                        className={`mb-4 overflow-hidden border-0 ${isToday ? 'ring-2 ring-primary/50' : ''}`}
                                     >
                                         <TouchableOpacity
                                             onPress={() => router.push(`/workout/active?routineId=${workout.routineId}`)}
                                             activeOpacity={0.7}
+                                            {...a11y.button(
+                                                `${routine?.name || workout.routineName}. ${formatDate(workout.date)}. ${workout.completed ? 'Completado' : 'Pendiente'}.`,
+                                                'Toca para comenzar este entrenamiento'
+                                            )}
                                         >
                                             <LinearGradient
                                                 colors={isToday
@@ -229,28 +229,28 @@ export default function WorkoutScheduleScreen() {
                                                 <View className="flex-row justify-between items-center">
                                                     <View className="flex-1">
                                                         <View className="flex-row items-center mb-2">
-                                                            <Text className="text-[10px] font-bold uppercase mr-2" style={{ color: Colors[theme].textMuted }}>
+                                                            <AccessibleText variant="caption" weight="bold" className="text-text-muted uppercase mr-2">
                                                                 {formatDate(workout.date)}
-                                                            </Text>
+                                                            </AccessibleText>
                                                             {isToday && (
-                                                                <View className="bg-blue-500 px-2 py-0.5 rounded-full">
-                                                                    <Text className="text-white text-[9px] font-bold">{t('common.today', 'HOY')}</Text>
+                                                                <View className="bg-primary px-2 py-0.5 rounded-full">
+                                                                    <AccessibleText weight="bold" className="text-white text-[9px]">{t('common.today', 'HOY')}</AccessibleText>
                                                                 </View>
                                                             )}
                                                             {workout.completed && (
-                                                                <View className="bg-green-500/10 px-2 py-0.5 rounded-full ml-2">
-                                                                    <Text className="text-green-500 text-[9px] font-bold">{t('common.completed', 'COMPLETADO')}</Text>
+                                                                <View className="bg-success/10 px-2 py-0.5 rounded-full ml-2">
+                                                                    <AccessibleText weight="bold" className="text-success text-[9px]">{t('common.completed', 'COMPLETADO')}</AccessibleText>
                                                                 </View>
                                                             )}
                                                         </View>
-                                                        <Text className="text-lg font-bold mb-1" style={{ color: Colors[theme].text }}>
+                                                        <AccessibleText variant="h3" weight="bold" className="text-text mb-1">
                                                             {routine?.name || workout.routineName}
-                                                        </Text>
+                                                        </AccessibleText>
                                                         <View className="flex-row items-center">
-                                                            <Ionicons name="fitness-outline" size={12} color={Colors[theme].textMuted} />
-                                                            <Text className="text-xs ml-1" style={{ color: Colors[theme].textSecondary }}>
+                                                            <Ionicons name="fitness-outline" size={12} color={colors.textMuted} />
+                                                            <AccessibleText variant="caption" className="text-text-secondary ml-1">
                                                                 {routine?.exercises.length || 0} {t('workout.exercises', 'ejercicios')} • {routine?.exercises.reduce((acc, ex) => acc + (ex.plannedSets || 3), 0) || 0} {t('workout.sets', 'series')}
-                                                            </Text>
+                                                            </AccessibleText>
                                                         </View>
                                                     </View>
 
@@ -261,10 +261,10 @@ export default function WorkoutScheduleScreen() {
                                                                 setEditingWorkout(workout);
                                                                 setSelectedNewDate(workout.date);
                                                             }}
-                                                            className="w-10 h-10 rounded-xl items-center justify-center"
-                                                            style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
+                                                            className="w-10 h-10 rounded-xl items-center justify-center bg-surface-highlight/30"
+                                                            {...a11y.button('Reprogramar', 'Cambia la fecha de este entrenamiento')}
                                                         >
-                                                            <Ionicons name="calendar-outline" size={20} color={Colors[theme].textSecondary} />
+                                                            <Ionicons name="calendar-outline" size={20} color={colors.textSecondary} />
                                                         </TouchableOpacity>
 
                                                         <TouchableOpacity
@@ -272,13 +272,13 @@ export default function WorkoutScheduleScreen() {
                                                                 e.stopPropagation();
                                                                 router.push(`/workout/active?routineId=${workout.routineId}`);
                                                             }}
-                                                            className="w-10 h-10 rounded-xl items-center justify-center"
-                                                            style={{ backgroundColor: workout.completed ? 'rgba(34, 197, 94, 0.1)' : 'rgba(59, 130, 246, 0.1)' }}
+                                                            className={`w-10 h-10 rounded-xl items-center justify-center ${workout.completed ? 'bg-success/10' : 'bg-primary/10'}`}
+                                                            {...a11y.button('Comenzar', 'Inicia este entrenamiento ahora')}
                                                         >
                                                             <Ionicons
                                                                 name={workout.completed ? "checkmark-circle" : "play"}
                                                                 size={24}
-                                                                color={workout.completed ? "#22c55e" : "#3b82f6"}
+                                                                color={workout.completed ? colors.success : colors.primary}
                                                             />
                                                         </TouchableOpacity>
                                                     </View>
@@ -303,35 +303,36 @@ export default function WorkoutScheduleScreen() {
             >
                 <View className="flex-1 justify-end bg-black/60">
                     <View
-                        className="rounded-t-3xl p-6"
-                        style={{ backgroundColor: Colors[theme].background }}
+                        className="rounded-t-3xl p-6 bg-background"
                     >
                         <View className="flex-row justify-between items-center mb-6">
-                            <Text className="text-xl font-bold" style={{ color: Colors[theme].text }}>
+                            <AccessibleText variant="h2" weight="bold" className="text-text">
                                 {t('workout.schedule.changeDate', 'Cambiar Fecha')}
-                            </Text>
-                            <TouchableOpacity onPress={() => setEditingWorkout(null)}>
-                                <Ionicons name="close" size={24} color={Colors[theme].text} />
+                            </AccessibleText>
+                            <TouchableOpacity
+                                onPress={() => setEditingWorkout(null)}
+                                {...a11y.button('Cerrar', 'Cierra el selector de fecha')}
+                            >
+                                <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
                         </View>
 
                         {editingWorkout && (
                             <View
-                                className="rounded-xl p-4 mb-6"
-                                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }}
+                                className="rounded-xl p-4 mb-6 bg-surface-highlight/30"
                             >
-                                <Text className="text-[10px] font-bold uppercase mb-1" style={{ color: Colors[theme].textMuted }}>
+                                <AccessibleText variant="caption" weight="bold" className="text-text-muted uppercase mb-1">
                                     {t('workout.schedule.workout', 'ENTRENAMIENTO')}
-                                </Text>
-                                <Text className="font-bold text-lg" style={{ color: Colors[theme].text }}>
+                                </AccessibleText>
+                                <AccessibleText variant="h3" weight="bold" className="text-text">
                                     {routines.find(r => r.id === editingWorkout.routineId)?.name || editingWorkout.routineName}
-                                </Text>
+                                </AccessibleText>
                             </View>
                         )}
 
-                        <Text className="text-sm mb-4 font-medium" style={{ color: Colors[theme].textSecondary }}>
+                        <AccessibleText weight="medium" className="text-text-secondary mb-4">
                             {t('workout.schedule.selectNewDate', 'Selecciona nueva fecha:')}
-                        </Text>
+                        </AccessibleText>
 
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-8">
                             <View className="flex-row gap-3">
@@ -340,19 +341,18 @@ export default function WorkoutScheduleScreen() {
                                         key={d.date}
                                         onPress={() => setSelectedNewDate(d.date)}
                                         className={`px-5 py-4 rounded-2xl items-center border ${selectedNewDate === d.date
-                                            ? 'bg-blue-600 border-blue-600'
-                                            : isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'
+                                            ? 'bg-primary border-primary'
+                                            : 'bg-surface-highlight/30 border-white/5'
                                             }`}
                                         style={{ minWidth: 90 }}
+                                        {...a11y.button(`Seleccionar ${d.label}`, `Toca para mover el entrenamiento al ${d.label}`)}
                                     >
-                                        <Text className={`text-[10px] font-bold uppercase mb-1 ${selectedNewDate === d.date ? 'text-blue-100' : 'text-gray-500'
-                                            }`}>
+                                        <AccessibleText variant="caption" weight="bold" className={`uppercase mb-1 ${selectedNewDate === d.date ? 'text-white/80' : 'text-text-muted'}`}>
                                             {d.dayName.substring(0, 3)}
-                                        </Text>
-                                        <Text className={`text-lg font-bold ${selectedNewDate === d.date ? 'text-white' : 'text-gray-700 dark:text-gray-300'
-                                            }`}>
+                                        </AccessibleText>
+                                        <AccessibleText variant="h3" weight="bold" className={`${selectedNewDate === d.date ? 'text-white' : 'text-text'}`}>
                                             {d.label.split(',')[0]}
-                                        </Text>
+                                        </AccessibleText>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -361,18 +361,19 @@ export default function WorkoutScheduleScreen() {
                         <View className="flex-row gap-4">
                             <TouchableOpacity
                                 onPress={handleDelete}
-                                className="flex-1 py-4 rounded-2xl items-center border border-red-500/30"
-                                style={{ backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)' }}
+                                className="flex-1 py-4 rounded-2xl items-center border border-error/30 bg-error/10"
+                                {...a11y.button('Eliminar', 'Quita este entrenamiento de la agenda')}
                             >
-                                <Text className="text-red-500 font-bold">{t('common.delete', 'Eliminar')}</Text>
+                                <AccessibleText weight="bold" className="text-error">{t('common.delete', 'Eliminar')}</AccessibleText>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 onPress={handleReschedule}
-                                className="py-4 rounded-2xl items-center bg-blue-600 shadow-lg shadow-blue-500/30"
+                                className="py-4 rounded-2xl items-center bg-primary shadow-lg shadow-primary/30"
                                 style={{ flex: 2 }}
+                                {...a11y.button('Guardar Cambios', 'Confirma la nueva fecha para el entrenamiento')}
                             >
-                                <Text className="text-white font-bold">{t('common.saveChanges', 'Guardar Cambio')}</Text>
+                                <AccessibleText weight="bold" className="text-white">{t('common.saveChanges', 'Guardar Cambio')}</AccessibleText>
                             </TouchableOpacity>
                         </View>
                     </View>

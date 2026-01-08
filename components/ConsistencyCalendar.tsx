@@ -1,9 +1,13 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
+import { AccessibleText } from './ui/AccessibleText';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
 
 export const ConsistencyCalendar: React.FC = () => {
     const { workouts } = useWorkoutHistoryStore();
+    const { theme } = useAppTheme();
 
     // Generate last 12 weeks of data
     const weeks = 12;
@@ -57,17 +61,20 @@ export const ConsistencyCalendar: React.FC = () => {
 
     const getCellColor = (intensity: number) => {
         switch (intensity) {
-            case 0: return 'bg-gray-800';
-            case 1: return 'bg-green-300';
-            case 2: return 'bg-green-500';
-            case 3: return 'bg-green-700';
-            default: return 'bg-gray-800';
+            case 0: return Colors[theme].surfaceHighlight + '40';
+            case 1: return '#4ade80'; // green-400
+            case 2: return '#22c55e'; // green-500
+            case 3: return '#15803d'; // green-700
+            default: return Colors[theme].surfaceHighlight + '40';
         }
     };
 
     return (
-        <View className="bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <Text className="text-white font-bold mb-3">Consistencia</Text>
+        <View
+            className="bg-surface rounded-xl p-4 border border-border/10"
+            accessibilityLabel={`Calendario de consistencia: ${workouts.length} entrenamientos registrados en las últimas 12 semanas`}
+        >
+            <AccessibleText weight="bold" className="text-text font-bold mb-3">Consistencia</AccessibleText>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View className="flex-row gap-1">
                     {grid.map((week, wIndex) => (
@@ -75,8 +82,11 @@ export const ConsistencyCalendar: React.FC = () => {
                             {week.map((day, dIndex) => (
                                 <View
                                     key={dIndex}
-                                    className={`w-3 h-3 rounded-sm ${getCellColor(day.intensity)}`}
-                                    style={{ opacity: day.date > today ? 0.3 : 1 }}
+                                    className="w-3 h-3 rounded-sm"
+                                    style={{
+                                        backgroundColor: getCellColor(day.intensity),
+                                        opacity: day.date > today ? 0.3 : 1
+                                    }}
                                 />
                             ))}
                         </View>
@@ -84,12 +94,12 @@ export const ConsistencyCalendar: React.FC = () => {
                 </View>
             </ScrollView>
             <View className="flex-row justify-end items-center mt-2 gap-2">
-                <Text className="text-gray-500 text-xs">Sin entreno</Text>
-                <View className="w-3 h-3 rounded-sm bg-gray-800" />
-                <View className="w-3 h-3 rounded-sm bg-green-300" />
-                <View className="w-3 h-3 rounded-sm bg-green-500" />
-                <View className="w-3 h-3 rounded-sm bg-green-700" />
-                <Text className="text-gray-500 text-xs">Alto volumen</Text>
+                <AccessibleText className="text-text-muted text-[10px] uppercase tracking-widest">Menos</AccessibleText>
+                <View className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: getCellColor(0) }} />
+                <View className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: getCellColor(1) }} />
+                <View className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: getCellColor(2) }} />
+                <View className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: getCellColor(3) }} />
+                <AccessibleText className="text-text-muted text-[10px] uppercase tracking-widest">Más</AccessibleText>
             </View>
         </View>
     );

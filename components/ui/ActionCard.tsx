@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
 
 interface ActionCardProps {
     type: string;
@@ -12,6 +13,8 @@ interface ActionCardProps {
 }
 
 export function ActionCard({ type, args, status, result }: ActionCardProps) {
+    const router = useRouter();
+
     const getIcon = () => {
         switch (type) {
             case 'schedule_workout': return 'calendar';
@@ -192,8 +195,34 @@ export function ActionCard({ type, args, status, result }: ActionCardProps) {
                 {renderDetails()}
 
                 {status === 'success' && result && (
-                    <Animated.View entering={FadeIn.delay(400)} className="mt-3 pt-3 border-t border-white/5">
-                        <Text className="text-green-400 text-xs">{typeof result === 'string' ? result : '✅ Acción completada exitosamente'}</Text>
+                    <Animated.View entering={FadeIn.delay(400)} className="mt-3 pt-3 border-t border-white/5 flex-row items-center justify-between">
+                        <Text className="text-green-400 text-xs flex-1 mr-2">{typeof result === 'string' ? result : '✅ Acción completada exitosamente'}</Text>
+
+                        {/* Action-specific navigation buttons */}
+                        {type === 'schedule_workout' && (
+                            <TouchableOpacity
+                                onPress={() => router.push('/workout/schedule' as any)}
+                                className="bg-green-500/20 px-2 py-1 rounded-lg"
+                            >
+                                <Text className="text-green-400 text-[10px] font-bold">VER AGENDA</Text>
+                            </TouchableOpacity>
+                        )}
+                        {type === 'generate_meal_plan' && (
+                            <TouchableOpacity
+                                onPress={() => router.push('/(tabs)/nutricion' as any)}
+                                className="bg-green-500/20 px-2 py-1 rounded-lg"
+                            >
+                                <Text className="text-green-400 text-[10px] font-bold">VER PLAN</Text>
+                            </TouchableOpacity>
+                        )}
+                        {type === 'substitute_exercise' && (
+                            <TouchableOpacity
+                                onPress={() => router.push('/(tabs)' as any)}
+                                className="bg-green-500/20 px-2 py-1 rounded-lg"
+                            >
+                                <Text className="text-green-400 text-[10px] font-bold">VER RUTINA</Text>
+                            </TouchableOpacity>
+                        )}
                     </Animated.View>
                 )}
 

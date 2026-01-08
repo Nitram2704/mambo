@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { useWorkoutHistoryStore, CompletedWorkout } from './workoutHistoryStore';
+import { useWorkoutHistoryStore } from './workoutHistoryStore';
+import { CompletedWorkout } from '@/types/schema';
 import { useNutritionStore, DailyNutrition } from './nutritionStore';
 import { useWeightStore, WeightLog } from './weightStore';
 import { useUserProfileStore } from './userProfileStore';

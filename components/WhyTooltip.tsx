@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal } from 'react-native';
+import { View, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { AccessibleText } from './ui/AccessibleText';
 
 interface WhyTooltipProps {
     title: string;
@@ -22,7 +23,11 @@ export const WhyTooltip: React.FC<WhyTooltipProps> = ({
         <>
             <TouchableOpacity
                 onPress={() => setShowModal(true)}
-                className="ml-2">
+                className="ml-2"
+                accessibilityRole="button"
+                accessibilityLabel={`¿Por qué ${title}?`}
+                accessibilityHint="Muestra una explicación detallada"
+            >
                 <View className="w-6 h-6 rounded-full bg-blue-500/20 items-center justify-center border border-blue-500/30">
                     <Ionicons name="help-circle" size={14} color="#60a5fa" />
                 </View>
@@ -42,38 +47,41 @@ export const WhyTooltip: React.FC<WhyTooltipProps> = ({
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
                                     <Ionicons name="information-circle" size={24} color="white" />
-                                    <Text className="text-white font-bold text-lg ml-2">
+                                    <AccessibleText weight="bold" className="text-white font-bold text-lg ml-2">
                                         ¿Por Qué?
-                                    </Text>
+                                    </AccessibleText>
                                 </View>
                                 <TouchableOpacity
                                     onPress={() => setShowModal(false)}
-                                    className="w-8 h-8 items-center justify-center">
+                                    className="w-8 h-8 items-center justify-center"
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Cerrar"
+                                >
                                     <Ionicons name="close" size={20} color="white" />
                                 </TouchableOpacity>
                             </View>
-                            <Text className="text-blue-100 font-bold text-base mt-1">
+                            <AccessibleText weight="bold" className="text-blue-100 font-bold text-base mt-1">
                                 {title}
-                            </Text>
+                            </AccessibleText>
                         </LinearGradient>
 
                         {/* Content */}
                         <View className="p-4">
-                            <Text className="text-white text-base leading-6 mb-4">
+                            <AccessibleText className="text-white text-base leading-6 mb-4">
                                 {explanation}
-                            </Text>
+                            </AccessibleText>
 
                             {Array.isArray(examples) && examples.length > 0 && (
                                 <View className="mb-4">
-                                    <Text className="text-blue-400 font-bold text-sm mb-2">
+                                    <AccessibleText weight="bold" className="text-blue-400 font-bold text-sm mb-2">
                                         Ejemplos:
-                                    </Text>
+                                    </AccessibleText>
                                     {examples.map((example, index) => (
                                         <View key={index} className="flex-row items-start mb-2">
-                                            <Text className="text-gray-400 text-sm mr-2">•</Text>
-                                            <Text className="text-gray-300 text-sm flex-1">
+                                            <AccessibleText className="text-gray-400 text-sm mr-2">•</AccessibleText>
+                                            <AccessibleText className="text-gray-300 text-sm flex-1">
                                                 {example}
-                                            </Text>
+                                            </AccessibleText>
                                         </View>
                                     ))}
                                 </View>
@@ -81,12 +89,12 @@ export const WhyTooltip: React.FC<WhyTooltipProps> = ({
 
                             {scientific && (
                                 <View className="bg-gray-800/50 p-3 rounded-lg">
-                                    <Text className="text-yellow-400 font-bold text-sm mb-1">
+                                    <AccessibleText weight="bold" className="text-yellow-400 font-bold text-sm mb-1">
                                         Base Científica:
-                                    </Text>
-                                    <Text className="text-gray-300 text-sm">
+                                    </AccessibleText>
+                                    <AccessibleText className="text-gray-300 text-sm">
                                         {scientific}
-                                    </Text>
+                                    </AccessibleText>
                                 </View>
                             )}
                         </View>

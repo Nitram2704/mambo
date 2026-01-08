@@ -37,13 +37,24 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarAccessibilityLabel: 'Inicio',
         }}
       />
+      <Tabs.Screen
+        name="social"
+        options={{
+          title: 'Social',
+          tabBarIcon: ({ color }) => <Ionicons name="people" size={24} color={color} />,
+          tabBarAccessibilityLabel: 'Social y Comunidad',
+        }}
+      />
+
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
+          tabBarAccessibilityLabel: 'Perfil',
         }}
       />
       <Tabs.Screen
@@ -51,6 +62,7 @@ export default function TabLayout() {
         options={{
           title: 'Nutrición',
           tabBarIcon: ({ color }) => <Ionicons name="nutrition" size={24} color={color} />,
+          tabBarAccessibilityLabel: 'Nutrición',
         }}
       />
       <Tabs.Screen
@@ -58,6 +70,7 @@ export default function TabLayout() {
         options={{
           title: 'Sueño',
           tabBarIcon: ({ color }) => <Ionicons name="moon" size={24} color={color} />,
+          tabBarAccessibilityLabel: 'Sueño y descanso',
         }}
       />
       <Tabs.Screen
@@ -65,6 +78,7 @@ export default function TabLayout() {
         options={{
           title: 'Reportes',
           tabBarIcon: ({ color }) => <Ionicons name="bar-chart" size={24} color={color} />,
+          tabBarAccessibilityLabel: 'Reportes y estadísticas',
         }}
       />
     </Tabs>

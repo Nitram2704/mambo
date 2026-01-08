@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, Alert } from 'react-native';
+import { View, TextInput, TouchableOpacity, ScrollView, Modal, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Meal } from '@/store/mealPlanStore';
+import { AccessibleText } from './ui/AccessibleText';
 
 interface EditMealModalProps {
     visible: boolean;
@@ -104,11 +105,19 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
             <View className="flex-1 bg-gray-950">
                 {/* Header */}
                 <View className="flex-row items-center justify-between p-4 border-b border-gray-800">
-                    <TouchableOpacity onPress={onClose}>
+                    <TouchableOpacity
+                        onPress={onClose}
+                        accessibilityRole="button"
+                        accessibilityLabel="Cerrar"
+                    >
                         <Ionicons name="close" size={28} color="#fff" />
                     </TouchableOpacity>
-                    <Text className="text-white text-lg font-bold">Editar Comida</Text>
-                    <TouchableOpacity onPress={handleDelete}>
+                    <AccessibleText variant="h3" weight="bold" className="text-white text-lg font-bold">Editar Comida</AccessibleText>
+                    <TouchableOpacity
+                        onPress={handleDelete}
+                        accessibilityRole="button"
+                        accessibilityLabel="Eliminar comida"
+                    >
                         <Ionicons name="trash" size={24} color="#ef4444" />
                     </TouchableOpacity>
                 </View>
@@ -116,21 +125,22 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
                 <ScrollView className="flex-1 p-4">
                     {/* Nombre */}
                     <View className="mb-4">
-                        <Text className="text-white text-sm font-semibold mb-2">Nombre</Text>
+                        <AccessibleText weight="semibold" className="text-white text-sm font-semibold mb-2">Nombre</AccessibleText>
                         <TextInput
                             value={name}
                             onChangeText={setName}
                             placeholder="Nombre de la comida"
                             placeholderTextColor="#6b7280"
                             className="bg-gray-800 text-white px-4 py-3 rounded-xl"
+                            accessibilityLabel="Nombre de la comida"
                         />
                     </View>
 
                     {/* Macros */}
-                    <Text className="text-white text-lg font-bold mb-3">Valores Nutricionales</Text>
+                    <AccessibleText variant="h3" weight="bold" className="text-white text-lg font-bold mb-3">Valores Nutricionales</AccessibleText>
 
                     <View className="mb-4">
-                        <Text className="text-white text-sm font-semibold mb-2">Calorías</Text>
+                        <AccessibleText weight="semibold" className="text-white text-sm font-semibold mb-2">Calorías</AccessibleText>
                         <TextInput
                             value={calories}
                             onChangeText={setCalories}
@@ -138,12 +148,13 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
                             keyboardType="numeric"
                             placeholderTextColor="#6b7280"
                             className="bg-gray-800 text-white px-4 py-3 rounded-xl"
+                            accessibilityLabel="Calorías"
                         />
                     </View>
 
                     <View className="flex-row gap-3 mb-4">
                         <View className="flex-1">
-                            <Text className="text-green-400 text-sm font-semibold mb-2">Proteína (g)</Text>
+                            <AccessibleText weight="semibold" className="text-green-400 text-sm font-semibold mb-2">Proteína (g)</AccessibleText>
                             <TextInput
                                 value={protein}
                                 onChangeText={setProtein}
@@ -151,10 +162,11 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
                                 keyboardType="numeric"
                                 placeholderTextColor="#6b7280"
                                 className="bg-gray-800 text-white px-4 py-3 rounded-xl"
+                                accessibilityLabel="Proteína en gramos"
                             />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-blue-400 text-sm font-semibold mb-2">Carbos (g)</Text>
+                            <AccessibleText weight="semibold" className="text-blue-400 text-sm font-semibold mb-2">Carbos (g)</AccessibleText>
                             <TextInput
                                 value={carbs}
                                 onChangeText={setCarbs}
@@ -162,10 +174,11 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
                                 keyboardType="numeric"
                                 placeholderTextColor="#6b7280"
                                 className="bg-gray-800 text-white px-4 py-3 rounded-xl"
+                                accessibilityLabel="Carbohidratos en gramos"
                             />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-orange-400 text-sm font-semibold mb-2">Grasas (g)</Text>
+                            <AccessibleText weight="semibold" className="text-orange-400 text-sm font-semibold mb-2">Grasas (g)</AccessibleText>
                             <TextInput
                                 value={fat}
                                 onChangeText={setFat}
@@ -173,27 +186,29 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
                                 keyboardType="numeric"
                                 placeholderTextColor="#6b7280"
                                 className="bg-gray-800 text-white px-4 py-3 rounded-xl"
+                                accessibilityLabel="Grasas en gramos"
                             />
                         </View>
                     </View>
 
                     {/* Tiempo de preparación */}
                     <View className="mb-4">
-                        <Text className="text-white text-sm font-semibold mb-2">Tiempo de Preparación</Text>
+                        <AccessibleText weight="semibold" className="text-white text-sm font-semibold mb-2">Tiempo de Preparación</AccessibleText>
                         <TextInput
                             value={prepTime}
                             onChangeText={setPrepTime}
                             placeholder="ej: 15 minutos"
                             placeholderTextColor="#6b7280"
                             className="bg-gray-800 text-white px-4 py-3 rounded-xl"
+                            accessibilityLabel="Tiempo de preparación"
                         />
                     </View>
 
                     {/* Ingredientes */}
                     <View className="mb-4">
-                        <Text className="text-white text-sm font-semibold mb-2">
+                        <AccessibleText weight="semibold" className="text-white text-sm font-semibold mb-2">
                             Ingredientes (uno por línea)
-                        </Text>
+                        </AccessibleText>
                         <TextInput
                             value={ingredients}
                             onChangeText={setIngredients}
@@ -203,14 +218,15 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
                             numberOfLines={5}
                             textAlignVertical="top"
                             className="bg-gray-800 text-white px-4 py-3 rounded-xl"
+                            accessibilityLabel="Lista de ingredientes"
                         />
                     </View>
 
                     {/* Instrucciones */}
                     <View className="mb-4">
-                        <Text className="text-white text-sm font-semibold mb-2">
+                        <AccessibleText weight="semibold" className="text-white text-sm font-semibold mb-2">
                             Instrucciones (opcional)
-                        </Text>
+                        </AccessibleText>
                         <TextInput
                             value={instructions}
                             onChangeText={setInstructions}
@@ -220,6 +236,7 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
                             numberOfLines={6}
                             textAlignVertical="top"
                             className="bg-gray-800 text-white px-4 py-3 rounded-xl"
+                            accessibilityLabel="Instrucciones de preparación"
                         />
                     </View>
 
@@ -227,10 +244,12 @@ export default function EditMealModal({ visible, meal, onSave, onDelete, onClose
                     <TouchableOpacity
                         onPress={handleSave}
                         className="bg-blue-500 py-4 rounded-xl mb-8"
+                        accessibilityRole="button"
+                        accessibilityLabel="Guardar cambios"
                     >
-                        <Text className="text-white text-center font-bold text-lg">
+                        <AccessibleText weight="bold" className="text-white text-center font-bold text-lg">
                             Guardar Cambios
-                        </Text>
+                        </AccessibleText>
                     </TouchableOpacity>
                 </ScrollView>
             </View>

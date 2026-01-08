@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useMealPlanStore, Meal } from '@/store/mealPlanStore';
 import EditMealModal from '@/components/EditMealModal';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 
 export default function MealPlanScreen() {
     const { weeklyPlan, loading, fetchWeeklyPlan, updateDayMeals } = useMealPlanStore();
@@ -81,7 +82,7 @@ export default function MealPlanScreen() {
             <View className="flex-1 bg-gray-950 justify-center items-center">
                 <Stack.Screen options={{ title: 'Plan de Comidas' }} />
                 <ActivityIndicator size="large" color="#3b82f6" />
-                <Text className="text-gray-400 mt-4">Cargando plan...</Text>
+                <AccessibleText className="text-gray-400 mt-4">Cargando plan...</AccessibleText>
             </View>
         );
     }
@@ -91,17 +92,19 @@ export default function MealPlanScreen() {
             <View className="flex-1 bg-gray-950 justify-center items-center px-6">
                 <Stack.Screen options={{ title: 'Plan de Comidas' }} />
                 <Ionicons name="calendar-outline" size={64} color="#6b7280" />
-                <Text className="text-white text-xl font-bold mt-4 text-center">
+                <AccessibleText variant="h2" weight="bold" className="text-white text-xl font-bold mt-4 text-center">
                     No tienes un plan de comidas
-                </Text>
-                <Text className="text-gray-400 text-center mt-2">
+                </AccessibleText>
+                <AccessibleText className="text-gray-400 text-center mt-2">
                     Completa el onboarding o crea un plan personalizado
-                </Text>
+                </AccessibleText>
                 <TouchableOpacity
                     onPress={() => fetchWeeklyPlan()}
                     className="bg-blue-500 px-6 py-3 rounded-xl mt-6"
+                    accessibilityRole="button"
+                    accessibilityLabel="Recargar plan de comidas"
                 >
-                    <Text className="text-white font-semibold">Recargar</Text>
+                    <AccessibleText weight="bold" className="text-white font-semibold">Recargar</AccessibleText>
                 </TouchableOpacity>
             </View>
         );
@@ -113,24 +116,24 @@ export default function MealPlanScreen() {
 
             <ScrollView className="flex-1">
                 <View className="p-4">
-                    <Text className="text-gray-400 text-sm mb-4">
+                    <AccessibleText className="text-gray-400 text-sm mb-4">
                         Tu plan personalizado de 7 días
-                    </Text>
+                    </AccessibleText>
 
                     {weeklyPlan.map((day) => (
                         <View key={day.id} className="mb-6">
                             {/* Día Header */}
-                            <View className="flex-row items-center mb-3">
+                            <View className="flex-row items-center mb-3" accessibilityRole="header">
                                 <Ionicons name="calendar" size={20} color="#3b82f6" />
-                                <Text className="text-white text-lg font-bold ml-2">
+                                <AccessibleText variant="h3" weight="bold" className="text-white text-lg font-bold ml-2">
                                     {getDayName(day.date)}
-                                </Text>
-                                <Text className="text-gray-500 text-sm ml-2">
+                                </AccessibleText>
+                                <AccessibleText className="text-gray-500 text-sm ml-2">
                                     {day.date.toLocaleDateString('es-ES', {
                                         day: 'numeric',
                                         month: 'short'
                                     })}
-                                </Text>
+                                </AccessibleText>
                             </View>
 
                             {/* Meals */}
@@ -142,6 +145,7 @@ export default function MealPlanScreen() {
                                         <View
                                             key={meal.id}
                                             className={`p-4 ${!isLast ? 'border-b border-gray-800' : ''}`}
+                                            accessibilityLabel={`${getMealTypeLabel(meal.type)}: ${meal.name}, ${meal.calories} calorías`}
                                         >
                                             {/* Meal Header */}
                                             <View className="flex-row items-center justify-between mb-2">
@@ -151,17 +155,19 @@ export default function MealPlanScreen() {
                                                         size={20}
                                                         color="#9ca3af"
                                                     />
-                                                    <Text className="text-gray-400 text-sm ml-2 font-semibold">
+                                                    <AccessibleText weight="semibold" className="text-gray-400 text-sm ml-2 font-semibold">
                                                         {getMealTypeLabel(meal.type)}
-                                                    </Text>
+                                                    </AccessibleText>
                                                 </View>
                                                 <View className="flex-row items-center gap-3">
-                                                    <Text className="text-blue-400 text-sm font-bold">
+                                                    <AccessibleText weight="bold" className="text-blue-400 text-sm font-bold">
                                                         {meal.calories} kcal
-                                                    </Text>
+                                                    </AccessibleText>
                                                     <TouchableOpacity
                                                         onPress={() => handleEditMeal(meal, day.date)}
                                                         className="p-1"
+                                                        accessibilityRole="button"
+                                                        accessibilityLabel={`Editar ${getMealTypeLabel(meal.type)}`}
                                                     >
                                                         <Ionicons name="pencil" size={18} color="#9ca3af" />
                                                     </TouchableOpacity>
@@ -169,46 +175,46 @@ export default function MealPlanScreen() {
                                             </View>
 
                                             {/* Meal Name */}
-                                            <Text className="text-white text-base font-semibold mb-2">
+                                            <AccessibleText weight="semibold" className="text-white text-base font-semibold mb-2">
                                                 {meal.name}
-                                            </Text>
+                                            </AccessibleText>
 
                                             {/* Macros */}
                                             <View className="flex-row gap-3">
-                                                <View className="bg-green-500/20 px-3 py-1 rounded-lg">
-                                                    <Text className="text-green-400 text-xs font-semibold">
+                                                <View className="bg-green-500/20 px-3 py-1 rounded-lg" accessibilityLabel={`Proteína: ${meal.protein} gramos`}>
+                                                    <AccessibleText weight="semibold" className="text-green-400 text-xs font-semibold">
                                                         P: {meal.protein}g
-                                                    </Text>
+                                                    </AccessibleText>
                                                 </View>
-                                                <View className="bg-blue-500/20 px-3 py-1 rounded-lg">
-                                                    <Text className="text-blue-400 text-xs font-semibold">
+                                                <View className="bg-blue-500/20 px-3 py-1 rounded-lg" accessibilityLabel={`Carbohidratos: ${meal.carbs} gramos`}>
+                                                    <AccessibleText weight="semibold" className="text-blue-400 text-xs font-semibold">
                                                         C: {meal.carbs}g
-                                                    </Text>
+                                                    </AccessibleText>
                                                 </View>
-                                                <View className="bg-orange-500/20 px-3 py-1 rounded-lg">
-                                                    <Text className="text-orange-400 text-xs font-semibold">
+                                                <View className="bg-orange-500/20 px-3 py-1 rounded-lg" accessibilityLabel={`Grasas: ${meal.fat} gramos`}>
+                                                    <AccessibleText weight="semibold" className="text-orange-400 text-xs font-semibold">
                                                         G: {meal.fat}g
-                                                    </Text>
+                                                    </AccessibleText>
                                                 </View>
                                             </View>
 
                                             {/* Prep Time */}
                                             {meal.prepTime && (
-                                                <View className="flex-row items-center mt-2">
+                                                <View className="flex-row items-center mt-2" accessibilityLabel={`Tiempo de preparación: ${meal.prepTime}`}>
                                                     <Ionicons name="time-outline" size={14} color="#6b7280" />
-                                                    <Text className="text-gray-500 text-xs ml-1">
+                                                    <AccessibleText className="text-gray-500 text-xs ml-1">
                                                         {meal.prepTime}
-                                                    </Text>
+                                                    </AccessibleText>
                                                 </View>
                                             )}
 
                                             {/* Ingredients (collapsed) */}
                                             {meal.ingredients && meal.ingredients.length > 0 && (
-                                                <View className="mt-2">
-                                                    <Text className="text-gray-500 text-xs">
+                                                <View className="mt-2" accessibilityLabel={`Ingredientes: ${meal.ingredients.join(', ')}`}>
+                                                    <AccessibleText className="text-gray-500 text-xs">
                                                         {meal.ingredients.slice(0, 3).join(', ')}
                                                         {meal.ingredients.length > 3 && '...'}
-                                                    </Text>
+                                                    </AccessibleText>
                                                 </View>
                                             )}
                                         </View>
@@ -217,31 +223,31 @@ export default function MealPlanScreen() {
                             </View>
 
                             {/* Daily Totals */}
-                            <View className="bg-gray-800/50 rounded-xl p-3 mt-2">
+                            <View className="bg-gray-800/50 rounded-xl p-3 mt-2" accessibilityLabel="Totales diarios">
                                 <View className="flex-row justify-around">
-                                    <View className="items-center">
-                                        <Text className="text-gray-400 text-xs">Total</Text>
-                                        <Text className="text-white text-sm font-bold">
+                                    <View className="items-center" accessibilityLabel={`Total calorías: ${day.meals.reduce((sum, m) => sum + m.calories, 0)}`}>
+                                        <AccessibleText className="text-gray-400 text-xs">Total</AccessibleText>
+                                        <AccessibleText weight="bold" className="text-white text-sm font-bold">
                                             {day.meals.reduce((sum, m) => sum + m.calories, 0)} kcal
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
-                                    <View className="items-center">
-                                        <Text className="text-gray-400 text-xs">Proteína</Text>
-                                        <Text className="text-green-400 text-sm font-bold">
+                                    <View className="items-center" accessibilityLabel={`Total proteína: ${day.meals.reduce((sum, m) => sum + m.protein, 0)} gramos`}>
+                                        <AccessibleText className="text-gray-400 text-xs">Proteína</AccessibleText>
+                                        <AccessibleText weight="bold" className="text-green-400 text-sm font-bold">
                                             {day.meals.reduce((sum, m) => sum + m.protein, 0)}g
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
-                                    <View className="items-center">
-                                        <Text className="text-gray-400 text-xs">Carbos</Text>
-                                        <Text className="text-blue-400 text-sm font-bold">
+                                    <View className="items-center" accessibilityLabel={`Total carbohidratos: ${day.meals.reduce((sum, m) => sum + m.carbs, 0)} gramos`}>
+                                        <AccessibleText className="text-gray-400 text-xs">Carbos</AccessibleText>
+                                        <AccessibleText weight="bold" className="text-blue-400 text-sm font-bold">
                                             {day.meals.reduce((sum, m) => sum + m.carbs, 0)}g
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
-                                    <View className="items-center">
-                                        <Text className="text-gray-400 text-xs">Grasas</Text>
-                                        <Text className="text-orange-400 text-sm font-bold">
+                                    <View className="items-center" accessibilityLabel={`Total grasas: ${day.meals.reduce((sum, m) => sum + m.fat, 0)} gramos`}>
+                                        <AccessibleText className="text-gray-400 text-xs">Grasas</AccessibleText>
+                                        <AccessibleText weight="bold" className="text-orange-400 text-sm font-bold">
                                             {day.meals.reduce((sum, m) => sum + m.fat, 0)}g
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
                                 </View>
                             </View>

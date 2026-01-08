@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, TextInput, FlatList, TouchableOpacity, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, Link } from 'expo-router';
 import { EXERCISES, Exercise, MuscleGroup } from '@/constants/exercises';
 import { useRoutineStore } from '@/store/routineStore';
+import { useUIStore } from '@/store/uiStore';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
 
-const MUSCLE_GROUPS: (MuscleGroup | 'All')[] = ['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
-const EQUIPMENT_TYPES = ['All', 'Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight'];
+const MUSCLE_GROUPS: (MuscleGroup | 'All')[] = ['All', 'chest', 'back', 'legs', 'shoulders', 'biceps', 'triceps', 'abs', 'cardio'];
+const EQUIPMENT_TYPES = ['All', 'barbell', 'dumbbell', 'machine', 'cable', 'bodyweight'];
 
 export default function ExercisesScreen() {
     const router = useRouter();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const addExercise = useRoutineStore((state) => state.addExercise);
+    const { showToast } = useUIStore();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup | 'All'>('All');
@@ -25,24 +33,20 @@ export default function ExercisesScreen() {
     });
 
     const handleMuscleFilter = (muscle: MuscleGroup | 'All') => {
-        console.log('Muscle filter clicked:', muscle);
         setSelectedMuscle(muscle);
     };
 
     const handleEquipmentFilter = (equipment: string) => {
-        console.log('Equipment filter clicked:', equipment);
         setSelectedEquipment(equipment);
     };
 
     const handleSelectExercise = (item: Exercise) => {
-        console.log('Exercise selected:', item.name);
         addExercise(item);
-        console.log('Navigating back...');
+        showToast(`${item.name} añadido`, 'success');
         router.back();
     };
 
     const handleViewDetails = (item: Exercise) => {
-        console.log('Viewing exercise details:', item.name);
         router.push({
             pathname: '/exercises/[id]',
             params: { id: item.id }
@@ -52,10 +56,10 @@ export default function ExercisesScreen() {
     const renderItem = ({ item }: { item: Exercise }) => (
         <Pressable
             onPress={() => handleSelectExercise(item)}
-            className="flex-row items-center justify-between p-4 border-b border-gray-800 active:bg-gray-800">
+            className="flex-row items-center justify-between p-4 border-b border-border/10 active:bg-surface-highlight/50">
             <View className="flex-1">
-                <Text className="text-white text-lg font-medium">{item.name}</Text>
-                <Text className="text-gray-500 text-sm">{item.muscleGroup} • {item.equipment}</Text>
+                <AccessibleText weight="bold" className="text-text text-lg">{item.name}</AccessibleText>
+                <AccessibleText className="text-text-secondary text-sm">{item.muscleGroup} • {item.equipment}</AccessibleText>
             </View>
             <View className="flex-row items-center gap-3">
                 <TouchableOpacity
@@ -63,9 +67,9 @@ export default function ExercisesScreen() {
                         e.stopPropagation();
                         handleViewDetails(item);
                     }}
-                    className="p-2"
+                    className="p-2 bg-success/10 rounded-full"
                 >
-                    <Ionicons name="school-outline" size={20} color="#10b981" />
+                    <Ionicons name="school-outline" size={20} color={colors.success} />
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={(e) => {
@@ -75,39 +79,40 @@ export default function ExercisesScreen() {
                             params: { exerciseId: item.id, exerciseName: item.name }
                         });
                     }}
-                    className="p-2"
+                    className="p-2 bg-primary/10 rounded-full"
                 >
-                    <Ionicons name="stats-chart" size={20} color="#60a5fa" />
+                    <Ionicons name="stats-chart" size={20} color={colors.primary} />
                 </TouchableOpacity>
-                <Ionicons name="add-circle-outline" size={24} color="#3b82f6" />
+                <Ionicons name="add-circle-outline" size={24} color={colors.primary} />
             </View>
         </Pressable>
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['top']}>
+        <ScreenWrapper safeArea={true} edges={['top']}>
             {/* Header */}
-            <View className="flex-row items-center p-4 border-b border-gray-800">
-                <TouchableOpacity onPress={() => router.back()} className="mr-4">
-                    <Ionicons name="arrow-back" size={24} color="white" />
+            <View className="flex-row items-center p-4 border-b border-border/10">
+                <TouchableOpacity onPress={() => router.back()} className="mr-4 p-2 bg-surface-highlight rounded-full">
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text className="text-white text-xl font-bold">Ejercicios</Text>
+                <AccessibleText weight="bold" className="text-text text-xl">Ejercicios</AccessibleText>
             </View>
 
             {/* Search Bar */}
             <View className="p-4 pb-2">
-                <View className="bg-gray-800 rounded-xl flex-row items-center px-4 py-3 border border-gray-700">
-                    <Ionicons name="search" size={20} color="#9ca3af" />
+                <View className="bg-surface-highlight/50 rounded-2xl flex-row items-center px-4 py-3 border border-border/10">
+                    <Ionicons name="search" size={20} color={colors.textMuted} />
                     <TextInput
-                        className="flex-1 text-white ml-3 text-base"
+                        className="flex-1 ml-3 text-base"
+                        style={{ color: colors.text }}
                         placeholder="Buscar ejercicio..."
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                            <Ionicons name="close-circle" size={20} color={colors.textMuted} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -122,12 +127,12 @@ export default function ExercisesScreen() {
                             key={muscle}
                             onPress={() => handleMuscleFilter(muscle)}
                             className={`px-4 py-2 rounded-full border ${selectedMuscle === muscle
-                                ? 'bg-blue-600 border-blue-600'
-                                : 'bg-gray-800 border-gray-700'
+                                ? 'bg-primary border-primary'
+                                : 'bg-surface-highlight/50 border-border/10'
                                 }`}>
-                            <Text className={`text-sm font-medium ${selectedMuscle === muscle ? 'text-white' : 'text-gray-400'}`}>
+                            <AccessibleText weight="bold" className={`text-sm ${selectedMuscle === muscle ? 'text-white' : 'text-text-secondary'}`}>
                                 {muscle === 'All' ? 'Todos Músculos' : muscle}
-                            </Text>
+                            </AccessibleText>
                         </Pressable>
                     ))}
                 </ScrollView>
@@ -141,12 +146,12 @@ export default function ExercisesScreen() {
                             key={eq}
                             onPress={() => handleEquipmentFilter(eq)}
                             className={`px-4 py-2 rounded-full border ${selectedEquipment === eq
-                                ? 'bg-blue-600 border-blue-600'
-                                : 'bg-gray-800 border-gray-700'
+                                ? 'bg-primary border-primary'
+                                : 'bg-surface-highlight/50 border-border/10'
                                 }`}>
-                            <Text className={`text-sm font-medium ${selectedEquipment === eq ? 'text-white' : 'text-gray-400'}`}>
+                            <AccessibleText weight="bold" className={`text-sm ${selectedEquipment === eq ? 'text-white' : 'text-text-secondary'}`}>
                                 {eq === 'All' ? 'Todo Equipo' : eq}
-                            </Text>
+                            </AccessibleText>
                         </Pressable>
                     ))}
                 </ScrollView>
@@ -154,9 +159,9 @@ export default function ExercisesScreen() {
 
             {/* Create Custom Exercise Button */}
             <Link href="/exercises/create" asChild>
-                <TouchableOpacity className="mx-4 mb-4 bg-gray-800 p-4 rounded-xl border border-gray-700 border-dashed flex-row items-center justify-center active:bg-gray-750">
-                    <Ionicons name="add" size={24} color="#3b82f6" />
-                    <Text className="text-blue-500 font-bold ml-2">Crear Ejercicio Personalizado</Text>
+                <TouchableOpacity className="mx-4 mb-4 bg-surface-highlight/30 p-4 rounded-2xl border border-primary/30 border-dashed flex-row items-center justify-center active:bg-surface-highlight/50">
+                    <Ionicons name="add" size={24} color={colors.primary} />
+                    <AccessibleText weight="bold" className="text-primary ml-2">Crear Ejercicio Personalizado</AccessibleText>
                 </TouchableOpacity>
             </Link>
 
@@ -167,11 +172,15 @@ export default function ExercisesScreen() {
                 renderItem={renderItem}
                 contentContainerStyle={{ paddingBottom: 20 }}
                 ListEmptyComponent={
-                    <View className="items-center justify-center py-10">
-                        <Text className="text-gray-500">No se encontraron ejercicios</Text>
-                    </View>
+                    <EmptyState
+                        icon="search-outline"
+                        title="No se encontraron ejercicios"
+                        description="Prueba con otros filtros o crea uno personalizado si no encuentras lo que buscas."
+                        actionLabel="Crear Personalizado"
+                        onAction={() => router.push('/exercises/create')}
+                    />
                 }
             />
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 }

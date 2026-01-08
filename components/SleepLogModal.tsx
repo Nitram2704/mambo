@@ -91,13 +91,12 @@ export default function SleepLogModal({ visible, onClose }: SleepLogModalProps) 
 
                     <ScrollView className="flex-1 p-6">
                         {/* Date */}
-                        <Card className="p-4 mb-4">
-                            <Text className="font-bold text-lg mb-3" style={{ color: Colors[theme].text }}>{t('sleep.date')}</Text>
+                        <Card variant="glass" className="p-4 mb-4">
+                            <Text className="text-text font-bold text-lg mb-3">{t('sleep.date')}</Text>
                             <TouchableOpacity
                                 onPress={() => setShowDatePicker(true)}
-                                className="p-3 rounded-lg border"
-                                style={{ backgroundColor: Colors[theme].surfaceHighlight, borderColor: Colors[theme].border }}>
-                                <Text className="text-center text-lg" style={{ color: Colors[theme].text }}>
+                                className="p-3 rounded-lg border bg-surface-highlight border-border">
+                                <Text className="text-text text-center text-lg">
                                     {date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                                 </Text>
                             </TouchableOpacity>
@@ -115,17 +114,16 @@ export default function SleepLogModal({ visible, onClose }: SleepLogModalProps) 
                         </Card>
 
                         {/* Sleep Times */}
-                        <Card className="p-4 mb-4">
-                            <Text className="font-bold text-lg mb-3" style={{ color: Colors[theme].text }}>{t('sleep.times')}</Text>
+                        <Card variant="glass" className="p-4 mb-4">
+                            <Text className="text-text font-bold text-lg mb-3">{t('sleep.times')}</Text>
 
                             <View className="mb-3">
-                                <Text className="text-sm mb-2" style={{ color: Colors[theme].textSecondary }}>{t('sleep.bedTime')}</Text>
+                                <Text className="text-text-secondary text-sm mb-2">{t('sleep.bedTime')}</Text>
                                 <TouchableOpacity
                                     onPress={() => setShowBedTimePicker(true)}
-                                    className="p-3 rounded-lg border flex-row items-center justify-between"
-                                    style={{ backgroundColor: Colors[theme].surfaceHighlight, borderColor: Colors[theme].border }}>
+                                    className="p-3 rounded-lg border bg-surface-highlight border-border flex-row items-center justify-between">
                                     <Ionicons name="moon" size={20} color={Colors[theme].primary} />
-                                    <Text className="text-lg font-bold" style={{ color: Colors[theme].text }}>
+                                    <Text className="text-text text-lg font-bold">
                                         {bedTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                                     </Text>
                                     <View style={{ width: 20 }} />
@@ -144,13 +142,12 @@ export default function SleepLogModal({ visible, onClose }: SleepLogModalProps) 
                             </View>
 
                             <View>
-                                <Text className="text-sm mb-2" style={{ color: Colors[theme].textSecondary }}>{t('sleep.wakeTime')}</Text>
+                                <Text className="text-text-secondary text-sm mb-2">{t('sleep.wakeTime')}</Text>
                                 <TouchableOpacity
                                     onPress={() => setShowWakeTimePicker(true)}
-                                    className="p-3 rounded-lg border flex-row items-center justify-between"
-                                    style={{ backgroundColor: Colors[theme].surfaceHighlight, borderColor: Colors[theme].border }}>
+                                    className="p-3 rounded-lg border bg-surface-highlight border-border flex-row items-center justify-between">
                                     <Ionicons name="sunny" size={20} color="#fbbf24" />
-                                    <Text className="text-lg font-bold" style={{ color: Colors[theme].text }}>
+                                    <Text className="text-text text-lg font-bold">
                                         {wakeTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                                     </Text>
                                     <View style={{ width: 20 }} />
@@ -169,16 +166,16 @@ export default function SleepLogModal({ visible, onClose }: SleepLogModalProps) 
                             </View>
 
                             {/* Duration Preview */}
-                            <View className="mt-3 p-3 rounded-lg border" style={{ backgroundColor: Colors[theme].primary + '1A', borderColor: Colors[theme].primary + '80' }}>
-                                <Text className="text-center" style={{ color: Colors[theme].primary }}>
+                            <View className="mt-3 p-3 rounded-lg border bg-primary/10 border-primary/50">
+                                <Text className="text-primary text-center">
                                     {t('sleep.duration')}: {formatSleepDuration(calculateDuration())}
                                 </Text>
                             </View>
                         </Card>
 
                         {/* Quality Rating */}
-                        <Card className="p-4 mb-4">
-                            <Text className="font-bold text-lg mb-3" style={{ color: Colors[theme].text }}>{t('sleep.qualityTitle')}</Text>
+                        <Card variant="glass" className="p-4 mb-4">
+                            <Text className="text-text font-bold text-lg mb-3">{t('sleep.qualityTitle')}</Text>
                             <View className="flex-row justify-between">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <TouchableOpacity
@@ -193,25 +190,21 @@ export default function SleepLogModal({ visible, onClose }: SleepLogModalProps) 
                                     </TouchableOpacity>
                                 ))}
                             </View>
-                            <Text className="text-center mt-2" style={{ color: Colors[theme].textSecondary }}>
+                            <Text className="text-text-secondary text-center mt-2">
                                 {t(`sleep.qualities.${quality}`)}
                             </Text>
                         </Card>
 
                         {/* Tags */}
-                        <Card className="p-4 mb-4">
-                            <Text className="font-bold text-lg mb-3" style={{ color: Colors[theme].text }}>{t('sleep.features')}</Text>
+                        <Card variant="glass" className="p-4 mb-4">
+                            <Text className="text-text font-bold text-lg mb-3">{t('sleep.features')}</Text>
                             <View className="flex-row flex-wrap gap-2">
                                 {tags.map((tag) => (
                                     <TouchableOpacity
                                         key={tag}
                                         onPress={() => toggleTag(tag)}
-                                        className="px-4 py-2 rounded-full border"
-                                        style={{
-                                            backgroundColor: selectedTags.includes(tag) ? Colors[theme].primary : Colors[theme].surfaceHighlight,
-                                            borderColor: selectedTags.includes(tag) ? Colors[theme].primary : Colors[theme].border
-                                        }}>
-                                        <Text style={{ color: selectedTags.includes(tag) ? 'white' : Colors[theme].textSecondary }}>
+                                        className={`px-4 py-2 rounded-full border ${selectedTags.includes(tag) ? 'bg-primary border-primary' : 'bg-surface-highlight border-border'}`}>
+                                        <Text className={`${selectedTags.includes(tag) ? 'text-white' : 'text-text-secondary'}`}>
                                             {t(`sleep.tags.${tag}`)}
                                         </Text>
                                     </TouchableOpacity>
@@ -220,11 +213,10 @@ export default function SleepLogModal({ visible, onClose }: SleepLogModalProps) 
                         </Card>
 
                         {/* Notes */}
-                        <Card className="p-4 mb-8">
-                            <Text className="font-bold text-lg mb-3" style={{ color: Colors[theme].text }}>{t('sleep.notes')}</Text>
+                        <Card variant="glass" className="p-4 mb-8">
+                            <Text className="text-text font-bold text-lg mb-3">{t('sleep.notes')}</Text>
                             <TextInput
-                                className="p-3 rounded-lg border text-base"
-                                style={{ backgroundColor: Colors[theme].surfaceHighlight, borderColor: Colors[theme].border, color: Colors[theme].text }}
+                                className="p-3 rounded-lg border text-base bg-surface-highlight border-border text-text"
                                 placeholder={t('sleep.notesPlaceholder')}
                                 placeholderTextColor={Colors[theme].textMuted}
                                 multiline

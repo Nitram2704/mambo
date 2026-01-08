@@ -69,51 +69,54 @@ export default function MiniLessonsScreen() {
         <Animated.View
             entering={FadeInUp.delay(100 + index * 50)}
             className="mb-4">
-            <Card
+            <TouchableOpacity
                 onPress={() => router.push({
                     pathname: '/learn/mini-lesson-viewer',
                     params: { lessonId: lesson.id }
                 })}
-                className="p-4">
-                <View className="flex-row items-start">
-                    <View
-                        style={{ backgroundColor: getCategoryColor(lesson.category) + '20' }}
-                        className="w-12 h-12 rounded-xl items-center justify-center mr-4">
-                        <Ionicons
-                            name={getCategoryIcon(lesson.category) as any}
-                            size={24}
-                            color={getCategoryColor(lesson.category)}
-                        />
-                    </View>
+                activeOpacity={0.7}
+            >
+                <Card className="p-4">
+                    <View className="flex-row items-start">
+                        <View
+                            style={{ backgroundColor: getCategoryColor(lesson.category) + '20' }}
+                            className="w-12 h-12 rounded-xl items-center justify-center mr-4">
+                            <Ionicons
+                                name={getCategoryIcon(lesson.category) as any}
+                                size={24}
+                                color={getCategoryColor(lesson.category)}
+                            />
+                        </View>
 
-                    <View className="flex-1">
-                        <Text style={{ color: Colors[theme].text }} className="text-lg font-bold mb-1">
-                            {t(`learn.miniLessons.lessons.${lesson.id}.title`)}
-                        </Text>
-                        <Text style={{ color: Colors[theme].textSecondary }} className="text-sm mb-3">
-                            {t(`learn.miniLessons.lessons.${lesson.id}.description`)}
-                        </Text>
+                        <View className="flex-1">
+                            <Text style={{ color: Colors[theme].text }} className="text-lg font-bold mb-1">
+                                {t(`learn.miniLessons.lessons.${lesson.id}.title`)}
+                            </Text>
+                            <Text style={{ color: Colors[theme].textSecondary }} className="text-sm mb-3">
+                                {t(`learn.miniLessons.lessons.${lesson.id}.description`)}
+                            </Text>
 
-                        <View className="flex-row items-center justify-between">
-                            <View className="flex-row items-center gap-3">
-                                <View className={`px-2 py-1 rounded-full ${getDifficultyColor(lesson.difficulty)}`}>
-                                    <Text style={{ color: getDifficultyTextColor(lesson.difficulty) }} className="text-xs font-bold">
-                                        {getDifficultyText(lesson.difficulty)}
-                                    </Text>
+                            <View className="flex-row items-center justify-between">
+                                <View className="flex-row items-center gap-3">
+                                    <View className={`px-2 py-1 rounded-full ${getDifficultyColor(lesson.difficulty)}`}>
+                                        <Text style={{ color: getDifficultyTextColor(lesson.difficulty) }} className="text-xs font-bold">
+                                            {getDifficultyText(lesson.difficulty)}
+                                        </Text>
+                                    </View>
+                                    <View className="flex-row items-center">
+                                        <Ionicons name="time-outline" size={14} color={Colors[theme].textSecondary} />
+                                        <Text style={{ color: Colors[theme].textSecondary }} className="text-xs ml-1">
+                                            {lesson.estimatedTime}
+                                        </Text>
+                                    </View>
                                 </View>
-                                <View className="flex-row items-center">
-                                    <Ionicons name="time-outline" size={14} color={Colors[theme].textSecondary} />
-                                    <Text style={{ color: Colors[theme].textSecondary }} className="text-xs ml-1">
-                                        {lesson.estimatedTime}
-                                    </Text>
-                                </View>
+
+                                <Ionicons name="chevron-forward" size={20} color={Colors[theme].textSecondary} />
                             </View>
-
-                            <Ionicons name="chevron-forward" size={20} color={Colors[theme].textSecondary} />
                         </View>
                     </View>
-                </View>
-            </Card>
+                </Card>
+            </TouchableOpacity>
         </Animated.View>
     );
 

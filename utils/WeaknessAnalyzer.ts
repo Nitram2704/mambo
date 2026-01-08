@@ -17,7 +17,7 @@ export const analyzeWeaknesses = (): WeaknessInsight[] => {
     // 1. Muscle Balance Analysis (Push vs Pull)
     const pushGroups = ['Pecho', 'Hombros', 'Tríceps'];
     const pullGroups = ['Espalda', 'Bíceps'];
-    const legsGroups = ['Piernas', 'Glúteos'];
+    const legsGroups = ['Piernas', 'Glúteos', 'Cuádriceps', 'Isquios', 'Pantorrillas'];
 
     const pushVolume = muscleBalance
         .filter(m => pushGroups.includes(m.muscle))
@@ -33,7 +33,7 @@ export const analyzeWeaknesses = (): WeaknessInsight[] => {
 
     if (pushVolume > 0 && pullVolume > 0) {
         const ratio = pushVolume / pullVolume;
-        if (ratio > 1.3) {
+        if (ratio > 1.4) { // Increased threshold slightly
             insights.push({
                 type: 'balance',
                 title: 'Desbalance de Empuje',
@@ -41,7 +41,7 @@ export const analyzeWeaknesses = (): WeaknessInsight[] => {
                 recommendation: 'Añade más ejercicios de tracción (remos, dominadas) para proteger la salud de tus hombros.',
                 severity: 'medium'
             });
-        } else if (ratio < 0.7) {
+        } else if (ratio < 0.6) { // Decreased threshold slightly
             insights.push({
                 type: 'balance',
                 title: 'Desbalance de Tracción',
@@ -54,7 +54,8 @@ export const analyzeWeaknesses = (): WeaknessInsight[] => {
 
     // 2. Legs Volume Analysis
     const totalVolume = muscleBalance.reduce((sum, m) => sum + m.volume, 0);
-    if (totalVolume > 0 && (legsVolume / totalVolume) < 0.2) {
+    // Only flag if total volume is significant (> 100 units) and legs are underrepresented
+    if (totalVolume > 100 && (legsVolume / totalVolume) < 0.2) {
         insights.push({
             type: 'balance',
             title: 'Día de Pierna Olvidado',

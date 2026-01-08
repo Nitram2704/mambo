@@ -21,22 +21,22 @@ export const SupersetContainer: React.FC<SupersetContainerProps> = ({
     return (
         <View className="relative">
             {/* Superset Indicator Bar */}
-            <View className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500 rounded-full" />
+            <View className="absolute left-0 top-0 bottom-0 w-1 bg-secondary rounded-full" />
 
             {/* Superset Header */}
             <View className="ml-3 mb-2">
-                <View className="flex-row items-center gap-2 bg-purple-500/20 px-3 py-2 rounded-xl border border-purple-500/30">
-                    <Ionicons name="link" size={16} color="#a855f7" />
-                    <Text className="text-purple-400 font-bold text-xs uppercase tracking-wider">
+                <View className="flex-row items-center gap-2 bg-secondary/20 px-3 py-2 rounded-xl border border-secondary/30">
+                    <Ionicons name="link" size={16} color="#a78bfa" />
+                    <Text className="text-secondary font-bold text-xs uppercase tracking-wider">
                         Superset ({currentIndex + 1}/{totalInSuperset})
                     </Text>
                     <View className="flex-1" />
                     {onUnlink && (
                         <TouchableOpacity
                             onPress={onUnlink}
-                            className="bg-purple-500/30 px-2 py-1 rounded-lg"
+                            className="bg-secondary/30 px-2 py-1 rounded-lg"
                         >
-                            <Ionicons name="unlink" size={14} color="#a855f7" />
+                            <Ionicons name="unlink" size={14} color="#a78bfa" />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -78,8 +78,8 @@ export const SupersetLinkButton: React.FC<SupersetLinkButtonProps> = ({ onPress,
         <TouchableOpacity
             onPress={onPress}
             className={`flex-row items-center gap-2 px-3 py-2 rounded-xl border ${isLinked
-                    ? 'bg-purple-500/20 border-purple-500/50'
-                    : 'bg-gray-800/50 border-gray-700 border-dashed'
+                ? 'bg-purple-500/20 border-purple-500/50'
+                : 'bg-gray-800/50 border-gray-700 border-dashed'
                 }`}
         >
             <Ionicons

@@ -5,12 +5,12 @@ export const AppLightTheme: Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: Colors.primary,
+    primary: Colors.light.primary,
     background: '#ffffff',
     card: '#ffffff',
     text: '#0f172a',
     border: '#e2e8f0',
-    notification: Colors.accent,
+    notification: Colors.light.accent,
   },
 };
 
@@ -18,11 +18,11 @@ export const AppDarkTheme: Theme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    primary: Colors.primary,
-    background: Colors.background,
-    card: Colors.surface,
-    text: Colors.text,
-    border: Colors.surfaceHighlight,
-    notification: Colors.accent,
+    primary: Colors.dark.primary,
+    background: Colors.dark.background,
+    card: Colors.dark.surface,
+    text: Colors.dark.text,
+    border: Colors.dark.surfaceHighlight,
+    notification: Colors.dark.accent,
   },
 };

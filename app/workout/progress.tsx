@@ -1,13 +1,22 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
 import WorkoutVolumeChart from '@/components/WorkoutVolumeChart';
+import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { Card } from '@/components/ui/Card';
+import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { a11y } from '@/utils/accessibility';
+import { useTranslation } from 'react-i18next';
 
 export default function WorkoutProgressScreen() {
     const router = useRouter();
+    const { t } = useTranslation();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const { workouts } = useWorkoutHistoryStore();
 
     // Calculate weekly volumes for last 7 weeks
@@ -71,39 +80,33 @@ export default function WorkoutProgressScreen() {
     const avgVolume = totalWorkouts > 0 ? Math.round(totalVolume / totalWorkouts) : 0;
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
-            {/* Header */}
-            <View className="flex-row items-center justify-between p-4 border-b border-gray-800">
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
-                <Text className="text-white text-xl font-bold">Progreso de Entrenamientos</Text>
-                <View style={{ width: 24 }} />
-            </View>
-
-            <ScrollView className="flex-1 p-4">
+        <ScreenWrapper
+            headerTitle={t('workout.progress.title', 'Progreso de Entrenamientos')}
+            scrollable={true}
+        >
+            <View className="p-4">
                 {/* Stats Cards */}
                 <View className="flex-row gap-4 mb-6">
-                    <View className="flex-1 bg-gray-800 rounded-xl p-4 border border-gray-700">
-                        <Text className="text-gray-400 text-xs mb-1">Total Entrenos</Text>
-                        <Text className="text-white text-2xl font-bold">{totalWorkouts}</Text>
-                    </View>
-                    <View className="flex-1 bg-gray-800 rounded-xl p-4 border border-gray-700">
-                        <Text className="text-gray-400 text-xs mb-1">Volumen Total</Text>
-                        <Text className="text-white text-2xl font-bold">{totalVolume.toLocaleString()}</Text>
-                        <Text className="text-gray-500 text-xs">kg</Text>
-                    </View>
-                    <View className="flex-1 bg-gray-800 rounded-xl p-4 border border-gray-700">
-                        <Text className="text-gray-400 text-xs mb-1">Promedio</Text>
-                        <Text className="text-white text-2xl font-bold">{avgVolume}</Text>
-                        <Text className="text-gray-500 text-xs">kg/sesión</Text>
-                    </View>
+                    <Card className="flex-1 p-4 border-white/5">
+                        <AccessibleText variant="caption" className="text-text-muted mb-1">{t('workout.progress.totalWorkouts', 'Total Entrenos')}</AccessibleText>
+                        <AccessibleText variant="h2" weight="bold" className="text-text">{totalWorkouts}</AccessibleText>
+                    </Card>
+                    <Card className="flex-1 p-4 border-white/5">
+                        <AccessibleText variant="caption" className="text-text-muted mb-1">{t('workout.progress.totalVolume', 'Volumen Total')}</AccessibleText>
+                        <AccessibleText variant="h2" weight="bold" className="text-text">{totalVolume.toLocaleString()}</AccessibleText>
+                        <AccessibleText variant="caption" className="text-text-muted">kg</AccessibleText>
+                    </Card>
+                    <Card className="flex-1 p-4 border-white/5">
+                        <AccessibleText variant="caption" className="text-text-muted mb-1">{t('workout.progress.average', 'Promedio')}</AccessibleText>
+                        <AccessibleText variant="h2" weight="bold" className="text-text">{avgVolume}</AccessibleText>
+                        <AccessibleText variant="caption" className="text-text-muted">kg/sesión</AccessibleText>
+                    </Card>
                 </View>
 
                 {/* Volume Chart */}
-                <View className="bg-gray-800 rounded-xl p-4 mb-6 border border-gray-700">
-                    <Text className="text-white font-bold text-lg mb-2">Volumen Semanal</Text>
-                    <Text className="text-gray-400 text-sm mb-4">Últimas 7 semanas</Text>
+                <Card className="p-4 mb-6 border-white/5">
+                    <AccessibleText variant="h3" weight="bold" className="text-text mb-2">{t('workout.progress.weeklyVolume', 'Volumen Semanal')}</AccessibleText>
+                    <AccessibleText variant="caption" className="text-text-secondary mb-4">{t('workout.progress.last7Weeks', 'Últimas 7 semanas')}</AccessibleText>
                     {weeklyData.some(w => w.volume > 0) ? (
                         <WorkoutVolumeChart
                             weeklyVolumes={weeklyData.map(w => w.volume)}
@@ -111,32 +114,32 @@ export default function WorkoutProgressScreen() {
                         />
                     ) : (
                         <View className="py-8 items-center">
-                            <Ionicons name="barbell-outline" size={48} color="#4b5563" />
-                            <Text className="text-gray-500 mt-4">Completa entrenamientos para ver tu progreso</Text>
+                            <Ionicons name="barbell-outline" size={48} color={colors.textMuted} />
+                            <AccessibleText className="text-text-muted mt-4 text-center">{t('workout.progress.noData', 'Completa entrenamientos para ver tu progreso')}</AccessibleText>
                         </View>
                     )}
-                </View>
+                </Card>
 
                 {/* Top Exercises */}
-                <View className="bg-gray-800 rounded-xl p-4 mb-8 border border-gray-700">
-                    <Text className="text-white font-bold text-lg mb-4">Top Ejercicios por Volumen</Text>
+                <Card className="p-4 mb-8 border-white/5">
+                    <AccessibleText variant="h3" weight="bold" className="text-text mb-4">{t('workout.progress.topExercises', 'Top Ejercicios por Volumen')}</AccessibleText>
                     {topExercises.length > 0 ? (
                         topExercises.map((exercise, index) => (
-                            <View key={exercise.name} className="flex-row items-center justify-between py-3 border-b border-gray-700 last:border-b-0">
+                            <View key={exercise.name} className="flex-row items-center justify-between py-3 border-b border-white/5 last:border-b-0">
                                 <View className="flex-row items-center flex-1">
                                     <View className="w-8 h-8 rounded-full bg-orange-500/20 items-center justify-center mr-3">
-                                        <Text className="text-orange-400 font-bold">{index + 1}</Text>
+                                        <AccessibleText weight="bold" className="text-orange-400">{index + 1}</AccessibleText>
                                     </View>
-                                    <Text className="text-white font-medium flex-1">{exercise.name}</Text>
+                                    <AccessibleText weight="medium" className="text-text flex-1">{exercise.name}</AccessibleText>
                                 </View>
-                                <Text className="text-orange-400 font-bold">{exercise.volume.toLocaleString()} kg</Text>
+                                <AccessibleText weight="bold" className="text-orange-400">{exercise.volume.toLocaleString()} kg</AccessibleText>
                             </View>
                         ))
                     ) : (
-                        <Text className="text-gray-500 text-center py-4">Sin datos aún</Text>
+                        <AccessibleText className="text-text-muted text-center py-4">{t('common.noData', 'Sin datos aún')}</AccessibleText>
                     )}
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                </Card>
+            </View>
+        </ScreenWrapper>
     );
 }

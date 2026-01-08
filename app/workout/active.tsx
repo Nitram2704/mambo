@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Modal, Platform } from 'react-native';
+import { View, TextInput, TouchableOpacity, ScrollView, Alert, Modal, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/use-app-theme';
 import { useActiveWorkoutStore } from '@/store/activeWorkoutStore';
 import { useSavedRoutinesStore } from '@/store/savedRoutinesStore';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
@@ -13,509 +16,264 @@ import { useNutritionStore } from '@/store/nutritionStore';
 import { useAchievementsStore } from '@/store/achievementsStore';
 import { ACHIEVEMENTS } from '@/constants/achievements';
 import { useUserProfileStore } from '@/store/userProfileStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 import RestTimer from '@/components/RestTimer';
-import SetRow from '@/components/SetRow';
+import ZenMode from '@/components/workout/ZenMode';
+import { EXERCISES } from '@/constants/exercises';
 import { PlateCalculator } from '@/components/PlateCalculator';
-import { SupersetContainer, SupersetLinkButton } from '@/components/SupersetContainer';
+import SetRow from '@/components/SetRow';
 import { WhyTooltip } from '@/components/WhyTooltip';
 import * as ImagePicker from 'expo-image-picker';
-import { supabase } from '@/lib/supabase';
 
 export default function ActiveWorkoutScreen() {
     const router = useRouter();
-    const { routineId } = useLocalSearchParams<{ routineId: string }>();
+    const { theme } = useAppTheme();
+
+    // Local State
     const [showPlateCalc, setShowPlateCalc] = useState(false);
-    const [plateCalcInitialWeight, setPlateCalcInitialWeight] = useState(60);
+    const [plateCalcInitialWeight, setPlateCalcInitialWeight] = useState(0);
     const [showPRModal, setShowPRModal] = useState(false);
     const [prExercise, setPrExercise] = useState('');
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [showSubstituteModal, setShowSubstituteModal] = useState(false);
+    const [coachMessage, setCoachMessage] = useState<string | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [techniqueFeedback, setTechniqueFeedback] = useState<string | null>(null);
-    const [coachMessage, setCoachMessage] = useState<string | null>(null);
-    const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
 
     const {
-        routine,
         exercises,
         currentExerciseIndex,
-        startWorkout,
+        startTime,
+        isZenMode: isFocusMode,
+        toggleZenMode: toggleFocusMode,
         updateSet,
         updateSetType,
-        addExtraSet,
         toggleSetCompletion,
+        addExtraSet,
+        removeSet,
         updateExerciseNote,
         updateRestTime,
         goToNextExercise,
         goToPreviousExercise,
         substituteExercise,
-        endWorkout,
-        updateExerciseVideo,
-        isFocusMode,
-        toggleFocusMode,
         linkSuperset,
         unlinkSuperset,
-        startRestTimer,
-        startTime
+        endWorkout,
+        updateExerciseVideo
     } = useActiveWorkoutStore();
 
-    const { routines, updateRoutine, fetchRoutines } = useSavedRoutinesStore();
-    const { addWorkout: addWorkoutToHistory, workouts: history } = useWorkoutHistoryStore();
+    const { addWorkout, workouts: history } = useWorkoutHistoryStore();
     const { markWorkoutCompleted } = useWeeklyScheduleStore();
     const { logWorkout } = useNutritionStore();
-    const { checkAchievements, addXp } = useAchievementsStore();
+    const { checkAchievements } = useAchievementsStore();
     const { profile } = useUserProfileStore();
+    const { subscription } = useSubscriptionStore();
 
-    // Initialize workout if needed
-    React.useEffect(() => {
-        const initWorkout = async () => {
-            if (routineId && (!routine || routine.id !== routineId)) {
-                let selectedRoutine = routines.find((r) => r.id === routineId);
+    const currentExercise = exercises[currentExerciseIndex];
+    const previousSets = history
+        .filter(w => w.exercises.some(e => e.exerciseId === currentExercise?.exerciseId))
+        .sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())[0]
+        ?.exercises.find(e => e.exerciseId === currentExercise?.exerciseId)?.sets || [];
 
-                // If routine not found, try fetching routines
-                if (!selectedRoutine && routines.length === 0) {
-                    await fetchRoutines();
-                    selectedRoutine = useSavedRoutinesStore.getState().routines.find((r) => r.id === routineId);
-                }
+    const previousPerformance = (() => {
+        const pastWorkouts = history.filter(w =>
+            w.exercises.some(e => e.exerciseId === currentExercise?.exerciseId)
+        );
+        if (pastWorkouts.length === 0) return null;
 
-                if (selectedRoutine) {
-                    startWorkout(selectedRoutine);
-                } else {
-                    // Routine still not found
-                    Alert.alert(
-                        'Error',
-                        'No se pudo encontrar la rutina. Inténtalo de nuevo.',
-                        [{ text: 'Volver', onPress: () => router.back() }]
-                    );
-                }
-            }
+        const lastWorkout = pastWorkouts.sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime())[0];
+        const lastExerciseData = lastWorkout.exercises.find(e => e.exerciseId === currentExercise?.exerciseId);
+
+        if (!lastExerciseData) return null;
+
+        const bestSet = lastExerciseData.sets
+            .filter(s => s.completed)
+            .sort((a, b) => (b.weight * b.reps) - (a.weight * a.reps))[0];
+
+        if (!bestSet) return null;
+
+        return {
+            date: new Date(lastWorkout.endTime),
+            bestWeight: bestSet.weight,
+            bestReps: bestSet.reps
         };
+    })();
 
-        initWorkout();
-    }, [routineId, routine, routines.length, startWorkout]); // Removed 'routines' from dependency to avoid loop, used length instead
-
-    // Live Workout Timer
     useEffect(() => {
         if (!startTime) return;
-
         const interval = setInterval(() => {
-            const now = new Date();
-            const elapsed = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-            setElapsedTime(elapsed);
+            setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
         }, 1000);
-
         return () => clearInterval(interval);
     }, [startTime]);
 
     const formatElapsedTime = (seconds: number) => {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-
-        const parts = [];
-        if (h > 0) parts.push(h.toString().padStart(2, '0'));
-        parts.push(m.toString().padStart(2, '0'));
-        parts.push(s.toString().padStart(2, '0'));
-
-        return parts.join(':');
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const currentExercise = exercises[currentExerciseIndex];
-
-    // Get previous performance for current exercise - must be before any conditional return
-    const previousSets = React.useMemo(() => {
-        if (!currentExercise || !history) return [];
-
-        // Find all workouts that contain this exercise
-        const relevantWorkouts = history.filter(w =>
-            w.exercises.some(e => e.exerciseId === currentExercise.exerciseId)
-        );
-
-        // Sort by date descending (newest first)
-        relevantWorkouts.sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime());
-
-        if (relevantWorkouts.length === 0) return [];
-
-        // Get the most recent workout's data for this exercise
-        const lastWorkout = relevantWorkouts[0];
-        const lastExerciseData = lastWorkout.exercises.find(e => e.exerciseId === currentExercise.exerciseId);
-
-        return lastExerciseData ? lastExerciseData.sets : [];
-    }, [history, currentExercise]);
-
-    // Get previous performance summary (best weight/reps)
-    const getPreviousPerformance = () => {
-        if (!currentExercise) return null;
-
-        const exerciseHistory = history
-            .flatMap(w => w.exercises.map(e => ({ ...e, workoutDate: w.endTime })))
-            .filter(e => e.exerciseId === currentExercise.exerciseId)
-            .sort((a, b) => b.workoutDate.getTime() - a.workoutDate.getTime());
-
-        if (exerciseHistory.length === 0) return null;
-
-        const lastSession = exerciseHistory[0];
-        const bestSet = lastSession.sets
-            .filter(s => s.completed)
-            .sort((a, b) => (b.weight * b.reps) - (a.weight * a.reps))[0];
-
-        return {
-            date: lastSession.workoutDate,
-            bestWeight: bestSet?.weight || 0,
-            bestReps: bestSet?.reps || 0,
-            volume: lastSession.sets.filter(s => s.completed).reduce((sum, s) => sum + (s.weight * s.reps), 0)
-        };
-    };
-
-    const previousPerformance = getPreviousPerformance();
-
-    // Early return for loading state - AFTER all hooks
-    if (!routine || exercises.length === 0) {
-        return (
-            <ScreenWrapper bg="bg-background" safeArea={true} className="items-center justify-center">
-                <Text className="text-text mb-4">Cargando...</Text>
-                <Button
-                    onPress={() => router.back()}
-                    variant="secondary"
-                    label="Cancelar"
-                />
-            </ScreenWrapper>
-        );
-    }
-
-    // Check for PR and show celebration
-    const checkForPR = (exerciseId: string, weight: number, reps: number) => {
+    const checkForPR = (exerciseName: string, weight: number, reps: number) => {
         const exerciseHistory = history
             .flatMap(w => w.exercises)
-            .filter(e => e.exerciseId === exerciseId);
+            .filter(e => e.exerciseName === exerciseName)
+            .flatMap(e => e.sets)
+            .filter(s => s.completed);
 
-        const maxVolume = Math.max(...exerciseHistory.flatMap(e =>
-            e.sets.filter(s => s.completed).map(s => s.weight * s.reps)
-        ), 0);
+        const currentOneRM = weight * (1 + reps / 30);
+        const maxPreviousOneRM = Math.max(
+            ...exerciseHistory.map(s => s.weight * (1 + s.reps / 30)),
+            0
+        );
 
-        const maxWeight = Math.max(...exerciseHistory.flatMap(e =>
-            e.sets.filter(s => s.completed).map(s => s.weight)
-        ), 0);
-
-        const currentVolume = weight * reps;
-        const isVolumePR = currentVolume > maxVolume && maxVolume > 0;
-        const isWeightPR = weight > maxWeight && maxWeight > 0;
-
-        if (isVolumePR || isWeightPR) {
-            setPrExercise(currentExercise.exerciseName);
+        if (currentOneRM > maxPreviousOneRM && maxPreviousOneRM > 0) {
+            setPrExercise(exerciseName);
             setShowPRModal(true);
-            return true;
+
+            // Check for achievement
+            checkAchievements({
+                history,
+                lastWorkout: {
+                    id: 'temp',
+                    routineId: '',
+                    routineName: '',
+                    startTime: new Date(),
+                    endTime: new Date(),
+                    durationSeconds: 0,
+                    volume: 0,
+                    exercises: []
+                }
+            });
         }
-        return false;
     };
 
     const handleToggleSetCompletion = (exerciseIndex: number, setId: string) => {
-        const exercise = exercises[exerciseIndex];
-        const set = exercise.sets.find(s => s.id === setId);
-
-        if (set && !set.completed && set.weight > 0 && set.reps > 0) {
-            checkForPR(exercise.exerciseId, set.weight, set.reps);
-
-            // Mambo Coach Feedback based on RIR
-            if (set.rir === 0) {
-                setCoachMessage("¡Al fallo! Increíble esfuerzo. 🔥");
-            } else if (set.rir <= 2) {
-                setCoachMessage("Intensidad perfecta para hipertrofia. ¡Sigue así! 💪");
-            } else if (set.rir >= 4) {
-                setCoachMessage("Parece que tenías más en el tanque. ¡A por más peso! ⚡");
-            } else {
-                setCoachMessage("Buen trabajo. Mantén el ritmo. 👍");
-            }
-
-            // Auto Rest Timer
-            startRestTimer(exercise.restTime || 120);
-        }
-
         toggleSetCompletion(exerciseIndex, setId);
+
+        const set = exercises[exerciseIndex].sets.find(s => s.id === setId);
+        if (set && !set.completed) { // If we just completed it (state updates are async, but logic holds)
+            // Check for PR
+            checkForPR(exercises[exerciseIndex].exerciseName, set.weight, set.reps);
+        }
     };
 
-    const checkIfShouldUpdateRoutine = () => {
-        if (!routine) return false;
+    const handleFinish = async () => {
+        const completedWorkout = await endWorkout();
+        if (completedWorkout) {
+            addWorkout(completedWorkout);
 
-        // Check if any exercise has a different number of completed sets than planned
-        const originalRoutine = routines.find(r => r.id === routine.id);
-        if (!originalRoutine) return false;
-
-        let hasChanges = false;
-
-        exercises.forEach(exSession => {
-            const originalExercise = originalRoutine.exercises.find(e => e.id === exSession.exerciseId);
-            if (originalExercise) {
-                // Count completed sets (ignoring empty ones)
-                const completedSetsCount = exSession.sets.filter(s => s.completed).length;
-                const plannedSets = originalExercise.plannedSets || 3;
-
-                if (completedSetsCount > 0 && completedSetsCount !== plannedSets) {
-                    hasChanges = true;
-                }
+            // Mark as completed in schedule if it was a scheduled routine
+            if (completedWorkout.routineId) {
+                markWorkoutCompleted(completedWorkout.routineId, new Date().toISOString());
             }
-        });
 
-        return hasChanges;
-    };
-
-    const promptUpdateRoutine = async () => {
-        return new Promise<boolean>((resolve) => {
-            if (checkIfShouldUpdateRoutine()) {
-                Alert.alert(
-                    'Actualizar Rutina',
-                    'Has realizado un número diferente de series de lo planeado. ¿Quieres actualizar la rutina original con estos cambios?',
-                    [
-                        {
-                            text: 'No, mantener original',
-                            style: 'cancel',
-                            onPress: () => resolve(false),
-                        },
-                        {
-                            text: 'Sí, actualizar',
-                            style: 'default',
-                            onPress: () => {
-                                // Update routine logic
-                                if (routine) {
-                                    const updatedExercises = routine.exercises.map(ex => {
-                                        const session = exercises.find(s => s.exerciseId === ex.id);
-                                        if (session) {
-                                            const completedCount = session.sets.filter(s => s.completed).length;
-                                            if (completedCount > 0) {
-                                                return { ...ex, plannedSets: completedCount };
-                                            }
-                                        }
-                                        return ex;
-                                    });
-                                    updateRoutine(routine.id, { exercises: updatedExercises });
-                                }
-                                resolve(true);
-                            },
-                        },
-                    ]
-                );
-            } else {
-                resolve(false);
-            }
-        });
-    };
-
-    const uploadVideo = async (uri: string) => {
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return null;
-
-            const ext = uri.split('.').pop();
-            const fileName = `${user.id}/${Date.now()}.${ext}`;
-            const formData = new FormData();
-
-            // @ts-ignore
-            formData.append('file', {
-                uri,
-                name: fileName,
-                type: `video/${ext}`,
+            // Log calories (approximate)
+            const calories = Math.floor(completedWorkout.durationSeconds / 60 * 5); // ~5 cal/min
+            logWorkout({
+                duration: Math.floor(completedWorkout.durationSeconds / 60),
+                calories
             });
 
-            const { data, error } = await supabase.storage
-                .from('workout-videos')
-                .upload(fileName, formData, {
-                    cacheControl: '3600',
-                    upsert: false,
-                });
+            // Check achievements
+            checkAchievements({
+                history: [...history, completedWorkout],
+                lastWorkout: completedWorkout
+            });
 
-            if (error) throw error;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('workout-videos')
-                .getPublicUrl(fileName);
-
-            return publicUrl;
-        } catch (error) {
-            console.error('Error uploading video:', error);
-            Alert.alert('Error', 'No se pudo subir el video');
-            return null;
+            router.replace({
+                pathname: '/workout/summary',
+                params: { workoutId: completedWorkout.id }
+            });
+        } else {
+            router.back();
         }
     };
 
     const pickVideo = async () => {
-        try {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permiso denegado', 'Necesitamos acceso a la galería para subir videos.');
-                return;
-            }
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+            allowsEditing: true,
+            quality: 1,
+        });
 
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-                allowsEditing: true,
-                quality: 0.5, // Compress video
-            });
-
-            if (!result.canceled) {
-                Alert.alert('Subiendo video...', 'Por favor espera.');
-                const videoUrl = await uploadVideo(result.assets[0].uri);
-                if (videoUrl) {
-                    updateExerciseVideo(currentExerciseIndex, videoUrl);
-                    Alert.alert(
-                        '¡Éxito!',
-                        'Video subido correctamente. ¿Quieres que la IA analice tu técnica?',
-                        [
-                            { text: 'Ahora no', style: 'cancel' },
-                            { text: 'Analizar', onPress: () => analyzeTechnique(videoUrl) }
-                        ]
-                    );
-                }
-            }
-        } catch (error) {
-            console.error('Error picking video:', error);
-            Alert.alert('Error', 'Hubo un problema al seleccionar el video');
+        if (!result.canceled) {
+            updateExerciseVideo(currentExerciseIndex, result.assets[0].uri);
+            analyzeTechnique(result.assets[0].uri);
         }
     };
 
-    const analyzeTechnique = async (videoUrl: string) => {
+    const analyzeTechnique = async (videoUri: string) => {
         setIsAnalyzing(true);
-        setTechniqueFeedback(null);
-
-        // Simulate AI analysis - in a real app this would call a backend with Gemini 1.5 Pro
+        // Mock AI analysis
         setTimeout(() => {
             setIsAnalyzing(false);
-            const feedbacks = [
-                "Tu técnica se ve sólida. Mantén los codos un poco más cerrados para proteger los hombros y asegúrate de controlar el descenso (fase excéntrica).",
-                "Buen rango de movimiento. Intenta no bloquear las articulaciones al final de la fase concéntrica para mantener la tensión muscular.",
-                "Excelente control. Asegúrate de mantener el core activo durante todo el movimiento para mayor estabilidad.",
-                "Se observa una ligera compensación con la espalda baja. Intenta reducir un poco el peso para priorizar la forma perfecta."
-            ];
-            setTechniqueFeedback(feedbacks[Math.floor(Math.random() * feedbacks.length)]);
+            setTechniqueFeedback("Tu espalda está un poco arqueada. Intenta mantener el core más tenso y la espalda neutra para evitar lesiones y mejorar la transferencia de fuerza.");
+            setCoachMessage("¡He analizado tu técnica! Toca para ver recomendaciones.");
         }, 3000);
     };
 
-    const handleFinish = async () => {
-        Alert.alert(
-            '¿Terminar entreno?',
-            'Se guardará el progreso y finalizará la sesión.',
-            [
-                {
-                    text: 'Cancelar',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Finalizar',
-                    style: 'default',
-                    onPress: async () => {
-                        // First check if we should update the routine
-                        await promptUpdateRoutine();
+    if (isFocusMode) {
+        return <ZenMode />;
+    }
 
-                        const completedWorkout = await endWorkout();
-                        if (completedWorkout) {
-                            // FIXED: Get the actual Supabase ID from addWorkoutToHistory
-                            const supabaseWorkoutId = await addWorkoutToHistory(completedWorkout);
-
-                            // Mark the scheduled workout as completed
-                            if (routineId) {
-                                markWorkoutCompleted(routineId);
-                            }
-
-                            // Add XP for completing workout
-                            addXp(10, 'Completed workout');
-
-                            // Check for achievements
-                            const newUnlocks = checkAchievements({
-                                lastWorkout: completedWorkout,
-                                history: [...history, completedWorkout],
-                                userWeight: profile?.weight
-                            });
-
-                            if (newUnlocks.length > 0) {
-                                const unlockNames = newUnlocks.map(u => {
-                                    const ach = ACHIEVEMENTS.find(a => a.id === u.id);
-                                    return ach?.title;
-                                }).join(', ');
-
-                                Alert.alert(
-                                    '¡Logro Desbloqueado! 🏆',
-                                    `Has desbloqueado: ${unlockNames}`,
-                                    [{ text: '¡Genial!' }]
-                                );
-                            }
-
-                            const durationMinutes = Math.round(completedWorkout.durationSeconds / 60);
-                            const estimatedCalories = Math.round(durationMinutes * 6);
-                            logWorkout({
-                                duration: durationMinutes,
-                                calories: estimatedCalories,
-                            });
-
-                            // FIXED: Use Supabase ID for navigation
-                            if (supabaseWorkoutId) {
-                                router.replace({
-                                    pathname: '/workout/summary',
-                                    params: { workoutId: supabaseWorkoutId }
-                                });
-                            } else {
-                                // Fallback if save failed
-                                Alert.alert('Error', 'No se pudo guardar el entreno');
-                                router.push('/(tabs)');
-                            }
-                        } else {
-                            router.push('/(tabs)');
-                        }
-                    },
-                },
-            ]
+    if (!currentExercise) {
+        return (
+            <ScreenWrapper>
+                <View className="flex-1 items-center justify-center">
+                    <AccessibleText>Cargando entrenamiento...</AccessibleText>
+                </View>
+            </ScreenWrapper>
         );
-    };
+    }
 
     return (
-        <ScreenWrapper bg="bg-background" safeArea={true} edges={['top', 'left', 'right', 'bottom']}>
+        <ScreenWrapper safeArea={true} edges={['top', 'left', 'right', 'bottom']}>
             {/* Header */}
-            <View className="flex-row items-center justify-between p-4 border-b border-white/5">
-                {!isFocusMode ? (
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Icon name="close" size={28} color="#f8fafc" />
-                    </TouchableOpacity>
-                ) : (
-                    <View /> // Spacer
-                )}
+            <View className="flex-row items-center justify-between p-4 border-b border-border/10">
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    accessibilityRole="button"
+                    accessibilityLabel="Cerrar entrenamiento"
+                >
+                    <Icon name="close" size={28} color={Colors[theme].text} />
+                </TouchableOpacity>
 
                 <View className="flex-1 items-center">
-                    <View className="flex-row items-center bg-surface-highlight/50 px-3 py-1.5 rounded-full border border-white/5">
+                    <View className="flex-row items-center bg-surface-highlight/50 px-3 py-1.5 rounded-full border border-border/10">
                         <Icon name="time-outline" size={14} variant="primary" />
-                        <Text className="text-text font-mono font-black ml-1.5 text-sm">
+                        <AccessibleText className="text-text font-mono font-black ml-1.5 text-sm">
                             {formatElapsedTime(elapsedTime)}
-                        </Text>
+                        </AccessibleText>
                     </View>
                 </View>
 
                 <View className="flex-row items-center gap-4">
                     <TouchableOpacity
                         onPress={toggleFocusMode}
-                        className={`w-10 h-10 rounded-full items-center justify-center border ${isFocusMode ? 'bg-secondary/20 border-secondary' : 'bg-surface-highlight/50 border-white/10'}`}
+                        className={`w-10 h-10 rounded-full items-center justify-center border bg-surface-highlight/50 border-border/10`}
+                        accessibilityRole="button"
+                        accessibilityLabel="Activar modo enfoque"
                     >
-                        <Icon name={isFocusMode ? "eye-off" : "eye"} size={20} color={isFocusMode ? "#8b5cf6" : "#f8fafc"} />
+                        <Icon name="eye" size={20} color={Colors[theme].text} />
                     </TouchableOpacity>
 
-                    {!isFocusMode && (
-                        <>
-                            <TouchableOpacity onPress={() => setShowPlateCalc(true)}>
-                                <Icon name="calculator-outline" size={24} variant="primary" />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={handleFinish}>
-                                <Text className="text-primary font-black">Finalizar</Text>
-                            </TouchableOpacity>
-                        </>
-                    )}
+                    <TouchableOpacity
+                        onPress={() => setShowPlateCalc(true)}
+                        accessibilityRole="button"
+                        accessibilityLabel="Calculadora de discos"
+                    >
+                        <Icon name="calculator-outline" size={24} variant="primary" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={handleFinish}
+                        accessibilityRole="button"
+                        accessibilityLabel="Finalizar entrenamiento"
+                    >
+                        <AccessibleText className="text-primary font-black">Finalizar</AccessibleText>
+                    </TouchableOpacity>
                 </View>
             </View>
-
-            {/* Focus Mode Exit Button (Floating) */}
-            {isFocusMode && (
-                <TouchableOpacity
-                    onPress={handleFinish}
-                    className="absolute top-4 left-4 z-50 bg-red-500/20 px-4 py-2 rounded-full border border-red-500/50"
-                >
-                    <Text className="text-red-400 font-bold text-xs">Finalizar</Text>
-                </TouchableOpacity>
-            )}
 
             <Modal
                 visible={showPlateCalc}
@@ -545,16 +303,16 @@ export default function ActiveWorkoutScreen() {
                         <View className="bg-warning/20 p-4 rounded-2xl mb-4">
                             <Icon name="trophy" size={60} variant="warning" />
                         </View>
-                        <Text className="text-text text-3xl font-black mt-2 text-center tracking-tighter uppercase">
+                        <AccessibleText className="text-text text-3xl font-black mt-2 text-center tracking-tighter uppercase">
                             ¡NUEVO RÉCORD!
-                        </Text>
+                        </AccessibleText>
                         <View className="h-1 w-20 bg-warning/30 rounded-full my-4" />
-                        <Text className="text-text text-lg font-black text-center">
+                        <AccessibleText className="text-text text-lg font-black text-center">
                             {prExercise}
-                        </Text>
-                        <Text className="text-text-secondary text-center mt-2 text-sm">
+                        </AccessibleText>
+                        <AccessibleText className="text-text-secondary text-center mt-2 text-sm">
                             Has superado tus límites. El Mambo Coach está impresionado. 🔥
-                        </Text>
+                        </AccessibleText>
                         <Button
                             onPress={() => setShowPRModal(false)}
                             variant="primary"
@@ -573,21 +331,23 @@ export default function ActiveWorkoutScreen() {
                 onRequestClose={() => setShowHistoryModal(false)}
             >
                 <View className="flex-1 justify-center items-center bg-black/60 px-4">
-                    <Card variant="glass" className="w-full max-h-[80%] border-white/10">
+                    <Card variant="glass" className="w-full max-h-[80%] border-border/10">
                         <View className="flex-row justify-between items-center mb-6">
                             <View>
-                                <Text className="text-text font-black text-xl uppercase tracking-widest">Historial</Text>
-                                <Text className="text-text-secondary text-xs font-bold">{currentExercise.exerciseName}</Text>
+                                <AccessibleText className="text-text font-black text-xl uppercase tracking-widest">Historial</AccessibleText>
+                                <AccessibleText className="text-text-secondary text-xs font-bold">{currentExercise.exerciseName}</AccessibleText>
                             </View>
                             <TouchableOpacity
                                 onPress={() => setShowHistoryModal(false)}
                                 className="bg-surface-highlight/50 p-2 rounded-full"
+                                accessibilityRole="button"
+                                accessibilityLabel="Cerrar historial"
                             >
-                                <Icon name="close" size={20} color="#f8fafc" />
+                                <Icon name="close" size={20} color={Colors[theme].text} />
                             </TouchableOpacity>
                         </View>
 
-                        <View className="bg-surface-highlight/30 p-4 rounded-2xl border border-white/5 mb-6">
+                        <View className="bg-surface-highlight/30 p-4 rounded-2xl border border-border/10 mb-6">
                             <View className="flex-row items-end justify-between h-32 gap-2">
                                 {history
                                     .filter(w => w.exercises.some(e => e.exerciseId === currentExercise.exerciseId))
@@ -612,15 +372,15 @@ export default function ActiveWorkoutScreen() {
                                             <View key={index} className="flex-1 items-center">
                                                 <View className="w-full bg-primary/10 rounded-t-lg relative" style={{ height: `${height}%` }}>
                                                     <View className="absolute -top-6 left-0 right-0 items-center">
-                                                        <Text className="text-primary text-[8px] font-black">{volume}</Text>
+                                                        <AccessibleText className="text-primary text-[8px] font-black">{volume}</AccessibleText>
                                                     </View>
                                                     <View
                                                         className="absolute inset-0 bg-primary rounded-t-lg opacity-80"
                                                     />
                                                 </View>
-                                                <Text className="text-[8px] text-text-muted mt-2 font-black uppercase">
+                                                <AccessibleText className="text-[8px] text-text-muted mt-2 font-black uppercase">
                                                     {workout.endTime.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                                                </Text>
+                                                </AccessibleText>
                                             </View>
                                         );
                                     })}
@@ -644,53 +404,63 @@ export default function ActiveWorkoutScreen() {
                 onRequestClose={() => setShowSubstituteModal(false)}
             >
                 <View className="flex-1 justify-center items-center bg-black/60 px-4">
-                    <Card variant="glass" className="w-full max-h-[80%] border-white/10">
+                    <Card variant="glass" className="w-full max-h-[80%] border-border/10">
                         <View className="flex-row justify-between items-center mb-4">
                             <View>
-                                <Text className="text-text font-black text-xl uppercase tracking-widest">Sustituir</Text>
-                                <Text className="text-text-secondary text-xs font-bold">Alternativas para {currentExercise.exerciseName}</Text>
+                                <AccessibleText className="text-text font-black text-xl uppercase tracking-widest">Sustituir</AccessibleText>
+                                <AccessibleText className="text-text-secondary text-xs font-bold">Alternativas para {currentExercise.exerciseName}</AccessibleText>
                             </View>
                             <TouchableOpacity
                                 onPress={() => setShowSubstituteModal(false)}
                                 className="bg-surface-highlight/50 p-2 rounded-full"
+                                accessibilityRole="button"
+                                accessibilityLabel="Cerrar sustitución"
                             >
-                                <Icon name="close" size={20} color="#f8fafc" />
+                                <Icon name="close" size={20} color={Colors[theme].text} />
                             </TouchableOpacity>
                         </View>
 
                         <ScrollView className="mb-4">
                             {(() => {
-                                const equipment = profile?.availableEquipment || 'full_gym';
-                                const allAlternatives = [
-                                    { name: 'Press de Banca con Mancuernas', equipment: ['full_gym', 'dumbbells'] },
-                                    { name: 'Press Inclinado', equipment: ['full_gym'] },
-                                    { name: 'Fondos', equipment: ['full_gym', 'bodyweight'] },
-                                    { name: 'Flexiones', equipment: ['bodyweight', 'dumbbells', 'bands', 'full_gym'] },
-                                    { name: 'Press con Bandas', equipment: ['bands'] },
-                                ];
+                                const alternatives = EXERCISES.filter(e =>
+                                    e.muscleGroup === currentExercise.muscleGroup &&
+                                    e.id !== currentExercise.exerciseId
+                                );
 
-                                return allAlternatives
-                                    .filter(alt => equipment === 'full_gym' || alt.equipment.includes(equipment))
-                                    .map((alt) => (
-                                        <TouchableOpacity
-                                            key={alt.name}
-                                            onPress={() => {
-                                                const mockExercise = {
-                                                    id: alt.name.toLowerCase().replace(/\s+/g, '_'),
-                                                    name: alt.name,
-                                                    muscleGroup: currentExercise.muscleGroup,
-                                                };
-                                                substituteExercise(currentExerciseIndex, mockExercise);
-                                                setShowSubstituteModal(false);
-                                            }}
-                                            className="p-4 bg-surface-highlight/30 rounded-2xl mb-2 border border-white/5"
-                                        >
-                                            <View className="flex-row justify-between items-center">
-                                                <Text className="text-text font-bold">{alt.name}</Text>
-                                                <Icon name="chevron-forward" size={16} color="#64748b" />
+                                if (alternatives.length === 0) {
+                                    return (
+                                        <View className="p-4 items-center">
+                                            <AccessibleText className="text-text-secondary text-center">
+                                                No se encontraron alternativas directas para este grupo muscular.
+                                            </AccessibleText>
+                                        </View>
+                                    );
+                                }
+
+                                return alternatives.map((alt) => (
+                                    <TouchableOpacity
+                                        key={alt.id}
+                                        onPress={() => {
+                                            substituteExercise(currentExerciseIndex, {
+                                                id: alt.id,
+                                                name: alt.name,
+                                                muscleGroup: alt.muscleGroup,
+                                            });
+                                            setShowSubstituteModal(false);
+                                        }}
+                                        className="p-4 bg-surface-highlight/30 rounded-2xl mb-2 border border-border/10"
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`Sustituir por ${alt.name}`}
+                                    >
+                                        <View className="flex-row justify-between items-center">
+                                            <View>
+                                                <AccessibleText className="text-text font-bold">{alt.name}</AccessibleText>
+                                                <AccessibleText className="text-text-secondary text-xs capitalize">{alt.equipment}</AccessibleText>
                                             </View>
-                                        </TouchableOpacity>
-                                    ));
+                                            <Icon name="chevron-forward" size={16} color={Colors[theme].textMuted} />
+                                        </View>
+                                    </TouchableOpacity>
+                                ));
                             })()}
                         </ScrollView>
 
@@ -711,19 +481,21 @@ export default function ActiveWorkoutScreen() {
                             <TouchableOpacity
                                 onPress={() => setCoachMessage(null)}
                                 className="absolute -top-10 left-0 right-0 items-center"
+                                accessibilityRole="button"
+                                accessibilityLabel="Cerrar mensaje del coach"
                             >
                                 <View className="bg-secondary px-4 py-2 rounded-full shadow-lg flex-row items-center gap-2">
-                                    <Icon name="sparkles" size={14} color="#f8fafc" />
-                                    <Text className="text-text font-black text-xs">{coachMessage}</Text>
+                                    <Icon name="sparkles" size={14} color={Colors[theme].text} />
+                                    <AccessibleText className="text-text font-black text-xs">{coachMessage}</AccessibleText>
                                 </View>
                             </TouchableOpacity>
                         )}
                         <View className="flex-row justify-between items-start mb-4">
                             <View className="flex-row gap-2 flex-wrap">
                                 <View className="bg-surface-highlight/50 px-3 py-1 rounded-full">
-                                    <Text className="text-text-secondary text-[10px] font-black uppercase tracking-widest">
+                                    <AccessibleText className="text-text-secondary text-[10px] font-black uppercase tracking-widest">
                                         {currentExercise.muscleGroup}
-                                    </Text>
+                                    </AccessibleText>
                                 </View>
                                 {/* Superset Indicator Badge */}
                                 {currentExercise.supersetGroup && (() => {
@@ -737,11 +509,14 @@ export default function ActiveWorkoutScreen() {
                                         <TouchableOpacity
                                             onPress={() => unlinkSuperset(currentExerciseIndex)}
                                             className="bg-secondary/20 px-3 py-1 rounded-full flex-row items-center gap-1"
+                                            accessibilityRole="button"
+                                            accessibilityLabel={`Superset ${currentIdxInSuperset + 1} de ${supersetExercises.length}`}
+                                            accessibilityHint="Toca para desvincular el superset"
                                         >
                                             <Icon name="link" size={12} variant="secondary" />
-                                            <Text className="text-secondary text-[10px] font-black uppercase tracking-widest">
+                                            <AccessibleText className="text-secondary text-[10px] font-black uppercase tracking-widest">
                                                 Superset {currentIdxInSuperset + 1}/{supersetExercises.length}
-                                            </Text>
+                                            </AccessibleText>
                                         </TouchableOpacity>
                                     );
                                 })()}
@@ -751,25 +526,28 @@ export default function ActiveWorkoutScreen() {
                                         params: { id: currentExercise.exerciseId }
                                     })}
                                     className="bg-surface-highlight/50 px-2 py-1 rounded-full items-center justify-center"
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Ver detalles del ejercicio"
                                 >
-                                    <Icon name="information-circle-outline" size={16} color="#f8fafc" />
+                                    <Icon name="information-circle-outline" size={16} color={Colors[theme].text} />
                                 </TouchableOpacity>
                             </View>
                             <View className="bg-surface-highlight/50 px-3 py-1 rounded-full">
-                                <Text className="text-text font-black text-[10px] uppercase tracking-widest">
+                                <AccessibleText className="text-text font-black text-[10px] uppercase tracking-widest">
                                     {currentExerciseIndex + 1} / {exercises.length}
-                                </Text>
+                                </AccessibleText>
                             </View>
                         </View>
 
                         <View className="flex-row items-center mb-1 pr-8">
-                            <Text
+                            <AccessibleText
+                                weight="bold"
                                 className="text-text text-2xl font-black flex-1"
                                 numberOfLines={1}
                                 adjustsFontSizeToFit
                             >
                                 {currentExercise.exerciseName}
-                            </Text>
+                            </AccessibleText>
                             <WhyTooltip
                                 title="¿Por Qué 8-12 Reps?"
                                 explanation="El rango de 8-12 repeticiones es óptimo para hipertrofia muscular porque permite usar pesos moderados que causan suficiente estrés en las fibras musculares sin comprometer la técnica."
@@ -781,20 +559,20 @@ export default function ActiveWorkoutScreen() {
                                 scientific="Estudios muestran que el rango 8-12 reps maximiza la activación de fibras de tipo II, responsables del crecimiento muscular (Schoenfeld et al., 2017)."
                             />
                         </View>
-                        <Text className="text-text-secondary text-sm font-medium">
+                        <AccessibleText className="text-text-secondary text-sm font-medium">
                             {currentExercise.sets.length} series planeadas
-                        </Text>
+                        </AccessibleText>
 
                         {/* Previous Performance */}
                         {previousPerformance && (
-                            <View className="mt-3 p-3 bg-surface-highlight/30 rounded-2xl border border-white/5">
-                                <Text className="text-text-secondary text-[10px] font-black uppercase tracking-widest mb-1">ÚLTIMA SESIÓN</Text>
-                                <Text className="text-text text-sm font-bold">
+                            <View className="mt-3 p-3 bg-surface-highlight/30 rounded-2xl border border-border/10">
+                                <AccessibleText weight="bold" className="text-text-secondary text-[10px] uppercase tracking-widest mb-1">ÚLTIMA SESIÓN</AccessibleText>
+                                <AccessibleText weight="bold" className="text-text text-sm font-bold">
                                     {previousPerformance.bestWeight}kg × {previousPerformance.bestReps} reps
-                                </Text>
-                                <Text className="text-text-muted text-[10px] mt-0.5">
+                                </AccessibleText>
+                                <AccessibleText className="text-text-muted text-[10px] mt-0.5">
                                     {previousPerformance.date.toLocaleDateString()}
-                                </Text>
+                                </AccessibleText>
                             </View>
                         )}
 
@@ -802,18 +580,30 @@ export default function ActiveWorkoutScreen() {
                         <View className="flex-row gap-2 mt-4">
                             <TouchableOpacity
                                 onPress={() => setShowSubstituteModal(true)}
-                                className="flex-1 bg-surface-highlight/50 py-2.5 px-1 rounded-xl items-center justify-center border border-white/5"
+                                className="flex-1 bg-surface-highlight/50 py-2.5 px-1 rounded-xl items-center justify-center border border-border/10"
                             >
-                                <Icon name="swap-horizontal" size={16} color="#f8fafc" />
-                                <Text className="text-text text-[10px] font-black uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Sustituir</Text>
+                                <Icon name="swap-horizontal" size={16} color={Colors[theme].text} />
+                                <AccessibleText weight="bold" className="text-text text-[10px] uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Sustituir</AccessibleText>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={pickVideo}
-                                className="flex-1 bg-surface-highlight/50 py-2.5 px-1 rounded-xl items-center justify-center border border-white/5"
+                                className="flex-1 bg-surface-highlight/50 py-2.5 px-1 rounded-xl items-center justify-center border border-border/10"
                             >
-                                <Icon name="videocam" size={16} color="#f8fafc" />
-                                <Text className="text-text text-[10px] font-black uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Técnica</Text>
+                                <Icon name="videocam" size={16} color={Colors[theme].text} />
+                                <AccessibleText weight="bold" className="text-text text-[10px] uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Técnica</AccessibleText>
                             </TouchableOpacity>
+                            {(subscription?.tier_id === 'PRO' || subscription?.tier_id === 'ELITE') && (
+                                <TouchableOpacity
+                                    onPress={() => router.push({
+                                        pathname: '/workout/form-check',
+                                        params: { exerciseIndex: currentExerciseIndex, setId: currentExercise.sets.find(s => !s.completed)?.id }
+                                    })}
+                                    className="flex-1 bg-secondary/20 py-2.5 px-1 rounded-xl items-center justify-center border border-secondary/30"
+                                >
+                                    <Icon name="camera" size={16} variant="secondary" />
+                                    <AccessibleText weight="bold" className="text-secondary text-[10px] uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Record Set</AccessibleText>
+                                </TouchableOpacity>
+                            )}
                             {/* Superset Button */}
                             {currentExercise.supersetGroup ? (
                                 <TouchableOpacity
@@ -821,7 +611,7 @@ export default function ActiveWorkoutScreen() {
                                     className="flex-1 bg-secondary/20 py-2.5 px-1 rounded-xl items-center justify-center border border-secondary/30"
                                 >
                                     <Icon name="unlink" size={16} variant="secondary" />
-                                    <Text className="text-secondary text-[10px] font-black uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Desvincular</Text>
+                                    <AccessibleText weight="bold" className="text-secondary text-[10px] uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Desvincular</AccessibleText>
                                 </TouchableOpacity>
                             ) : currentExerciseIndex < exercises.length - 1 ? (
                                 <TouchableOpacity
@@ -838,18 +628,18 @@ export default function ActiveWorkoutScreen() {
                                             ]
                                         );
                                     }}
-                                    className="flex-1 bg-surface-highlight/50 py-2.5 px-1 rounded-xl items-center justify-center border border-white/5"
+                                    className="flex-1 bg-surface-highlight/50 py-2.5 px-1 rounded-xl items-center justify-center border border-border/10"
                                 >
-                                    <Icon name="link" size={16} color="#f8fafc" />
-                                    <Text className="text-text text-[10px] font-black uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Superset</Text>
+                                    <Icon name="link" size={16} color={Colors[theme].text} />
+                                    <AccessibleText weight="bold" className="text-text text-[10px] uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Superset</AccessibleText>
                                 </TouchableOpacity>
                             ) : null}
                             <TouchableOpacity
                                 onPress={() => setShowHistoryModal(true)}
-                                className="flex-1 bg-surface-highlight/50 py-2.5 px-1 rounded-xl items-center justify-center border border-white/5"
+                                className="flex-1 bg-surface-highlight/50 py-2.5 px-1 rounded-xl items-center justify-center border border-border/10"
                             >
-                                <Icon name="stats-chart" size={16} color="#f8fafc" />
-                                <Text className="text-text text-[10px] font-black uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Historial</Text>
+                                <Icon name="stats-chart" size={16} color={Colors[theme].text} />
+                                <AccessibleText weight="bold" className="text-text text-[10px] uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Historial</AccessibleText>
                             </TouchableOpacity>
                         </View>
                     </Card>
@@ -858,12 +648,12 @@ export default function ActiveWorkoutScreen() {
                 {/* Sets Table */}
                 <View className="px-4 py-2">
                     <View className="flex-row justify-between items-center mb-4 px-1">
-                        <Text className="text-text font-black text-lg uppercase tracking-widest">Series</Text>
+                        <AccessibleText weight="bold" className="text-text text-lg uppercase tracking-widest">Series</AccessibleText>
                         <View className="flex-row items-center gap-2 bg-success/10 px-3 py-1 rounded-full border border-success/20">
                             <Icon name="checkmark-circle" size={14} variant="success" />
-                            <Text className="text-success text-[10px] font-black uppercase tracking-widest">
+                            <AccessibleText weight="bold" className="text-success text-[10px] uppercase tracking-widest">
                                 {currentExercise.sets.filter(s => s.completed).length} completadas
-                            </Text>
+                            </AccessibleText>
                         </View>
                     </View>
 
@@ -882,6 +672,7 @@ export default function ActiveWorkoutScreen() {
                             }}
                             previousSet={previousSets[index]}
                             show1RM={true}
+                            onRemove={() => removeSet(currentExerciseIndex, set.id)}
                         />
                     ))}
 
@@ -891,7 +682,7 @@ export default function ActiveWorkoutScreen() {
                         activeOpacity={0.7}
                     >
                         <Icon name="add" size={22} variant="primary" />
-                        <Text className="text-primary font-black text-sm uppercase tracking-widest">Añadir Set</Text>
+                        <AccessibleText weight="bold" className="text-primary text-sm uppercase tracking-widest">Añadir Set</AccessibleText>
                     </TouchableOpacity>
                 </View>
 
@@ -901,7 +692,7 @@ export default function ActiveWorkoutScreen() {
                         <View className="bg-secondary/20 p-1.5 rounded-full mr-2">
                             <Icon name="sparkles" size={12} variant="secondary" />
                         </View>
-                        <Text className="text-secondary text-xs font-black uppercase tracking-widest">Análisis Técnica Mambo Coach</Text>
+                        <AccessibleText weight="bold" className="text-secondary text-xs uppercase tracking-widest">Análisis Técnica Mambo Coach</AccessibleText>
                     </View>
                     <Card variant="glass" className="p-4 border-secondary/30">
                         {!currentExercise.videoUrl ? (
@@ -913,38 +704,39 @@ export default function ActiveWorkoutScreen() {
                                 <View className="bg-secondary/20 p-4 rounded-2xl mb-3">
                                     <Icon name="videocam" size={36} variant="secondary" />
                                 </View>
-                                <Text
-                                    className="text-secondary font-black text-sm uppercase tracking-widest mb-1"
+                                <AccessibleText
+                                    weight="bold"
+                                    className="text-secondary text-sm uppercase tracking-widest mb-1"
                                     numberOfLines={1}
                                     adjustsFontSizeToFit
                                 >
                                     Subir Video para Análisis
-                                </Text>
-                                <Text className="text-text-secondary text-xs text-center px-4 leading-relaxed">
+                                </AccessibleText>
+                                <AccessibleText className="text-text-secondary text-xs text-center px-4 leading-relaxed">
                                     Nuestra IA analizará tu forma y te dará recomendaciones personalizadas
-                                </Text>
+                                </AccessibleText>
                             </TouchableOpacity>
                         ) : (
                             <View>
                                 <View className="flex-row items-center justify-between mb-3">
                                     <View className="flex-row items-center gap-2">
                                         <Icon name="checkmark-circle" size={20} variant="secondary" />
-                                        <Text className="text-text font-black uppercase tracking-widest text-xs">Video Registrado</Text>
+                                        <AccessibleText weight="bold" className="text-text uppercase tracking-widest text-xs">Video Registrado</AccessibleText>
                                     </View>
                                     <TouchableOpacity onPress={pickVideo}>
-                                        <Text className="text-secondary text-[10px] font-black uppercase tracking-widest">Cambiar Video</Text>
+                                        <AccessibleText weight="bold" className="text-secondary text-[10px] uppercase tracking-widest">Cambiar Video</AccessibleText>
                                     </TouchableOpacity>
                                 </View>
 
                                 {isAnalyzing ? (
                                     <View className="items-center py-4">
-                                        <Text className="text-secondary animate-pulse font-black uppercase tracking-widest text-xs">IA Analizando técnica...</Text>
+                                        <AccessibleText weight="bold" className="text-secondary animate-pulse uppercase tracking-widest text-xs">IA Analizando técnica...</AccessibleText>
                                     </View>
                                 ) : techniqueFeedback ? (
                                     <View className="bg-secondary/10 p-3 rounded-xl border border-secondary/20">
-                                        <Text className="text-secondary text-sm italic">
+                                        <AccessibleText className="text-secondary text-sm italic">
                                             &quot;{techniqueFeedback}&quot;
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
                                 ) : (
                                     <Button
@@ -961,9 +753,9 @@ export default function ActiveWorkoutScreen() {
 
                 {/* Progress Graph */}
                 <View className="px-4 py-2">
-                    <Text className="text-text-secondary text-[10px] font-black uppercase tracking-widest mb-2 px-1">Progreso de Fuerza</Text>
+                    <AccessibleText weight="bold" className="text-text-secondary text-[10px] uppercase tracking-widest mb-2 px-1">Progreso de Fuerza</AccessibleText>
                     <Card variant="glass" className="p-4 border-white/5">
-                        <Text className="text-text-secondary text-[10px] font-black uppercase tracking-widest mb-3">Últimas 4 sesiones</Text>
+                        <AccessibleText className="text-text-secondary text-[10px] font-black uppercase tracking-widest mb-3">Últimas 4 sesiones</AccessibleText>
                         <View className="flex-row items-end justify-between h-16">
                             {history.slice(0, 4).reverse().map((workout, index) => {
                                 const exerciseData = workout.exercises.find(e => e.exerciseId === currentExercise.exerciseId);
@@ -976,9 +768,9 @@ export default function ActiveWorkoutScreen() {
                                             className="bg-primary rounded-sm w-2"
                                             style={{ height: Math.min(height, 50) }}
                                         />
-                                        <Text className="text-[8px] text-text-muted font-black mt-1">
+                                        <AccessibleText weight="bold" className="text-[8px] text-text-muted mt-1">
                                             {workout.endTime.getDate()}/{workout.endTime.getMonth() + 1}
-                                        </Text>
+                                        </AccessibleText>
                                     </View>
                                 );
                             })}
@@ -988,7 +780,7 @@ export default function ActiveWorkoutScreen() {
 
                 {/* Exercise Note */}
                 <View className="px-4 py-2">
-                    <Text className="text-text-secondary text-[10px] font-black uppercase tracking-widest mb-2 px-1">Notas del Ejercicio</Text>
+                    <AccessibleText weight="bold" className="text-text-secondary text-[10px] uppercase tracking-widest mb-2 px-1">Notas del Ejercicio</AccessibleText>
                     <Card variant="glass" className="p-0 border-white/5">
                         <TextInput
                             className="text-text p-4 min-h-[80px]"
@@ -1004,7 +796,7 @@ export default function ActiveWorkoutScreen() {
                 {/* Rest Timer Config */}
                 <View className="px-4 py-2 mb-4">
                     <View className="flex-row items-center mb-2 px-1">
-                        <Text className="text-text-secondary text-[10px] font-black uppercase tracking-widest">Descanso entre series</Text>
+                        <AccessibleText weight="bold" className="text-text-secondary text-[10px] uppercase tracking-widest">Descanso entre series</AccessibleText>
                         <WhyTooltip
                             title="¿Por Qué Descansar 1-3 Min?"
                             explanation="El descanso permite que tus niveles de ATP y fosfocreatina se recuperen, lo que te permite mantener la intensidad en la siguiente serie. Descansos muy cortos limitan el volumen total, mientras que muy largos pueden enfriar el músculo."
@@ -1025,10 +817,10 @@ export default function ActiveWorkoutScreen() {
                                     ? 'bg-primary border-primary/50'
                                     : 'bg-surface-highlight/50 border-white/5'
                                     }`}>
-                                <Text className={`text-center font-black text-[10px] uppercase tracking-widest ${currentExercise.restTime === seconds ? 'text-white' : 'text-text-muted'
+                                <AccessibleText weight="bold" className={`text-center text-[10px] uppercase tracking-widest ${currentExercise.restTime === seconds ? 'text-white' : 'text-text-muted'
                                     }`}>
                                     {seconds / 60} min
-                                </Text>
+                                </AccessibleText>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -1045,9 +837,9 @@ export default function ActiveWorkoutScreen() {
                             }`}
                         activeOpacity={0.7}
                     >
-                        <Icon name="chevron-back" size={20} color={currentExerciseIndex === 0 ? "#64748b" : "#f8fafc"} />
-                        <Text className={`font-black text-sm uppercase tracking-widest ${currentExerciseIndex === 0 ? 'text-text-muted' : 'text-text'
-                            }`}>Anterior</Text>
+                        <Icon name="chevron-back" size={20} color={currentExerciseIndex === 0 ? Colors[theme].textMuted : Colors[theme].text} />
+                        <AccessibleText weight="bold" className={`text-sm uppercase tracking-widest ${currentExerciseIndex === 0 ? 'text-text-muted' : 'text-text'
+                            }`}>Anterior</AccessibleText>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={goToNextExercise}
@@ -1058,9 +850,9 @@ export default function ActiveWorkoutScreen() {
                             }`}
                         activeOpacity={0.7}
                     >
-                        <Text className={`font-black text-sm uppercase tracking-widest ${currentExerciseIndex === exercises.length - 1 ? 'text-text-muted' : 'text-white'
-                            }`}>Siguiente</Text>
-                        <Icon name="chevron-forward" size={20} color={currentExerciseIndex === exercises.length - 1 ? "#64748b" : "#ffffff"} />
+                        <AccessibleText weight="bold" className={`text-sm uppercase tracking-widest ${currentExerciseIndex === exercises.length - 1 ? 'text-text-muted' : 'text-white'
+                            }`}>Siguiente</AccessibleText>
+                        <Icon name="chevron-forward" size={20} color={currentExerciseIndex === exercises.length - 1 ? Colors[theme].textMuted : "#ffffff"} />
                     </TouchableOpacity>
                 </View>
             </ScrollView>

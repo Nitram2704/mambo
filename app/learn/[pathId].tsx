@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -193,70 +193,73 @@ export default function LearningPathScreen() {
         return (
             <Animated.View
                 key={exercise.id}
-                entering={FadeInUp.delay(100 + index * 50)}
+                entering={FadeInUp.delay(300 + index * 50)}
                 className="mb-4">
-                <Card
+                <TouchableOpacity
                     onPress={() => handleExercisePress(exercise)}
-                    className="p-4">
-                    <View className="flex-row items-center justify-between">
-                        <View className="flex-row items-center flex-1">
-                            {/* Completion Status */}
-                            <TouchableOpacity
-                                onPress={(e) => {
-                                    e.stopPropagation();
-                                    toggleExerciseCompletion(exercise.id);
-                                }}
-                                style={{ backgroundColor: isCompleted ? '#22c55e' : (isDark ? '#374151' : '#e5e7eb') }}
-                                className="w-10 h-10 rounded-full items-center justify-center mr-4">
-                                {isCompleted ? (
-                                    <Ionicons name="checkmark" size={20} color="white" />
-                                ) : (
-                                    <Text style={{ color: Colors[theme].text }} className="font-bold">{index + 1}</Text>
-                                )}
-                            </TouchableOpacity>
+                    activeOpacity={0.7}
+                >
+                    <Card className="p-4">
+                        <View className="flex-row items-center justify-between">
+                            <View className="flex-row items-center flex-1">
+                                {/* Status Icon */}
+                                <TouchableOpacity
+                                    onPress={(e) => {
+                                        e.stopPropagation();
+                                        toggleExerciseCompletion(exercise.id);
+                                    }}
+                                    style={{ backgroundColor: isCompleted ? '#22c55e' : (isDark ? '#374151' : '#e5e7eb') }}
+                                    className="w-10 h-10 rounded-full items-center justify-center mr-4">
+                                    {isCompleted ? (
+                                        <Ionicons name="checkmark" size={20} color="white" />
+                                    ) : (
+                                        <Text style={{ color: Colors[theme].text }} className="font-bold">{index + 1}</Text>
+                                    )}
+                                </TouchableOpacity>
 
-                            {/* Exercise Info */}
-                            <View className="flex-1">
-                                <Text style={{ color: isCompleted ? '#22c55e' : Colors[theme].text }} className="text-lg font-bold mb-1">
-                                    {exercise.name}
-                                </Text>
-                                <View className="flex-row items-center gap-3">
-                                    {exercise.difficulty_level && (
-                                        <View className={`px-2 py-0.5 rounded-full ${getDifficultyColor(exercise.difficulty_level)}`}>
-                                            <Text style={{ color: getDifficultyTextColor(exercise.difficulty_level) }} className="text-xs">
-                                                {exercise.difficulty_level === 'Beginner' ? t('levels.beginner') :
-                                                    exercise.difficulty_level === 'Intermediate' ? t('levels.intermediate') : t('levels.advanced')}
-                                            </Text>
-                                        </View>
-                                    )}
-                                    {exercise.estimated_duration && (
-                                        <View className="flex-row items-center">
-                                            <Ionicons name="time-outline" size={12} color={Colors[theme].textSecondary} />
-                                            <Text style={{ color: Colors[theme].textSecondary }} className="text-xs ml-1">
-                                                {exercise.estimated_duration}s
-                                            </Text>
-                                        </View>
-                                    )}
-                                    {hasVideo && (
-                                        <TouchableOpacity
-                                            onPress={(e) => {
-                                                e.stopPropagation();
-                                                toggleVideoWatched(exercise.id);
-                                            }}
-                                            className="flex-row items-center">
-                                            <Ionicons name={hasWatchedVideo ? "videocam" : "videocam-outline"} size={12} color={hasWatchedVideo ? "#22c55e" : "#3b82f6"} />
-                                            <Text style={{ color: hasWatchedVideo ? '#22c55e' : '#3b82f6' }} className="text-xs ml-1">
-                                                {hasWatchedVideo ? t('common.completed') : t('common.view')}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    )}
+                                {/* Exercise Info */}
+                                <View className="flex-1">
+                                    <Text style={{ color: isCompleted ? '#22c55e' : Colors[theme].text }} className="text-lg font-bold mb-1">
+                                        {exercise.name}
+                                    </Text>
+                                    <View className="flex-row items-center gap-3">
+                                        {exercise.difficulty_level && (
+                                            <View className={`px-2 py-0.5 rounded-full ${getDifficultyColor(exercise.difficulty_level)}`}>
+                                                <Text style={{ color: getDifficultyTextColor(exercise.difficulty_level) }} className="text-xs">
+                                                    {exercise.difficulty_level === 'Beginner' ? t('levels.beginner') :
+                                                        exercise.difficulty_level === 'Intermediate' ? t('levels.intermediate') : t('levels.advanced')}
+                                                </Text>
+                                            </View>
+                                        )}
+                                        {exercise.estimated_duration && (
+                                            <View className="flex-row items-center">
+                                                <Ionicons name="time-outline" size={12} color={Colors[theme].textSecondary} />
+                                                <Text style={{ color: Colors[theme].textSecondary }} className="text-xs ml-1">
+                                                    {exercise.estimated_duration}s
+                                                </Text>
+                                            </View>
+                                        )}
+                                        {hasVideo && (
+                                            <TouchableOpacity
+                                                onPress={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleVideoWatched(exercise.id);
+                                                }}
+                                                className="flex-row items-center">
+                                                <Ionicons name={hasWatchedVideo ? "videocam" : "videocam-outline"} size={12} color={hasWatchedVideo ? "#22c55e" : "#3b82f6"} />
+                                                <Text style={{ color: hasWatchedVideo ? '#22c55e' : '#3b82f6' }} className="text-xs ml-1">
+                                                    {hasWatchedVideo ? t('common.completed') : t('common.view')}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
                                 </View>
                             </View>
-                        </View>
 
-                        <Ionicons name="chevron-forward" size={20} color={Colors[theme].textSecondary} />
-                    </View>
-                </Card>
+                            <Ionicons name="chevron-forward" size={20} color={Colors[theme].textSecondary} />
+                        </View>
+                    </Card>
+                </TouchableOpacity>
             </Animated.View>
         );
     };

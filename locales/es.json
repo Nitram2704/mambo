@@ -1,32 +1,51 @@
 {
     "common": {
-        "continue": "Continuar",
-        "back": "Atr�s",
+        "loading": "Cargando...",
+        "error": "Ocurrió un error",
         "save": "Guardar",
         "cancel": "Cancelar",
-        "error": "Error",
-        "success": "�xito",
-        "generatePlan": "Generar Mi Plan",
         "delete": "Eliminar",
-        "saveChanges": "Guardar Cambios",
-        "today": "HOY",
-        "completed": "COMPLETADO"
+        "edit": "Editar",
+        "back": "Atrás",
+        "next": "Siguiente",
+        "done": "Listo",
+        "search": "Buscar",
+        "continue": "Continuar",
+        "success": "Éxito",
+        "generatePlan": "Generar Mi Plan",
+        "today": "Hoy",
+        "tip": "Consejo",
+        "ok": "Aceptar"
+    },
+    "auth": {
+        "login": "Iniciar Sesión",
+        "signup": "Registrarse",
+        "email": "Correo",
+        "password": "Contraseña",
+        "continueWithGoogle": "Continuar con Google",
+        "continueWithApple": "Continuar con Apple",
+        "modal": {
+            "title": "Términos y Condiciones",
+            "content": "Bienvenido a Mambo Fitness. Al usar nuestra aplicación, aceptas los siguientes términos:\n\n1. Uso del Servicio: Mambo Fitness proporciona herramientas de entrenamiento y nutrición basadas en IA. El contenido es informativo y no sustituye el consejo médico profesional.\n\n2. Privacidad: Respetamos tus datos. Consulta nuestra Política de Privacidad para saber cómo manejamos tu información personal y de salud.\n\n3. Responsabilidad: Eres responsable de realizar los ejercicios de forma segura. Mambo Fitness no se hace responsable de lesiones derivadas del uso de la app.\n\n4. Suscripciones: Los pagos se gestionan a través de Google Play Store. Puedes cancelar en cualquier momento desde la configuración de tu cuenta.\n\n5. Cambios: Nos reservamos el derecho de modificar estos términos en cualquier momento."
+        }
     },
     "onboarding": {
+        "welcome": "Bienvenido a Mambo",
+        "getStarted": "Comenzar",
         "progress": "Paso {{current}} de {{total}}",
         "basicInfo": {
-            "title": "�Hola! Cu�ntanos de ti =K",
-            "subtitle": "Esto nos ayudar� a personalizar tu experiencia",
+            "title": "¡Hola! Cuéntanos sobre ti 👋",
+            "subtitle": "Esto nos ayudará a personalizar tu experiencia",
             "nameLabel": "Nombre Completo",
             "namePlaceholder": "Tu nombre",
             "ageLabel": "Edad",
             "weightLabel": "Peso (kg)",
             "heightLabel": "Altura (cm)",
-            "genderLabel": "G�nero"
+            "genderLabel": "Género"
         },
         "fitnessProfile": {
-            "title": "Tu Perfil Fitness =�",
-            "subtitle": "Esto nos ayudar� a crear tu plan perfecto",
+            "title": "Tu Perfil Fitness 💪",
+            "subtitle": "Esto nos ayudará a crear tu plan perfecto",
             "experienceLabel": "Nivel de Experiencia",
             "experienceSedentary": "Sedentario",
             "experienceSedentaryDesc": "Sin experiencia en ejercicio",
@@ -43,62 +62,158 @@
             "goalGeneralHealth": "Salud General",
             "daysLabel": "Días de Entrenamiento",
             "durationLabel": "Duración por Sesión",
-            "equipmentLabel": "Equipo Disponible",
+            "equipmentLabel": "Equipamiento Disponible",
             "equipmentFullGym": "Gimnasio Completo",
             "equipmentDumbbells": "Mancuernas",
             "equipmentBodyweight": "Peso Corporal",
-            "equipmentBands": "Bandas",
-            "restrictionsLabel": "Restricciones Físicas (opcional)",
-            "restrictionsPlaceholder": "Ej: lesión de rodilla, dolor lumbar..."
+            "equipmentBands": "Bandas Elásticas",
+            "restrictionsLabel": "Restricciones Físicas (Opcional)",
+            "restrictionsPlaceholder": "Ej: lesión de rodilla, dolor de espalda..."
         },
         "nutritionProfile": {
-            "title": "Tu Perfil Nutricional �x��️",
+            "title": "Tu Perfil Nutricional 🍽️",
             "subtitle": "Para crear tu plan de comidas ideal",
             "dietaryLabel": "Tipo de Dieta",
-            "dietaryOmnivore": "Omnívora",
+            "dietaryOmnivore": "Omnívoro",
             "dietaryOmnivoreDesc": "Como de todo",
-            "dietaryVegetarian": "Vegetariana",
+            "dietaryVegetarian": "Vegetariano",
             "dietaryVegetarianDesc": "Sin carne",
-            "dietaryVegan": "Vegana",
+            "dietaryVegan": "Vegano",
             "dietaryVeganDesc": "Sin productos animales",
-            "dietaryOther": "Otra",
+            "dietaryOther": "Otro",
             "dietaryOtherDesc": "Con restricciones específicas",
-            "restrictionsLabel": "Alergias o Restricciones (opcional)",
-            "restrictionsPlaceholder": "Ej: intolerancia a lactosa, alergia a frutos secos...",
-            "budgetLabel": "Presupuesto para Alimentación",
+            "restrictionsLabel": "Alergias o Restricciones (Opcional)",
+            "restrictionsPlaceholder": "Ej: intolerancia a la lactosa, alergia a nueces...",
+            "budgetLabel": "Presupuesto de Comida",
             "budgetLow": "Económico",
             "budgetLowDesc": "Ingredientes accesibles",
             "budgetMedium": "Moderado",
-            "budgetMediumDesc": "Balance precio-calidad",
+            "budgetMediumDesc": "Equilibrio precio-calidad",
             "budgetHigh": "Premium",
-            "budgetHighDesc": "Sin restricción de presupuesto",
-            "skillLabel": "Habilidad en Cocina",
+            "budgetHighDesc": "Sin restricciones de presupuesto",
+            "skillLabel": "Habilidades de Cocina",
             "skillBasic": "Básico",
             "skillBasicDesc": "Recetas simples y rápidas",
             "skillIntermediate": "Intermedio",
-            "skillIntermediateDesc": "Puedo cocinar bien",
+            "skillIntermediateDesc": "Sé cocinar bien",
             "skillAdvanced": "Avanzado",
             "skillAdvancedDesc": "Chef en casa"
         },
         "generating": {
             "title": "Creando tu Plan Personalizado",
-            "subtitle": "Estamos usando IA para diseñar el plan perfecto para ti",
+            "subtitle": "Usamos IA para diseñar el plan perfecto para ti",
             "preparing": "Preparando...",
-            "calculatingMacros": "Calculando tus necesidades nutricionales...",
-            "creatingWorkout": "Creando tu rutina de entrenamiento personalizada...",
-            "workoutDone": "Plan de entrenamiento creado! �S&",
-            "designingNutrition": "Diseñando tu plan de comidas...",
-            "nutritionDone": "Plan nutricional listo! �S&",
+            "calculatingMacros": "Calculando necesidades nutricionales...",
+            "creatingWorkout": "Creando rutina de entrenamiento personalizada...",
+            "workoutDone": "¡Plan de entrenamiento creado! ✅",
+            "designingNutrition": "Diseñando plan de comidas...",
+            "nutritionDone": "¡Plan nutricional listo! ✅",
             "saving": "Guardando tus planes...",
-            "allDone": "¡Todo listo! �x}0",
-            "error": "Hubo un problema generando tus planes. ¿Quieres intentar de nuevo?",
+            "allDone": "¡Todo listo! 🎉",
+            "error": "Ocurrió un problema al generar tus planes. ¿Reintentar?",
             "retry": "Reintentar",
             "continueWithoutPlan": "Continuar sin plan",
-            "tip1": "�x� Analizando tu perfil y objetivos...",
-            "tip2": "�x�9️ Tu plan se ajustará a tu nivel y equipo disponible",
-            "tip3": "�x��️ Creando recetas adaptadas a tu presupuesto",
-            "tip4": "�xa� ¡Casi listo para comenzar tu transformación!"
+            "tip1": "💡 Analizando tu perfil y objetivos...",
+            "tip2": "🏋️ Tu plan se adapta a tu nivel y equipo",
+            "tip3": "🍽️ Creando recetas que se ajusten a tu presupuesto",
+            "tip4": "🚀 ¡Casi listo para comenzar tu transformación!"
+        },
+        "barriers": {
+            "title": "¿Qué te ha detenido antes?",
+            "subtitle": "Entender tus obstáculos nos ayuda a despejar el camino",
+            "time": "Falta de Tiempo",
+            "motivation": "Perdí la Motivación",
+            "knowledge": "No sabía qué hacer",
+            "injury": "Lesión / Dolor",
+            "consistency": "Difícil ser constante",
+            "none": "Apenas comienzo"
+        },
+        "motivation": {
+            "title": "¿Por qué ahora?",
+            "subtitle": "Tu 'Por qué' es tu combustible. Elige tus motores.",
+            "health": "Salud y Longevidad",
+            "confidence": "Confianza y Autoestima",
+            "energy": "Más Energía",
+            "appearance": "Verme Mejor",
+            "strength": "Ser más Fuerte",
+            "stress": "Aliviar Estrés"
+        },
+        "socialProof": {
+            "title": "Estás en buena compañía",
+            "subtitle": "Únete a miles que están transformando sus vidas",
+            "stat1": "Usuarios Activos",
+            "stat1Value": "10k+",
+            "stat2": "Entrenamientos",
+            "stat2Value": "500k+",
+            "stat3": "Metas Alcanzadas",
+            "stat3Value": "92%",
+            "quote": "\"Mambo cambió mi vida. Por fin mantuve una rutina.\"",
+            "author": "Sarah, 28"
         }
+    },
+    "sleep": {
+        "title": "Sueño",
+        "logSleep": "Registrar Sueño",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "date": "Fecha",
+        "times": "Horarios",
+        "bedTime": "Hora de dormir",
+        "wakeTime": "Hora de despertar",
+        "duration": "Duración: {{count}}",
+        "qualityTitle": "¿Cómo dormiste?",
+        "qualities": {
+            "1": "Muy mal",
+            "2": "Mal",
+            "3": "Regular",
+            "4": "Bien",
+            "5": "Excelente"
+        },
+        "features": "Factores",
+        "tags": {
+            "restless": "Inquieto",
+            "dreams": "Sueños vívidos",
+            "interrupted": "Interrumpido",
+            "refreshed": "Renovado"
+        },
+        "notes": "Notas",
+        "notesPlaceholder": "Añade notas sobre tu sueño...",
+        "lastNight": "Anoche",
+        "noLogs": "Sin registros",
+        "quality": "Calidad",
+        "lastSession": "Última sesión",
+        "register": "Registrar Sueño",
+        "thisWeek": "Esta Semana",
+        "average": "Promedio",
+        "reports": "Ver Reportes",
+        "report": {
+            "title": "Reporte de Sueño",
+            "average": "Promedio",
+            "quality": "Calidad",
+            "stats": "Estadísticas",
+            "consistency": "Consistencia",
+            "streak": "Racha",
+            "days": "días",
+            "sleepDebt": "Deuda de sueño",
+            "weeklyBreakdown": "Desglose Semanal",
+            "noLogs": "No hay datos suficientes para mostrar el desglose.",
+            "recommendation": "Recomendación",
+            "recommendationNote": "Intenta mantener un horario constante para mejorar tu calidad de sueño."
+        },
+        "goals": {
+            "title": "Metas de Sueño",
+            "targetHours": "Horas Objetivo",
+            "recommended": "Recomendado: 7-9 horas",
+            "targetBedtime": "Hora de Dormir Objetivo",
+            "targetWakeTime": "Hora de Despertar Objetivo",
+            "tipDesc": "Dormir lo suficiente es crucial para la recuperación muscular y el rendimiento mental."
+        }
+    },
+    "tabs": {
+        "home": "Inicio",
+        "workout": "Entrenar",
+        "nutrition": "Nutrición",
+        "profile": "Perfil"
     },
     "profile": {
         "title": "Perfil",
@@ -107,12 +222,12 @@
         "noProfileSubtitle": "Configura tu perfil para calcular tu plan nutricional personalizado y desbloquear todas las funciones.",
         "configureButton": "Configurar Perfil",
         "resetTitle": "Reiniciar Perfil",
-        "resetMessage": "¿Estás seguro? Esto te llevará al formulario de inicio para volver a crear tu perfil.",
+        "resetMessage": "¿Estás seguro? Esto te llevará al inicio para recrear tu perfil.",
         "resetConfirm": "Reiniciar",
         "achievements": "Logros",
-        "achievementsDesc": "Ver medallas",
+        "achievementsDesc": "Ver medallas y nivel",
         "progress": "Progreso",
-        "progressDesc": "Ver estadísticas",
+        "progressDesc": "Ver estadísticas detalladas",
         "personalInfo": "Información Personal",
         "age": "Edad",
         "gender": "Género",
@@ -120,39 +235,98 @@
         "weight": "Peso",
         "activity": "Actividad",
         "objective": "Objetivo",
-        "nutritionalGoals": "Metas Nutricionales",
+        "nutritionalGoals": "Objetivos Nutricionales",
         "edit": "Editar",
         "calories": "Calorías",
-        "protein": "Proteína",
-        "carbs": "Carbos",
+        "protein": "Proteínas",
+        "carbs": "Carbohidratos",
         "fats": "Grasas",
-        "settings": "Ajustes",
-        "darkMode": "Tema Oscuro",
+        "settings": "Configuración",
+        "darkMode": "Modo Oscuro",
         "language": "Idioma",
-        "theme": "Tema",
-        "waterReminder": "Recordatorio Agua",
-        "workoutReminder": "Recordatorio Entreno",
+        "waterReminder": "Recordatorio de Agua",
+        "workoutReminder": "Recordatorio de Entrenamiento",
         "exitPlan": "Salir del Plan Actual",
         "exitPlanTitle": "Salir del Plan Actual",
-        "exitPlanMessage": "Esto eliminará todos los entrenamientos programados a futuro. Tu historial y racha se mantendrán intactos. ¿Estás seguro?",
+        "exitPlanMessage": "Esto eliminará todos los entrenamientos futuros programados. Tu historial y racha permanecerán intactos. ¿Estás seguro?",
         "exitPlanConfirm": "Salir del Plan",
-        "exitPlanSuccess": "Has salido del plan actual. Ahora puedes programar tus rutinas manualmente.",
+        "exitPlanSuccess": "Has salido del plan actual. Ahora puedes programar rutinas manualmente.",
         "years": "años",
-        "male": "Masculino",
-        "female": "Femenino",
-        "logout": "Cerrar Sesión",
-        "logoutConfirm": "¿Estás seguro que deseas salir?",
-        "exit": "Salir",
-        "stats": {
-            "workouts": "Entrenos",
-            "streak": "Racha",
-            "level": "Nivel"
+        "male": "Hombre",
+        "female": "Mujer",
+        "regeneratePlan": "Regenerar Plan",
+        "theme": "Tema",
+        "coachStyle": "Estilo de Coach",
+        "amigo": "Amigo",
+        "cientifico": "Científico",
+        "sargento": "Sargento",
+        "tooltips": {
+            "calories": {
+                "title": "¿Por qué estas calorías?",
+                "explanation": "Calculadas según tu TDEE y objetivo.",
+                "examples": [
+                    "Déficit para perder grasa",
+                    "Superávit para ganar músculo"
+                ],
+                "scientific": "Basado en la ecuación de Mifflin-St Jeor."
+            },
+            "protein": {
+                "title": "Importancia de la proteína",
+                "explanation": "Esencial para la reparación muscular.",
+                "examples": [
+                    "Pollo",
+                    "Pescado",
+                    "Huevos"
+                ],
+                "scientific": "1.6g-2.2g por kg de peso corporal."
+            },
+            "carbs": {
+                "title": "Energía para entrenar",
+                "explanation": "Principal fuente de combustible.",
+                "examples": [
+                    "Arroz",
+                    "Avena",
+                    "Frutas"
+                ],
+                "scientific": "40-60% de tus calorías totales."
+            },
+            "fats": {
+                "title": "Salud hormonal",
+                "explanation": "Necesarias para la absorción de vitaminas.",
+                "examples": [
+                    "Aguacate",
+                    "Nueces",
+                    "Aceite de oliva"
+                ],
+                "scientific": "0.8g-1g por kg de peso corporal."
+            }
+        },
+        "progressScreen": {
+            "title": "Mi Progreso",
+            "noData": "Sin datos de progreso",
+            "dailyCalorieGoal": "Meta Diaria",
+            "calories": "{{count}} kcal",
+            "exerciseGoal": "Meta de Ejercicio",
+            "minutesPerDay": "{{count}} min/día",
+            "currentStreak": "Racha Actual",
+            "keepItUp": "¡Sigue así!"
+        },
+        "achievementsScreen": {
+            "title": "Mis Logros",
+            "currentLevel": "Nivel Actual",
+            "totalXp": "{{count}} XP Total",
+            "unlocked": "Desbloqueados",
+            "categories": {
+                "BEGINNER": "PRINCIPIANTE",
+                "INTERMEDIATE": "INTERMEDIO",
+                "ADVANCED": "AVANZADO",
+                "SPECIAL": "ESPECIAL",
+                "STRENGTH": "FUERZA",
+                "NUTRITION": "NUTRICIÓN",
+                "LEARNING": "APRENDIZAJE"
+            }
         },
         "achievementsList": {
-            "title": "Tus Logros",
-            "unlocked": "Desbloqueado",
-            "locked": "Bloqueado",
-            "xpReward": "XP",
             "first_workout": {
                 "title": "Primer Paso",
                 "description": "Completa tu primer entrenamiento"
@@ -163,10 +337,10 @@
             },
             "early_bird": {
                 "title": "Madrugador",
-                "description": "Completa un entrenamiento antes de las 8 AM"
+                "description": "Entrena antes de las 8 AM"
             },
             "ten_workouts": {
-                "title": "Consistencia",
+                "title": "Dedicado",
                 "description": "Completa 10 entrenamientos"
             },
             "streak_3": {
@@ -174,8 +348,8 @@
                 "description": "Entrena 3 días seguidos"
             },
             "volume_10k": {
-                "title": "Levantador de Peso",
-                "description": "Acumula 10,000 kg de volumen total"
+                "title": "Levantador Junior",
+                "description": "Mueve 10,000 kg en total"
             },
             "fifty_workouts": {
                 "title": "Veterano",
@@ -183,27 +357,27 @@
             },
             "volume_100k": {
                 "title": "Hércules",
-                "description": "Acumula 100,000 kg de volumen total"
+                "description": "Mueve 100,000 kg en total"
             },
             "night_owl": {
-                "title": "Noctámbulo",
-                "description": "Completa un entrenamiento después de las 10 PM"
+                "title": "Búho Nocturno",
+                "description": "Entrena después de las 10 PM"
             },
             "squat_master": {
-                "title": "Rey de las Sentadillas",
-                "description": "Completa 100 series de sentadillas"
+                "title": "Maestro de Sentadillas",
+                "description": "Realiza 100 sentadillas"
             },
             "bench_press_pro": {
-                "title": "Maestro del Press",
-                "description": "Completa 100 series de press de banca"
+                "title": "Pro de Banca",
+                "description": "Realiza 100 press de banca"
             },
             "deadlift_beast": {
                 "title": "Bestia del Peso Muerto",
-                "description": "Completa 100 series de peso muerto"
+                "description": "Realiza 100 pesos muertos"
             },
             "volume_beast": {
-                "title": "Depredador de Volumen",
-                "description": "Levanta 5,000 kg en una sola sesión"
+                "title": "Volumen Bestial",
+                "description": "Mueve 5,000 kg en una sesión"
             },
             "perfect_week": {
                 "title": "Semana Perfecta",
@@ -211,18 +385,18 @@
             },
             "volume_25k": {
                 "title": "Levantador Serio",
-                "description": "Acumula 25,000 kg de volumen total"
+                "description": "Mueve 25,000 kg en total"
             },
             "volume_50k": {
-                "title": "Máquina de Poder",
-                "description": "Acumula 50,000 kg de volumen total"
+                "title": "Levantador Elite",
+                "description": "Mueve 50,000 kg en total"
             },
             "streak_7": {
-                "title": "Semana Imparable",
+                "title": "Imparable",
                 "description": "Entrena 7 días seguidos"
             },
             "streak_30": {
-                "title": "Mes Legendario",
+                "title": "Leyenda",
                 "description": "Entrena 30 días seguidos"
             },
             "hundred_workouts": {
@@ -230,281 +404,308 @@
                 "description": "Completa 100 entrenamientos"
             },
             "streak_100": {
-                "title": "Leyenda de la Constancia",
+                "title": "Dios del Fitness",
                 "description": "Entrena 100 días seguidos"
             },
             "first_pullup": {
                 "title": "Primera Dominada",
-                "description": "Realiza tu primera dominada completa"
+                "description": "Realiza tu primera dominada estricta"
             },
             "squat_1_5_bw": {
                 "title": "Piernas de Acero",
-                "description": "Haz sentadilla con 1.5x tu peso corporal"
+                "description": "Sentadilla con 1.5x tu peso corporal"
             },
             "sets_1000": {
-                "title": "Mil Series",
-                "description": "Registra 1000 series en total"
+                "title": "Maratón de Series",
+                "description": "Completa 1000 series totales"
             },
             "macros_7_days": {
-                "title": "Maestro de Macros",
+                "title": "Nutrición Precisa",
                 "description": "Cumple tus macros 7 días seguidos"
             },
             "clean_30_days": {
-                "title": "Limpieza Total",
-                "description": "30 días sin exceder tus calorías"
+                "title": "Comer Limpio",
+                "description": "30 días sin exceder calorías"
             },
             "lessons_10": {
-                "title": "Estudiante Dedicado",
-                "description": "Completa 10 mini-lecciones"
+                "title": "Estudiante Modelo",
+                "description": "Completa 10 mini lecciones"
             }
-        },
-        "tooltips": {
-            "consistency": "Tu racha de días activos. ¡No la pierdas!",
-            "xp": "Puntos de experiencia ganados por completar entrenos y retos.",
-            "level": "Tu nivel actual basado en la XP total acumulada.",
-            "calories": {
-                "title": "¿Por Qué Este Déficit/Superávit?",
-                "explanation": "Tu meta calórica se calcula basándose en tu TDEE (gasto calórico total diario) más tu objetivo. Déficit para perder grasa, superávit para ganar músculo.",
-                "examples": [
-                    "Déficit de 500 cal = 0.5kg pérdida semanal",
-                    "Superávit de 300 cal = ganancia muscular sostenible",
-                    "Mantener = preservar composición corporal"
-                ],
-                "scientific": "El déficit calórico crea el ambiente hormonal óptimo para pérdida de grasa mientras preserva masa muscular (Helms et al., 2014)."
-            },
-            "protein": {
-                "title": "¿Por Qué 1.6-2.2g/kg de Proteína?",
-                "explanation": "La proteína es el macronutriente más importante para la síntesis proteica muscular. Cada gramo proporciona aminoácidos esenciales para reparar y construir músculo.",
-                "examples": [
-                    "1.6g/kg = mantenimiento muscular",
-                    "2.2g/kg = máximo crecimiento muscular",
-                    "Distribuir en 4-5 comidas diarias"
-                ],
-                "scientific": "La ingesta de proteína de alta calidad cada 3-4 horas maximiza la síntesis proteica muscular (Morton et al., 2018)."
-            },
-            "carbs": {
-                "title": "¿Por Qué Carbohidratos?",
-                "explanation": "Los carbohidratos son el combustible principal para entrenamientos intensos. Proporcionan glucosa para mantener energía y preservar glucógeno muscular.",
-                "examples": [
-                    "2-3g/kg para entrenamiento intenso",
-                    "1-2g/kg para mantenimiento",
-                    "Timing: pre/post-entreno para rendimiento"
-                ],
-                "scientific": "Los carbohidratos mantienen niveles de glucógeno muscular, cruciales para rendimiento y recuperación (Burke et al., 2011)."
-            },
-            "fats": {
-                "title": "¿Por Qué Grasas Saludables?",
-                "explanation": "Las grasas son esenciales para producción hormonal, absorción de vitaminas liposolubles y salud cerebral. El equilibrio es clave para optimizar testosterona y recuperación.",
-                "examples": [
-                    "0.8-1g/kg = mínimo para salud hormonal",
-                    "Fuentes: aguacate, nueces, aceite de oliva",
-                    "Evitar exceso que complique pérdida de grasa"
-                ],
-                "scientific": "Las grasas saludables son precursoras de hormonas anabólicas como testosterona (Volek et al., 2015)."
-            }
-        },
-        "achievementsScreen": {
-            "title": "Logros",
-            "currentLevel": "Nivel Actual",
-            "totalXp": "{{count}} XP Total",
-            "unlocked": "Desbloqueados",
-            "categories": {
-                "BEGINNER": "PRINCIPIANTE",
-                "INTERMEDIATE": "INTERMEDIO",
-                "ADVANCED": "AVANZADO",
-                "SPECIAL": "ESPECIAL",
-                "STRENGTH": "FUERZA",
-                "NUTRITION": "NUTRICI�N",
-                "LEARNING": "APRENDIZAJE"
-            }
-        },
-        "progressScreen": {
-            "title": "Progreso",
-            "weight": "Peso",
-            "measurements": "Medidas",
-            "photos": "Fotos",
-            "noData": "Sin datos registrados",
-            "addLog": "Registrar",
-            "history": "Historial",
-            "dailyCalorieGoal": "Meta de Calorías Diarias",
-            "exerciseGoal": "Meta de Ejercicio",
-            "currentStreak": "Racha Actual",
-            "keepItUp": "¡Sigue así!",
-            "calories": "{{count}} calorías",
-            "minutesPerDay": "{{count}} minutos/día"
         }
+    },
+    "learn": {
+        "title": "Aprender",
+        "hero": {
+            "title": "Academia Mambo",
+            "subtitle": "Domina la ciencia del fitness"
+        },
+        "miniLessons": {
+            "new": "NUEVO",
+            "title": "Mini Lecciones",
+            "subtitle": "Aprende conceptos clave en 5 min",
+            "heroTitle": "Aprende y Crece",
+            "heroSubtitle": "Mejora tu conocimiento fitness",
+            "availableLessons": "Lecciones Disponibles",
+            "lessons": {
+                "biomechanics_basics": {
+                    "title": "Biomecánica Básica",
+                    "description": "Entiende cómo se mueve tu cuerpo"
+                },
+                "nutrition_101": {
+                    "title": "Nutrición 101",
+                    "description": "Fundamentos de una dieta saludable"
+                },
+                "recovery_importance": {
+                    "title": "Importancia del Descanso",
+                    "description": "Por qué el sueño es clave"
+                },
+                "fat_loss_vs_muscle": {
+                    "title": "Grasa vs Músculo",
+                    "description": "Diferencias clave en el entrenamiento"
+                },
+                "supplementation_guide": {
+                    "title": "Guía de Suplementación",
+                    "description": "Qué tomar y cuándo"
+                }
+            }
+        },
+        "learningPaths": {
+            "title": "Rutas de Aprendizaje",
+            "subtitle": "Programas estructurados para ti",
+            "progress": "Progreso",
+            "pathExercises": "Ejercicios",
+            "data": {
+                "basics": {
+                    "title": "Fundamentos",
+                    "description": "Domina los movimientos básicos"
+                },
+                "upper-body": {
+                    "title": "Tren Superior",
+                    "description": "Fuerza y control de torso"
+                },
+                "lower-body": {
+                    "title": "Tren Inferior",
+                    "description": "Potencia y estabilidad de piernas"
+                },
+                "calisthenics": {
+                    "title": "Calistenia Pro",
+                    "description": "Control corporal avanzado"
+                }
+            }
+        }
+    },
+    "levels": {
+        "beginner": "Principiante",
+        "intermediate": "Intermedio",
+        "advanced": "Avanzado",
+        "all": "Todos"
+    },
+    "assistant": {
+        "chat": "Chat",
+        "agenda": "Agenda",
+        "errorVoice": "No se pudo procesar el audio",
+        "errorVoiceMessage": "Hubo un error al procesar tu mensaje de voz.",
+        "errorVoiceStart": "No se pudo iniciar la grabación",
+        "welcome": "¡Hola! Soy tu Mambo Coach. Veo que tu objetivo es {{goal}}. ¿En qué puedo ayudarte hoy?",
+        "weeklyAgenda": "Agenda Semanal",
+        "agendaSubtitle": "Tus entrenamientos programados",
+        "viewAll": "Ver Todo",
+        "exercises": "ejercicios",
+        "restDay": "Día de descanso",
+        "listening": "Escuchando...",
+        "placeholder": "Escribe un mensaje..."
+    },
+    "dashboard": {
+        "title": "Panel Principal",
+        "calories": "Calorías",
+        "workouts": "Entrenamientos",
+        "activeMinutes": "Minutos Activos",
+        "dailyGoal": "Meta Diaria",
+        "caloriesRemaining": "Calorías Restantes",
+        "hydration": "Hidratación",
+        "weeklyCheckin": "Check-in Semanal",
+        "weeklyCheckinDesc": "Registra tu progreso",
+        "quickActions": "Acciones Rápidas",
+        "train": "Entrenar",
+        "startRoutine": "Iniciar Rutina",
+        "agenda": "Agenda",
+        "learn": "Aprender",
+        "weight": "Peso",
+        "protein": "Proteína",
+        "carbs": "Carbohidratos",
+        "fats": "Grasas",
+        "whyDrinkWater": "¿Por qué beber agua?",
+        "waterExplanation": "El agua es esencial para el rendimiento físico y mental.",
+        "waterExamples": [
+            "Mejora la piel",
+            "Regula la temperatura",
+            "Ayuda a la digestión"
+        ],
+        "waterScientific": "La deshidratación del 2% reduce el rendimiento en un 20%."
     },
     "nutrition": {
         "title": "Nutrición",
         "today": "Hoy",
-        "backToToday": "Volver a hoy",
-        "caloriesRemaining": "CALORÍAS RESTANTES",
-        "caloriesConsumed": "consumidas",
-        "caloriesBurned": "quemadas",
-        "protein": "PROTEÍNA",
-        "carbs": "CARBS",
-        "fats": "GRASAS",
-        "mealTypes": {
-            "breakfast": "Desayuno",
-            "mid_morning": "Media Mañana",
-            "lunch": "Almuerzo",
-            "snack": "Algo",
-            "dinner": "Cena"
-        },
-        "foodItems": {
-            "one": "alimento",
-            "other": "alimentos"
-        },
-        "suggestedByAI": "Sugerido por IA",
+        "previousDay": "Día Anterior",
+        "nextDay": "Día Siguiente",
+        "caloriesRemaining": "Calorías Restantes",
+        "caloriesConsumed": "Consumidas",
+        "caloriesBurned": "Quemadas",
+        "protein": "Proteína",
+        "carbs": "Carbohidratos",
+        "fats": "Grasas",
+        "foodItems": "{{count}} alimentos",
+        "suggestedByAI": "SUGERIDO POR IA",
         "eat": "Comer",
         "noFoods": "No hay alimentos registrados",
         "addFood": "Añadir Alimento",
-        "total": "Total",
-        "foodDatabase": "Base de Alimentos",
-        "shoppingList": "Lista de Compras",
-        "myRecipes": "Mis Recetas",
+        "total": "TOTAL",
+        "foodDatabase": "BASE DE DATOS",
+        "shoppingList": "LISTA DE COMPRA",
+        "myRecipes": "MIS RECETAS",
+        "mealTypes": {
+            "breakfast": "Desayuno",
+            "mid_morning": "Media Mañana",
+            "lunch": "Comida",
+            "snack": "Merienda",
+            "dinner": "Cena"
+        },
         "alerts": {
-            "registered": "¡Registrado!",
-            "addedToDiary": "{{name}} añadido a tu diario.",
-            "copied": "¡Copiado!",
-            "copiedToClipboard": "Comida copiada al portapapeles. Navega a otro día y pégala.",
-            "pasted": "¡Pegado!",
-            "pastedSuccess": "Sección agregada exitosamente",
-            "pastedSingleSuccess": "{{name}} agregado exitosamente.",
-            "deleteTitle": "Eliminar Alimento",
-            "deleteMessage": "¿Estás seguro de que quieres eliminar este alimento?",
+            "registered": "Registrado",
+            "addedToDiary": "Se ha añadido {{name}} a tu diario.",
+            "copied": "Copiado",
+            "copiedToClipboard": "Sección copiada al portapapeles.",
             "pasteSectionTitle": "Pegar Sección",
-            "pasteSectionMessage": "¿Pegar {{count}} alimentos de {{type}} en este día?"
+            "pasteSectionMessage": "¿Pegar {{count}} alimentos del {{type}}?",
+            "pasted": "Pegado",
+            "pastedSuccess": "Alimentos añadidos correctamente.",
+            "pastedSingleSuccess": "{{name}} añadido correctamente.",
+            "deleteTitle": "Eliminar Alimento",
+            "deleteMessage": "¿Estás seguro de que quieres eliminar este alimento?"
+        },
+        "logMeal": {
+            "title": "Registrar Comida",
+            "cancel": "Cancelar",
+            "mealName": "Nombre de la comida",
+            "mealNamePlaceholder": "Ej: Avena con frutas",
+            "quantity": "Cantidad (g/ml)",
+            "manualNote": "Nota manual",
+            "caloriesLabel": "Calorías",
+            "caloriesPlaceholder": "kcal",
+            "searchInDatabase": "Buscar en Base de Datos",
+            "macronutrients": "Macronutrientes",
+            "proteinLabel": "Proteína (g)",
+            "proteinPlaceholder": "0",
+            "carbsLabel": "Carbohidratos (g)",
+            "carbsPlaceholder": "0",
+            "fatsLabel": "Grasas (g)",
+            "fatsPlaceholder": "0",
+            "photo": "Foto",
+            "camera": "Cámara",
+            "gallery": "Galería"
+        },
+        "foodDatabaseScreen": {
+            "title": "Base de Datos",
+            "local": "Local",
+            "localDesc": "Tus alimentos guardados",
+            "online": "En línea",
+            "onlineDesc": "Millones de alimentos online",
+            "searchPlaceholder": "Buscar alimento...",
+            "searchPlaceholderLocal": "Buscar en base de datos local...",
+            "searchPlaceholderOnline": "Buscar en internet...",
+            "searchingOnline": "Buscando en internet...",
+            "generic": "Genérico",
+            "portion": "Porción",
+            "writeToSearchOnline": "Escribe para buscar online",
+            "noFoodsFound": "No se encontraron alimentos",
+            "searchByBrand": "Prueba buscando por marca o nombre",
+            "tryAnotherTerm": "Prueba con otro término",
+            "low": "Económico",
+            "medium": "Moderado",
+            "high": "Premium"
         },
         "categories": {
             "all": "Todos",
             "favorites": "Favoritos",
             "protein": "Proteína",
-            "carbs": "Carbos",
+            "carbs": "Carbohidratos",
             "fats": "Grasas",
             "vegetables": "Vegetales",
             "dairy": "Lácteos",
             "fruits": "Frutas",
             "snacks": "Snacks",
             "beverages": "Bebidas"
-        },
-        "foodDatabaseScreen": {
-            "title": "Base de Alimentos",
-            "local": "Local",
-            "online": "Online",
-            "localDesc": "Base de datos local",
-            "onlineDesc": "Buscando en internet...",
-            "searchPlaceholderLocal": "Buscar alimento...",
-            "searchPlaceholderOnline": "Busca marcas (ej: Bimbo, Lala)...",
-            "searchingOnline": "Buscando en OpenFoodFacts...",
-            "noFoodsFound": "No se encontraron alimentos",
-            "writeToSearchOnline": "Escribe para buscar en internet",
-            "searchByBrand": "Busca por marca o nombre de producto",
-            "tryAnotherTerm": "Intenta con otro término",
-            "generic": "Genérico",
-            "economic": "$ Económico",
-            "medium": "$$ Medio",
-            "premium": "$$$ Premium",
-            "portion": "Porción"
-        },
-        "logMeal": {
-            "title": "Registrar Comida",
-            "save": "Guardar",
-            "cancel": "Cancelar",
-            "mealName": "Nombre de la Comida",
-            "mealNamePlaceholder": "Ej: Pollo con arroz",
-            "quantity": "Cantidad (g/ml)",
-            "autoCalcActive": "Auto-cálculo activo",
-            "howDidYouWeight": "¿Cómo pesaste el alimento?",
-            "raw": "Crudo",
-            "cooked": "Cocido",
-            "cookedNote": "* Se ajustarán los macros asumiendo que el alimento absorbió agua (arroz/pasta) o perdió agua (carne).",
-            "autoCalcNote": "Los macros se calcularán automáticamente basados en esta cantidad.",
-            "manualNote": "Ingresa la cantidad para tu referencia.",
-            "caloriesLabel": "Calorías *",
-            "caloriesPlaceholder": "500",
-            "searchInDatabase": "Buscar en Base de Alimentos",
-            "macronutrients": "Macronutrientes",
-            "proteinLabel": "Proteína (g)",
-            "proteinPlaceholder": "30",
-            "carbsLabel": "Carbohidratos (g)",
-            "carbsPlaceholder": "60",
-            "fatsLabel": "Grasas (g)",
-            "fatsPlaceholder": "15",
-            "photo": "Foto (Opcional)",
-            "deletePhoto": "Eliminar Foto",
-            "camera": "Cámara",
-            "gallery": "Galería",
-            "analyzing": "Analizando tu comida...",
-            "analyzingNote": "Esto puede tomar unos segundos",
-            "feedbackTitle": "¿Ayudar a mejorar la IA?",
-            "feedbackNote": "Detectamos que ajustaste los valores estimados por la IA. Tus correcciones nos ayudan a mejorar la precisión para todos los usuarios.",
-            "noThanks": "No, gracias",
-            "yesSend": "Sí, enviar",
-            "feedbackSuccess": "¡Gracias! Tu feedback ayudará a mejorar la IA.",
-            "analysisComplete": "�S& Análisis Completo",
-            "analysisCompleteNote": "{{name}}\n\nConfianza: {{confidence}}%\n\nPuedes revisar y ajustar los valores antes de guardar.",
-            "analysisError": "No se pudo analizar la imagen. Por favor, ingresa los valores manualmente.",
-            "nameRequired": "Por favor, ingresa el nombre de la comida",
-            "caloriesRequired": "Por favor, ingresa las calorías",
-            "permissionRequired": "Permiso Requerido",
-            "galleryPermissionNote": "Se necesita permiso para acceder a tus fotos",
-            "cameraPermissionNote": "Se necesita permiso para usar la cámara"
-        },
-        "addCustomFood": {
-            "title": "Nuevo Alimento",
-            "nameLabel": "Nombre *",
-            "namePlaceholder": "Ej: Batido de Proteína",
-            "categoryLabel": "Categoría *",
-            "portionLabel": "Porción *",
-            "portionPlaceholder": "Ej: 1 scoop (30g)",
-            "caloriesLabel": "Calorías *",
-            "caloriesPlaceholder": "120",
-            "macrosLabel": "Macronutrientes (gramos)",
-            "proteinLabel": "Proteína",
-            "carbsLabel": "Carbos",
-            "fatsLabel": "Grasas",
-            "tipTitle": "Tip",
-            "tipNote": "Los campos marcados con * son obligatorios. Los macronutrientes son opcionales pero recomendados.",
-            "savedSuccess": "Alimento personalizado creado",
-            "fillRequired": "Por favor completa Nombre, Porción y Calorías"
-        },
-        "scanBarcode": {
-            "title": "Escanear Código",
-            "permissionNote": "Necesitamos permiso para usar la cámara y escanear códigos de barras.",
-            "grantPermission": "Conceder Permiso",
-            "productNotFound": "Producto no encontrado",
-            "productNotFoundNote": "No encontramos este producto en la base de datos. ¿Quieres agregarlo manualmente?",
-            "addManually": "Agregar Manualmente",
-            "aimAtBarcode": "Apunta al código de barras",
-            "searchingProduct": "Buscando producto..."
-        },
-        "mealTemplates": {
-            "title": "Plantillas de Comidas",
-            "searchPlaceholder": "Buscar plantilla...",
-            "foodsCount": "{{count}} alimentos",
-            "useTemplate": "Usar Plantilla",
-            "deleteTemplateTitle": "Eliminar Plantilla",
-            "deleteTemplateMessage": "¿Estás seguro de eliminar \"{{name}}\"?",
-            "noTemplatesFound": "No se encontraron plantillas",
-            "noTemplatesNote": "No hay plantillas guardadas",
-            "createFromLogMeal": "Crea plantillas desde la pantalla de registro de comidas",
-            "templateUsed": "�S& Comida Registrada",
-            "templateUsedNote": "{{name}} ha sido añadido a tu registro diario"
         }
+    },
+    "reports": {
+        "weeklyTitle": "Reporte Semanal",
+        "monthlyTitle": "Reporte Mensual",
+        "caloriesPerDay": "Calorías/Día",
+        "workouts": "Entrenamientos",
+        "calorieTrend": "Tendencia de Calorías",
+        "macroDistribution": "Distribución de Macros",
+        "dailyAverage": "Promedio Diario",
+        "totalMinutes": "Minutos Totales",
+        "avgPerDay": "Promedio/Día",
+        "caloriesBurned": "Calorías Quemadas",
+        "dailyBreakdown": "Desglose Diario",
+        "noData": "Sin datos disponibles",
+        "totalCalories": "Calorías Totales",
+        "day": "día",
+        "monthlyAverage": "Promedio Mensual",
+        "weeklyBreakdown": "Desglose Semanal",
+        "week": "Semana",
+        "monthlyAchievements": "Logros del Mes",
+        "workoutsCompleted": "entrenamientos completados",
+        "activeNutritionTracking": "Seguimiento de nutrición activo",
+        "startTracking": "¡Comienza a registrar para ver tus logros!"
+    },
+    "history": {
+        "title": "Historial",
+        "subtitle": "Tu Actividad",
+        "tabs": {
+            "all": "Todo",
+            "workouts": "Entrenamientos",
+            "meals": "Comidas",
+            "sleep": "Sueño",
+            "water": "Agua"
+        },
+        "empty": "Sin historial aún",
+        "emptyDesc": "Comienza a registrar tus entrenamientos y comidas para ver tu progreso aquí.",
+        "items": {
+            "duration": "Duración",
+            "volume": "Volumen",
+            "exercises": "Ejercicios",
+            "quality": "Calidad",
+            "amount": "Cantidad",
+            "cal": "Cal",
+            "prot": "Prot",
+            "carbs": "Carb",
+            "fat": "Grasa"
+        }
+    },
+    "analytics": {
+        "advancedTitle": "Analytics Avanzados",
+        "aiPredictions": "Predicciones de IA",
+        "moreDataNeeded": "Necesitamos más datos para generar predicciones precisas.",
+        "weeklyVolume": "Volumen Semanal (kg)",
+        "prProgression": "Progresión de PR",
+        "exercises": "ejercicios",
+        "moreExerciseData": "Registra más datos de {{exercise}} para ver tu progresión.",
+        "oneRMPrediction": "Predicción 1RM",
+        "calculating": "Calculando...",
+        "muscleBalance": "Equilibrio Muscular",
+        "noTrainingData": "No hay datos de entrenamiento suficientes.",
+        "performanceInsights": "Insights de Rendimiento",
+        "recommendation": "RECOMENDACIÓN",
+        "allGood": "¡Todo se ve genial!",
+        "excellentBalance": "Mantienes un excelente equilibrio en tu entrenamiento.",
+        "weightEvolution": "Evolución de Peso",
+        "moreWeightData": "Registra tu peso regularmente para ver la tendencia."
     },
     "workout": {
         "schedule": {
             "title": "Mi Agenda",
-            "weeklyProgress": "Progreso Semanal",
-            "emptyTitle": "No tienes entrenamientos agendados.",
-            "emptySubtitle": "Adopta un plan predefinido o genera uno nuevo.",
-            "viewPlans": "Ver Planes",
-            "week": "Semana",
-            "starts": "Inicia",
-            "changeDate": "Cambiar Fecha",
-            "workout": "ENTRENAMIENTO",
-            "selectNewDate": "Selecciona nueva fecha:",
             "deleteRecurringTitle": "Eliminar Entreno Recurrente",
             "deleteRecurringMessage": "Este entrenamiento es parte de una rutina programada. ¿Qué deseas eliminar?",
             "onlyThis": "Solo este",
@@ -512,26 +713,45 @@
             "updated": "Programación Actualizada",
             "futureRemoved": "Se han eliminado los entrenamientos futuros de esta rutina.",
             "deleteTitle": "Eliminar Entreno",
-            "deleteMessage": "¿Seguro que quieres quitar este entreno de la agenda?"
+            "deleteMessage": "¿Seguro que quieres quitar este entreno de la agenda?",
+            "weeklyProgress": "Progreso Semanal",
+            "emptyTitle": "No tienes entrenamientos agendados.",
+            "emptySubtitle": "Adopta un plan predefinido o genera uno nuevo para ver tu agenda aquí.",
+            "viewPlans": "Ver Planes",
+            "week": "Semana",
+            "starts": "Inicia",
+            "changeDate": "Cambiar Fecha",
+            "workout": "ENTRENAMIENTO",
+            "selectNewDate": "Selecciona nueva fecha:"
         },
         "exercises": "ejercicios",
-        "sets": "series"
+        "sets": "series",
+        "progress": {
+            "title": "Progreso de Entrenamientos",
+            "totalWorkouts": "Total Entrenos",
+            "totalVolume": "Volumen Total",
+            "average": "Promedio",
+            "weeklyVolume": "Volumen Semanal",
+            "last7Weeks": "Últimas 7 semanas",
+            "noData": "Completa entrenamientos para ver tu progreso",
+            "topExercises": "Top Ejercicios por Volumen"
+        }
     },
     "workoutPlans": {
-        "title": "Logros",
+        "title": "Planes",
         "objective": "OBJETIVO",
         "level": "NIVEL",
         "availablePlans": "{{count}} PLANES DISPONIBLES",
-        "noPlans": "No hay planes con estos filtros",
+        "noPlans": "No se encontraron planes con estos filtros",
         "daysPerWeek": "{{count}} días/sem",
-        "structure": "ESTRUCTURA DEL PLAN",
-        "adopt": "Elegir Días y Adoptar",
-        "adopting": "Adoptando...",
-        "confirmAdopt": "Confirmar y Adoptar",
-        "creating": "Creando plan...",
-        "daysQuestion": "¿Qué días entrenas?",
-        "daysSubtitle": "Selecciona los días de la semana para tus entrenamientos",
+        "structure": "ESTRUCTURA SEMANAL",
+        "adopting": "ADOPTANDO...",
+        "adopt": "ADOPTAR PLAN",
+        "daysQuestion": "¿Qué días entrenarás?",
+        "daysSubtitle": "Selecciona los días de la semana para este plan",
         "daysSelected": "{{count}} días seleccionados",
+        "creating": "CREANDO...",
+        "confirmAdopt": "CONFIRMAR Y ADOPTAR",
         "goals": {
             "all": "Todos",
             "hypertrophy": "Hipertrofia",
@@ -547,568 +767,174 @@
         },
         "alerts": {
             "error": "Error",
-            "selectDay": "Selecciona al menos un día",
-            "templateNotFound": "Template no encontrado",
-            "noExercises": "No se pudieron crear las rutinas. Asegúrate de que los ejercicios existen en la base de datos.",
+            "selectDay": "Por favor selecciona al menos un día.",
+            "templateNotFound": "No se encontró la plantilla.",
+            "noExercises": "El plan no tiene ejercicios válidos.",
             "adoptSuccessTitle": "¡Plan Adoptado!",
-            "adoptSuccessMessage": "Se han creado {{count}} rutinas.\nAgendado en: {{days}}\nTotal: {{total}} entrenamientos",
+            "adoptSuccessMessage": "Se han creado {{count}} rutinas y programado {{total}} sesiones para los días: {{days}}.",
             "viewSchedule": "Ver Agenda"
         }
     },
-    "dashboard": {
-        "title": "Dashboard",
-        "calories": "CALORÍAS",
-        "workouts": "WORKOUTS",
-        "activeMinutes": "{{count}} min activos",
-        "dailyGoal": "Objetivo Diario",
-        "caloriesRemaining": "{{count}} kcal restantes",
-        "protein": "PROTEÍNA",
-        "carbs": "CARBS",
-        "fats": "GRASAS",
-        "hydration": "Hidratación",
-        "whyDrinkWater": "¿Por Qué Beber Agua?",
-        "waterExplanation": "El agua es vital para el transporte de nutrientes, la lubricación de articulaciones y la regulación de la temperatura. Una hidratación óptima mejora el rendimiento y la recuperación.",
-        "waterExamples": [
-            "Mejora la fuerza muscular",
-            "Reduce la fatiga",
-            "Ayuda a la digestión"
-        ],
-        "waterScientific": "Incluso una deshidratación leve del 2% puede reducir significativamente el rendimiento físico y cognitivo (Armstrong et al., 2012).",
-        "weeklyCheckin": "Check-in Semanal",
-        "weeklyCheckinDesc": "¿Cómo te fue esta semana? Analiza tu progreso.",
-        "quickActions": "Acciones Rápidas",
-        "train": "Entrenar",
-        "startRoutine": "Iniciar rutina",
-        "agenda": "Agenda",
-        "learn": "Aprender",
-        "weight": "Peso",
-        "logout": "Cerrar Sesión",
-        "logoutConfirm": "¿Estás seguro que deseas salir?",
-        "exit": "Salir"
-    },
-    "sleep": {
-        "title": "Sueño",
-        "lastNight": "Anoche",
-        "lastSession": "Última sesión registrada",
-        "quality": "Calidad:",
-        "logSleep": "Registrar Sueño",
-        "tapToStart": "Toca para comenzar",
-        "average": "PROMEDIO",
-        "reports": "Reportes",
-        "goals": {
-            "title": "Metas de Sueño",
-            "save": "Guardar",
-            "targetHours": "Horas Objetivo",
-            "recommended": "Recomendado: 7-9 horas para adultos",
-            "targetBedtime": "Hora de Dormir Objetivo",
-            "targetWakeTime": "Hora de Despertar Objetivo",
-            "tip": "Consejo",
-            "tipDesc": "Mantener un horario consistente de sueño ayuda a mejorar la calidad del descanso y tu salud general.",
-            "errorTitle": "Error",
-            "errorHours": "Ingresa un número válido de horas (1-24)",
-            "savedTitle": "¡Guardado!",
-            "savedDesc": "Tus metas de sueño han sido actualizadas"
+    "settings": {
+        "title": "Configuración",
+        "sections": {
+            "notifications": "Notificaciones",
+            "language": "Idioma y Región",
+            "theme": "Apariencia",
+            "units": "Unidades",
+            "account": "Cuenta",
+            "privacy": "Privacidad y Seguridad",
+            "about": "Acerca de"
         },
-        "thisWeek": "Esta Semana",
-        "noLogs": "Sin registros esta semana",
-        "register": "Registrar",
-        "cancel": "Cancelar",
-        "save": "Guardar",
-        "date": "Fecha",
-        "times": "Horarios",
-        "bedTime": "Hora de Dormir",
-        "wakeTime": "Hora de Despertar",
-        "duration": "Duración",
-        "qualityTitle": "Calidad del Sueño",
-        "qualities": {
-            "1": "Muy Malo",
-            "2": "Malo",
-            "3": "Regular",
-            "4": "Bueno",
-            "5": "Excelente"
+        "notifications": {
+            "water": "Recordatorio de Agua",
+            "workout": "Recordatorio de Entrenamiento",
+            "meal": "Recordatorio de Comidas",
+            "general": "Notificaciones Generales"
         },
-        "features": "Características",
-        "tags": {
-            "restless": "Inquieto",
-            "dreams": "Sueños",
-            "interrupted": "Interrumpido",
-            "refreshed": "Descansado"
+        "theme": {
+            "light": "Claro",
+            "dark": "Oscuro",
+            "system": "Sistema"
         },
-        "notes": "Notas (Opcional)",
-        "notesPlaceholder": "¿Cómo fue tu sueño?",
-        "errorDuration": "La duración del sueño no es válida"
-    },
-    "learn": {
-        "title": "Aprender",
-        "hero": {
-            "title": "Domina la Técnica",
-            "subtitle": "Aprende ejercicios correctamente con guías paso a paso y videos instructivos"
+        "units": {
+            "metric": "Métrico (kg/cm)",
+            "imperial": "Imperial (lb/in)"
         },
-        "miniLessons": {
-            "title": "Mini-Lecciones",
-            "subtitle": "Aprende los fundamentos con lecciones cortas y quizzes interactivos",
-            "new": "Nuevo",
-            "available": "Lecciones Disponibles",
-            "empty": "No hay lecciones disponibles aún",
-            "questions": "preguntas",
-            "start": "Comenzar Lección",
-            "next": "Siguiente",
-            "finish": "Finalizar",
-            "correct": "¡Correcto!",
-            "incorrect": "Incorrecto",
-            "quizTitle": "Quiz de la Lección",
-            "lessons": {
-                "biomechanics_basics": {
-                    "title": "¿Cómo Crece el Músculo?",
-                    "description": "Entiende la ciencia detrás del crecimiento muscular",
-                    "introduction": "El crecimiento muscular, o hipertrofia, ocurre cuando sometes tus músculos a estrés que supera su capacidad actual. Aquí te explicamos cómo funciona este proceso fascinante.",
-                    "sections": [
-                        {
-                            "title": "El Proceso de Hipertrofia",
-                            "content": "Cuando levantas pesas, creas micro-desgarros en las fibras musculares. Tu cuerpo responde reparando estos desgarros, haciendo que los músculos sean más grandes y fuertes. Este proceso requiere: 1) Entrenamiento progresivo, 2) Nutrición adecuada, 3) Descanso suficiente.",
-                            "infographic": "muscle_fiber_growth"
-                        },
-                        {
-                            "title": "Factores que Influyen",
-                            "content": "La genética juega un rol importante, pero el entrenamiento consistente puede maximizar tu potencial. La hipertrofia ocurre principalmente en las fibras de tipo II, que son las responsables de la fuerza y el tamaño muscular.",
-                            "infographic": "fiber_types"
-                        },
-                        {
-                            "title": "Mitos Comunes",
-                            "content": "No necesitas entrenar todos los días. Los músculos necesitan 48-72 horas para recuperarse completamente. El crecimiento ocurre durante el descanso, no durante el entrenamiento.",
-                            "infographic": "muscle_building"
-                        }
-                    ],
-                    "keyTakeaways": [
-                        "La hipertrofia requiere estrés progresivo + recuperación",
-                        "Los músculos crecen durante el descanso, no el entrenamiento",
-                        "La genética influye, pero el entrenamiento consistente maximiza el potencial"
-                    ],
-                    "quiz": [
-                        {
-                            "question": "¿Cuándo ocurre realmente el crecimiento muscular?",
-                            "options": [
-                                "Durante el entrenamiento",
-                                "Durante el descanso",
-                                "Mientras comes",
-                                "Mientras duermes"
-                            ],
-                            "correctAnswer": 1,
-                            "explanation": "El crecimiento muscular ocurre durante las fases de recuperación y descanso, cuando el cuerpo repara los micro-desgarros causados por el entrenamiento."
-                        },
-                        {
-                            "question": "¿Qué tipo de fibras musculares son responsables del crecimiento?",
-                            "options": [
-                                "Tipo I (aeróbicas)",
-                                "Tipo II (anaeróbicas)",
-                                "Tipo III (mixtas)",
-                                "Todas por igual"
-                            ],
-                            "correctAnswer": 1,
-                            "explanation": "Las fibras de tipo II son las que responden mejor al entrenamiento de fuerza y son las principales responsables del crecimiento muscular."
-                        }
-                    ]
-                },
-                "nutrition_101": {
-                    "title": "Nutrición 101: Macros y Micros",
-                    "description": "Domina los fundamentos de la nutrición para el fitness",
-                    "introduction": "La nutrición es 80% del éxito en fitness. Entender macros (proteínas, carbohidratos, grasas) y micros (vitaminas, minerales) es crucial para optimizar tus resultados.",
-                    "sections": [
-                        {
-                            "title": "Los 3 Macronutrientes",
-                            "content": "Proteínas: Bloques de construcción musculares (1.6-2.2g/kg). Carbohidratos: Fuente de energía principal (2-3g/kg para activos). Grasas: Hormonas y absorción de vitaminas (0.8-1g/kg).",
-                            "infographic": "macro_balance"
-                        },
-                        {
-                            "title": "Micronutrientes Esenciales",
-                            "content": "Vitaminas y minerales que apoyan la recuperación, inmunidad y rendimiento. Especialmente importantes: Vitamina D, Zinc, Magnesio, Hierro, y complejo B.",
-                            "infographic": "vitamin_wheel"
-                        },
-                        {
-                            "title": "Timing Nutricional",
-                            "content": "Pre-entreno: Carbohidratos para energía. Post-entreno: Proteína + carbohidratos para recuperación. Distribuir comidas cada 3-4 horas mantiene niveles estables.",
-                            "infographic": "meal_timing"
-                        }
-                    ],
-                    "keyTakeaways": [
-                        "Proteína es esencial para el crecimiento muscular",
-                        "Los carbohidratos son tu principal fuente de energía",
-                        "Los micronutrientes son cruciales para la recuperación"
-                    ],
-                    "quiz": [
-                        {
-                            "question": "¿Cuál es la recomendación general de proteína por kg de peso corporal?",
-                            "options": [
-                                "0.8-1g/kg",
-                                "1.6-2.2g/kg",
-                                "3-4g/kg",
-                                "5g/kg"
-                            ],
-                            "correctAnswer": 1,
-                            "explanation": "Para personas activas y que buscan ganar músculo, se recomienda 1.6-2.2g de proteína por kg de peso corporal."
-                        },
-                        {
-                            "question": "¿Qué macronutriente es más importante inmediatamente después del entrenamiento?",
-                            "options": [
-                                "Grasas",
-                                "Carbohidratos",
-                                "Proteína",
-                                "Fibra"
-                            ],
-                            "correctAnswer": 2,
-                            "explanation": "La proteína es crucial post-entreno para iniciar el proceso de recuperación y síntesis proteica muscular."
-                        }
-                    ]
-                },
-                "recovery_importance": {
-                    "title": "La Ciencia del Descanso",
-                    "description": "Por qué el descanso es tan importante como el entrenamiento",
-                    "introduction": "El descanso no es tiempo perdido - es cuando ocurre la transformación. La recuperación adecuada es esencial para el progreso sostenible.",
-                    "sections": [
-                        {
-                            "title": "Sueño y Recuperación",
-                            "content": "Durante el sueño profundo, se libera la hormona del crecimiento, crucial para la reparación muscular. 7-9 horas de sueño de calidad son mínimas para atletas.",
-                            "infographic": "sleep_cycle"
-                        },
-                        {
-                            "title": "Descanso Activo",
-                            "content": "Días de descanso total o actividades ligeras como caminar permiten la recuperación sin perder condición cardiovascular. El descanso muscular específico es clave.",
-                            "infographic": "active_recovery"
-                        },
-                        {
-                            "title": "Señales de Sobreentrenamiento",
-                            "content": "Fatiga crónica, dolores persistentes, pérdida de fuerza, irritabilidad. Si experimentas estos síntomas, necesitas más descanso.",
-                            "infographic": "overtraining_signs"
-                        }
-                    ],
-                    "keyTakeaways": [
-                        "El sueño es cuando ocurre el crecimiento muscular real",
-                        "Los días de descanso son parte del programa de entrenamiento",
-                        "Escuchar tu cuerpo previene lesiones y sobreentrenamiento"
-                    ],
-                    "quiz": [
-                        {
-                            "question": "¿Cuántas horas de sueño se recomiendan mínimamente para personas activas?",
-                            "options": [
-                                "4-5 horas",
-                                "6-7 horas",
-                                "7-9 horas",
-                                "10+ horas"
-                            ],
-                            "correctAnswer": 2,
-                            "explanation": "Las personas activas necesitan 7-9 horas de sueño de calidad para una recuperación óptima y liberación de hormona del crecimiento."
-                        }
-                    ]
-                },
-                "fat_loss_vs_muscle": {
-                    "title": "Pérdida de Grasa vs Ganancia Muscular",
-                    "description": "Entiende las diferencias y cómo balancear ambos objetivos",
-                    "introduction": "Perder grasa mientras ganas músculo es posible pero requiere estrategia. Entender la diferencia entre estos procesos te ayudará a optimizar tus resultados.",
-                    "sections": [
-                        {
-                            "title": "Pérdida de Grasa",
-                            "content": "Requiere déficit calórico (quemar más calorías de las que consumes). El ejercicio cardiovascular acelera esto, pero el déficit es lo más importante.",
-                            "infographic": "calorie_deficit"
-                        },
-                        {
-                            "title": "Ganancia Muscular",
-                            "content": "Requiere superávit calórico y entrenamiento de fuerza progresivo. La proteína es crucial para proporcionar los aminoácidos necesarios.",
-                            "infographic": "muscle_building"
-                        },
-                        {
-                            "title": "Recompocisión Corporal",
-                            "content": "Principantes pueden perder grasa y ganar músculo simultáneamente. Avanzados necesitan fases separadas. El entrenamiento de fuerza preserva masa muscular durante déficit.",
-                            "infographic": "body_recomp"
-                        }
-                    ],
-                    "keyTakeaways": [
-                        "Déficit calórico = pérdida de grasa",
-                        "Superávit + entrenamiento = ganancia muscular",
-                        "Principantes pueden recompocisionar, avanzados necesitan fases separadas"
-                    ],
-                    "quiz": [
-                        {
-                            "question": "¿Qué es más importante para perder grasa?",
-                            "options": [
-                                "Hacer cardio",
-                                "Déficit calórico",
-                                "Ayuno intermitente",
-                                "Suplementos"
-                            ],
-                            "correctAnswer": 1,
-                            "explanation": "Aunque el cardio ayuda, el déficit calórico (consumir menos calorías de las que quemas) es el factor más importante para perder grasa."
-                        }
-                    ]
-                },
-                "supplementation_guide": {
-                    "title": "Suplementación: Qué Funciona, Qué No",
-                    "description": "Guía práctica de suplementos basados en evidencia",
-                    "introduction": "Los suplementos pueden ayudar, pero no reemplazan una buena nutrición y entrenamiento. Aquí te decimos cuáles valen la pena y cuáles son marketing.",
-                    "sections": [
-                        {
-                            "title": "Suplementos Probados",
-                            "content": "Proteína en polvo: Conveniente para alcanzar metas proteicas. Creatina: Aumenta fuerza y masa muscular. Vitamina D: Esencial si no tienes exposición solar. Omega-3: Antiinflamatorio.",
-                            "infographic": "proven_supplements"
-                        },
-                        {
-                            "title": "Marketing vs Ciencia",
-                            "content": "Quemadores de grasa: Mayormente cafeína. Pre-entrenos: Estimulantes temporales. BCAAs: Innecesarios si comes suficiente proteína. Muchos suplementos son caros placebos.",
-                            "infographic": "marketing_myths"
-                        },
-                        {
-                            "title": "Cuándo Usar Suplementos",
-                            "content": "Cuando no puedes obtener nutrientes de alimentos. Para optimizar rendimiento cuando ya tienes bases sólidas. No como atajos para malos hábitos.",
-                            "infographic": "supplement_timing"
-                        }
-                    ],
-                    "keyTakeaways": [
-                        "La comida es la base, suplementos son extras",
-                        "Creatina y proteína son los más probados",
-                        "Muchos suplementos son marketing caro"
-                    ],
-                    "quiz": [
-                        {
-                            "question": "¿Cuál es el suplemento más estudiado y efectivo?",
-                            "options": [
-                                "Proteína",
-                                "Creatina",
-                                "BCAAs",
-                                "Quemadores de grasa"
-                            ],
-                            "correctAnswer": 1,
-                            "explanation": "La creatina es uno de los suplementos más estudiados y ha demostrado consistentemente aumentar fuerza y masa muscular."
-                        }
-                    ]
-                }
-            },
-            "infographics": {
-                "visualization": "Visualización",
-                "moreInfo": "Más info en la lección",
-                "muscle_fiber_growth": {
-                    "before": "ANTES",
-                    "after": "DESPU�0S",
-                    "description": "El entrenamiento crea micro-desgarros que se reparan haciendo la fibra más gruesa."
-                },
-                "macro_balance": {
-                    "prot": "PROT",
-                    "carb": "CARB",
-                    "fat": "GRAS",
-                    "description": "Distribución típica para mantenimiento y ganancia muscular."
-                },
-                "calorie_deficit": {
-                    "burned": "QUEMADO",
-                    "consumed": "CONSUMIDO",
-                    "description": "Déficit = Quemar más de lo que consumes."
-                },
-                "sleep_cycle": {
-                    "deep": "SUE�O PROFUNDO",
-                    "rem": "REM",
-                    "description": "Los ciclos de 90 min alternan entre sueño ligero, profundo y REM."
-                },
-                "fiber_types": {
-                    "type1": "TIPO I",
-                    "type1Desc": "Resistencia (Maratón)",
-                    "type2": "TIPO II",
-                    "type2Desc": "Fuerza/Tamaño (Pesas)"
-                },
-                "overtraining_signs": {
-                    "fatigue": "Fatiga",
-                    "insomnia": "Insomnio",
-                    "pain": "Dolor",
-                    "irritability": "Irritabilidad"
-                },
-                "proven_supplements": {
-                    "title": "TOP 3 EVIDENCIA:",
-                    "creatine": "1. Creatina (Fuerza)",
-                    "protein": "2. Proteína (Conveniencia)",
-                    "caffeine": "3. Cafeína (Rendimiento)"
-                },
-                "vitamin_wheel": {
-                    "title": "VITS",
-                    "description": "Los micronutrientes apoyan funciones vitales y recuperación."
-                },
-                "meal_timing": {
-                    "pre": "PRE",
-                    "workout": "ENTRENO",
-                    "post": "POST",
-                    "description": "Carbos antes para energía, proteína después para reparar."
-                },
-                "active_recovery": {
-                    "walk": "Caminar",
-                    "bike": "Bici suave",
-                    "swim": "Nadar",
-                    "description": "Moverse suavemente aumenta el flujo sanguíneo sin fatiga extra."
-                },
-                "body_recomp": {
-                    "start": "INICIO",
-                    "recomp": "RECOMP",
-                    "description": "Menos grasa (rojo) y más músculo (naranja) al mismo tiempo."
-                },
-                "marketing_myths": {
-                    "title": "MITOS COMUNES:",
-                    "myth1": "Quemadores de grasa mágicos",
-                    "myth2": "BCAAs son obligatorios",
-                    "myth3": "Sudas grasa"
-                },
-                "muscle_building": {
-                    "progress": "PROGRESO",
-                    "description": "La sobrecarga progresiva es la clave del crecimiento."
-                },
-                "supplement_timing": {
-                    "title": "TIMING �PTIMO:",
-                    "creatine": "Creatina: Cualquier momento (consistencia)",
-                    "caffeine": "Cafeína: 30-60 min antes de entrenar",
-                    "protein": "Proteína: Cuando necesites completar macros"
-                },
-                "recovery_cycle": {
-                    "title": "CICLO",
-                    "stress": "Estrés",
-                    "rest": "Descanso",
-                    "adaptation": "Adaptación"
-                }
-            }
+        "account": {
+            "editProfile": "Editar Perfil",
+            "changePassword": "Cambiar Contraseña",
+            "deleteAccount": "Eliminar Cuenta",
+            "logout": "Cerrar Sesión"
         },
-        "learningPaths": {
-            "title": "Rutas de Aprendizaje",
-            "subtitle": "Elige tu camino y mejora tu técnica ejercicio por ejercicio",
-            "progress": "Progreso",
-            "exercises": "ejercicios",
-            "starts": "Inicia",
-            "empty": "No hay ejercicios en esta ruta aún",
-            "pathExercises": "Ejercicios de la Ruta",
-            "completeToMaster": "Completa cada ejercicio para dominar la técnica",
-            "data": {
-                "basics": {
-                    "title": "Aprende los Básicos",
-                    "description": "Domina los ejercicios fundamentales del fitness"
-                },
-                "upper-body": {
-                    "title": "Fuerza Superior",
-                    "description": "Desarrolla pecho, espalda y hombros"
-                },
-                "lower-body": {
-                    "title": "Potencia Inferior",
-                    "description": "Fortalece piernas y glúteos"
-                },
-                "calisthenics": {
-                    "title": "Dominio Calistenia",
-                    "description": "Ejercicios con peso corporal avanzado"
-                }
-            }
+        "privacy_labels": {
+            "security": "Seguridad",
+            "data": "Mis Datos"
+        },
+        "about": {
+            "terms": "Términos y Condiciones",
+            "privacy": "Política de Privacidad",
+            "privacy_content": "En Mambo Fitness, tu privacidad es nuestra prioridad. Esta política describe cómo manejamos tus datos:\n\n1. Datos Recopilados: Recopilamos información de perfil (edad, peso, altura), datos de actividad física y fotos de progreso (si decides usarlas para el Body Scan).\n\n2. Uso de Datos: Utilizamos tus datos exclusivamente para personalizar tus planes de entrenamiento y nutrición, y para mejorar la precisión de nuestra IA.\n\n3. Almacenamiento Seguro: Tus datos se almacenan de forma segura en Supabase con cifrado de nivel industrial. Las fotos se guardan en contenedores privados accesibles solo por ti.\n\n4. Control del Usuario: Puedes ver, modificar o eliminar tus datos en cualquier momento desde la configuración. Al eliminar tu cuenta, todos tus datos personales se borran permanentemente.\n\n5. Terceros: No vendemos ni compartimos tus datos personales con terceros para fines publicitarios.",
+            "contact": "Contáctanos",
+            "version": "Versión"
+        },
+        "regions": {
+            "spain": "España",
+            "mexico": "México",
+            "argentina": "Argentina",
+            "colombia": "Colombia",
+            "chile": "Chile",
+            "usa": "Estados Unidos",
+            "other": "Otro"
+        },
+        "delete_account": {
+            "title": "Eliminar Cuenta",
+            "warning": "Esta acción es irreversible. Perderás todos tus datos y progreso. ¿Estás seguro?",
+            "confirm": "Eliminar Definitivamente"
         }
     },
-    "weight": {
-        "title": "Peso",
-        "logWeight": "Registrar Peso",
-        "history": "Historial",
-        "stats": "Estadísticas",
-        "lastLog": "�altimo registro",
-        "goal": "Meta",
-        "remaining": "Restante",
-        "weightLabel": "Peso (kg)",
-        "dateLabel": "Fecha",
-        "saveSuccess": "Peso registrado correctamente",
-        "deleteTitle": "Eliminar Registro",
-        "deleteMessage": "¿Estás seguro de que quieres eliminar este registro de peso?"
-    },
-    "exercises": {
-        "title": "Ejercicios",
-        "search": "Buscar ejercicio...",
-        "stats": "Estadísticas",
-        "history": "Historial",
-        "muscles": "Músculos",
-        "equipment": "Equipo",
-        "difficulty": "Dificultad",
-        "instructions": "Instrucciones",
-        "sets": "series",
-        "reps": "reps",
-        "weight": "kg",
-        "1rm": "1RM Est.",
-        "volume": "Volumen",
-        "noHistory": "No hay historial para este ejercicio",
-        "noStats": "No hay estadísticas suficientes"
-    },
-    "assistant": {
-        "chat": "Chat",
-        "agenda": "Agenda",
-        "weeklyAgenda": "Tu Agenda Semanal",
-        "agendaSubtitle": "Organiza tus entrenamientos y mantén la constancia.",
-        "viewAll": "Ver Todo",
-        "restDay": "Día de descanso",
-        "exercises": "ejercicios",
-        "welcome": "¡Hola! �x9 Veo que estás en {{goal}}. ¿En qué te ayudo hoy?",
-        "listening": "Escuchando...",
-        "placeholder": "Escribe un mensaje...",
-        "errorVoice": "�R Error al procesar el audio.",
-        "errorVoiceMessage": "�R Error al procesar el mensaje de voz.",
-        "errorVoiceStart": "�R Error al iniciar la grabación."
-    },
-    "history": {
-        "title": "Historial",
-        "subtitle": "Tu actividad",
-        "empty": "Sin actividad aún",
-        "emptyDesc": "Tus entrenamientos, comidas, sueño y agua aparecerán aquí",
+    "social": {
+        "title": "Social",
         "tabs": {
-            "all": "Todos",
-            "workouts": "Entrenamientos",
-            "meals": "Comidas",
-            "sleep": "Sueño",
-            "water": "Agua"
+            "feed": "Feed",
+            "groups": "Grupos",
+            "coaching": "Asesoría"
         },
-        "items": {
-            "duration": "Duración",
-            "volume": "Volumen",
-            "exercises": "Ejercicios",
-            "quality": "Calidad",
-            "amount": "Cantidad",
-            "cal": "Cal",
-            "prot": "Prot",
-            "carbs": "Carbs",
-            "fat": "Grasa"
+        "groups": {
+            "title": "Mis Grupos",
+            "create": "Crear Grupo",
+            "empty": "No perteneces a ningún grupo aún.",
+            "types": {
+                "couple": "Pareja",
+                "friends": "Amigos",
+                "community": "Comunidad"
+            }
+        },
+        "coaching": {
+            "title": "Asesoría",
+            "clients": "Mis Clientes",
+            "noCoach": "No tienes un entrenador asignado.",
+            "request": "Solicitar Entrenador"
+        },
+        "feed": {
+            "createPost": "Crear Publicación",
+            "addPhoto": "Añadir Foto",
+            "captionPlaceholder": "¿Qué tal tu entrenamiento hoy?",
+            "workoutProof": "Prueba de Entrenamiento",
+            "workoutProofDesc": "Verificado por datos de actividad",
+            "post": "Publicar"
         }
     },
-    "analytics": {
-        "advancedTitle": "Analytics Avanzados",
-        "mamboAi": "Predicciones Mambo AI",
-        "weeklyVolume": "Volumen Semanal (kg)",
-        "prProgression": "Progresión de PR (kg)",
-        "muscleBalance": "Balance Muscular",
-        "performanceInsights": "Insights de Rendimiento",
-        "weightEvolution": "Evolución de Peso (kg)",
-        "noData": "No hay datos de entrenamiento aún",
-        "registerMore": "Registra más sesiones de {{exercise}} para ver el progreso",
-        "prPrediction": "PREDICCIÓN DE 1RM",
-        "calculating": "Calculando...",
-        "everythingOk": "¡Todo en orden!",
-        "excellentBalance": "Tu balance y adherencia son excelentes.",
-        "recommendation": "Recomendación:",
-        "weightTrendDesc": "Entrena más para generar predicciones...",
-        "registerWeight": "Registra tu peso más seguido para ver la gráfica"
-    },
-    "reports": {
-        "monthly": {
-            "title": "Reporte Mensual",
-            "totalCalories": "Total Calorías",
-            "workouts": "Entrenamientos",
-            "monthlyAvg": "Promedio Mensual",
-            "weeklyBreakdown": "Desglose Semanal",
-            "monthAchievements": "Logros del Mes",
-            "workoutsCompleted": "12+ Entrenamientos completados",
-            "nutritionActive": "Seguimiento nutricional activo",
-            "startLogging": "Comienza a registrar tus comidas y entrenamientos"
+    "bodyScan": {
+        "title": "Body Scan AI",
+        "subtitle": "Análisis de físico con IA",
+        "uploadPhoto": "Sube una foto de tu físico",
+        "uploadDesc": "Para mejores resultados, usa buena iluminación y posa de frente.",
+        "camera": "Cámara",
+        "gallery": "Galería",
+        "analyze": "Analizar Físico",
+        "analyzing": "Analizando...",
+        "results": "Resultados del Análisis",
+        "metrics": {
+            "vTaper": "V-Taper (Hombros/Cintura)",
+            "symmetry": "Simetría Muscular",
+            "muscleMass": "Masa Muscular",
+            "definition": "Definición (Grasa Est.)",
+            "potential": "Potencial Genético"
         },
-        "weekly": {
-            "title": "Reporte Semanal",
-            "caloriesPerDay": "Calorías/Día",
-            "workouts": "Entrenamientos",
-            "calorieTrend": "Tendencia de Calorías",
-            "macroDistribution": "Distribución de Macros",
-            "dailyAvg": "Promedio Diario",
-            "totalMinutes": "Total Minutos",
-            "avgPerDay": "Promedio/Día",
-            "caloriesBurned": "Calorías Quemadas",
-            "dailyBreakdown": "Desglose Diario",
-            "noData": "Sin datos para esta semana"
+        "naturalProbability": "Probabilidad Natural",
+        "naturalDesc": "Basado en volumen y definición",
+        "strongPoints": "Puntos Fuertes",
+        "weakPoints": "Puntos a Mejorar",
+        "coachAdvice": "Consejo del Coach"
+    },
+    "formCheck": {
+        "title": "Análisis de Técnica",
+        "record": "Grabar Video",
+        "analyzing": "Analizando Técnica...",
+        "score": "Puntuación",
+        "strengths": "Puntos Fuertes",
+        "issues": "Problemas Detectados",
+        "corrections": "Correcciones",
+        "keyPoints": "Puntos Clave",
+        "recordAnother": "Grabar Otro Video",
+        "backToWorkout": "Volver al Workout",
+        "instructions": {
+            "title": "Instrucciones",
+            "stable": "Coloca tu teléfono en un lugar estable",
+            "visible": "Asegúrate de que todo tu cuerpo sea visible",
+            "reps": "Graba 1-3 repeticiones del ejercicio",
+            "duration": "Máximo 10 segundos de video"
+        },
+        "permissions": {
+            "title": "Permiso de Cámara Requerido",
+            "description": "Necesitamos acceso a tu cámara para grabar y analizar tu técnica",
+            "allow": "Permitir Acceso"
+        },
+        "analysis": {
+            "excellent": "¡Excelente técnica!",
+            "good": "Buena técnica, con margen de mejora",
+            "needsWork": "Necesita correcciones importantes"
         }
+    },
+    "privacy": {
+        "data_management_title": "Gestión de Datos",
+        "export_data": "Exportar mis Datos",
+        "export_desc": "Descarga una copia de toda tu información en formato JSON",
+        "export_failed": "Error al exportar datos",
+        "preferences_title": "Preferencias de Privacidad",
+        "analytics": "Análisis de Uso",
+        "analytics_desc": "Ayúdanos a mejorar compartiendo datos anónimos de uso",
+        "marketing": "Comunicaciones de Marketing",
+        "marketing_desc": "Recibe ofertas y novedades de Mambo Fitness"
+    },
+    "security": {
+        "biometrics_title": "Seguridad Biométrica",
+        "biometric_desc": "Usa tu huella o rostro para acceder",
+        "biometric_prompt": "Autentícate para activar la seguridad",
+        "biometric_fallback": "Usa tu contraseña",
+        "biometric_failed": "Error de autenticación",
+        "access_title": "Acceso a la Cuenta",
+        "sessions_title": "Sesiones Activas"
     }
 }

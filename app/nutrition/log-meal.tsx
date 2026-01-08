@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Image, ActivityIndicator, Modal } from 'react-native';
+import { View, TextInput, TouchableOpacity, ScrollView, Alert, Image, ActivityIndicator, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,12 +13,12 @@ import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 import { Card } from '@/components/ui/Card';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 
 export default function LogMealScreen() {
     const router = useRouter();
     const { t } = useTranslation();
-    const theme = useAppTheme() as 'light' | 'dark';
-    const isDark = theme === 'dark';
+    const { theme, isDark } = useAppTheme();
     const { logMeal, getTodayData, getDataForDate } = useNutritionStore();
     const { checkNutritionStreaks } = useAchievementsStore();
     const { profile } = useUserProfileStore();
@@ -116,42 +116,7 @@ export default function LogMealScreen() {
         }
     }, [quantity, baseValues, measurementType]);
 
-    const pickImageFromGallery = async () => {
-        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (permissionResult.granted === false) {
-            Alert.alert(t('nutrition.logMeal.permissionRequired'), t('nutrition.logMeal.galleryPermissionNote'));
-            return;
-        }
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 0.7,
-        });
-        if (!result.canceled && result.assets[0]) {
-            setPhotoUri(result.assets[0].uri);
-            await analyzePhoto(result.assets[0].uri);
-        }
-    };
-
-    const takePhoto = async () => {
-        const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-        if (permissionResult.granted === false) {
-            Alert.alert(t('nutrition.logMeal.permissionRequired'), t('nutrition.logMeal.cameraPermissionNote'));
-            return;
-        }
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 0.7,
-        });
-        if (!result.canceled && result.assets[0]) {
-            setPhotoUri(result.assets[0].uri);
-            await analyzePhoto(result.assets[0].uri);
-        }
-    };
-
-    const analyzePhoto = async (uri: string) => {
+    const handleAnalyzePhoto = async (uri: string) => {
         setAnalyzingPhoto(true);
         try {
             const analysis = await analyzeFoodImage(uri);
@@ -180,6 +145,41 @@ export default function LogMealScreen() {
             );
         } finally {
             setAnalyzingPhoto(false);
+        }
+    };
+
+    const pickImageFromGallery = async () => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permissionResult.granted === false) {
+            Alert.alert(t('nutrition.logMeal.permissionRequired'), t('nutrition.logMeal.galleryPermissionNote'));
+            return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.7,
+        });
+        if (!result.canceled && result.assets[0]) {
+            setPhotoUri(result.assets[0].uri);
+            await handleAnalyzePhoto(result.assets[0].uri);
+        }
+    };
+
+    const takePhoto = async () => {
+        const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+        if (permissionResult.granted === false) {
+            Alert.alert(t('nutrition.logMeal.permissionRequired'), t('nutrition.logMeal.cameraPermissionNote'));
+            return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 0.7,
+        });
+        if (!result.canceled && result.assets[0]) {
+            setPhotoUri(result.assets[0].uri);
+            await handleAnalyzePhoto(result.assets[0].uri);
         }
     };
 
@@ -224,17 +224,12 @@ export default function LogMealScreen() {
             const yesterdayKey = yesterday.toISOString().split('T')[0];
             const yesterdayData = getDataForDate(yesterdayKey);
 
-            checkNutritionStreaks(todayData, yesterdayData, {
-                calorieGoal: profile.calorieGoal,
-                proteinGoal: profile.proteinGoal,
-                carbsGoal: profile.carbsGoal,
-                fatsGoal: profile.fatsGoal,
-            });
+            checkNutritionStreaks(todayData, yesterdayData, profile);
         }
 
         // Navigate to nutrition tab after saving
         // Use navigate to ensure we go back to the main tab, clearing the stack if needed
-        router.navigate('/(tabs)/nutricion');
+        router.push('/(tabs)/nutricion');
     };
 
     const mealTypes: { id: MealType; label: string; icon: string }[] = [
@@ -250,11 +245,11 @@ export default function LogMealScreen() {
             {/* Header */}
             <View className="flex-row items-center justify-between p-4 border-b" style={{ borderColor: Colors[theme].border }}>
                 <TouchableOpacity onPress={() => router.back()}>
-                    <Text className="text-base font-medium" style={{ color: Colors[theme].textSecondary }}>{t('nutrition.logMeal.cancel')}</Text>
+                    <AccessibleText weight="medium" className="text-text-secondary text-base">{t('nutrition.logMeal.cancel')}</AccessibleText>
                 </TouchableOpacity>
-                <Text className="text-xl font-bold" style={{ color: Colors[theme].text }}>{t('nutrition.logMeal.title')}</Text>
+                <AccessibleText variant="h3" weight="bold" className="text-text">{t('nutrition.logMeal.title')}</AccessibleText>
                 <TouchableOpacity onPress={handleSave}>
-                    <Text className="text-base font-bold" style={{ color: Colors.orange[500] }}>{t('nutrition.logMeal.save')}</Text>
+                    <AccessibleText weight="bold" className="text-primary text-base">{t('nutrition.logMeal.save')}</AccessibleText>
                 </TouchableOpacity>
             </View>
 
@@ -277,10 +272,10 @@ export default function LogMealScreen() {
                                     size={16}
                                     color={selectedMealType === type.id ? 'white' : Colors[theme].textMuted}
                                 />
-                                <Text className={`ml-2 font-medium ${selectedMealType === type.id ? 'text-white' : Colors[theme].textSecondary
+                                <AccessibleText weight="medium" className={`ml-2 ${selectedMealType === type.id ? 'text-white' : 'text-text-secondary'
                                     }`}>
                                     {type.label}
-                                </Text>
+                                </AccessibleText>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -288,7 +283,7 @@ export default function LogMealScreen() {
 
                 {/* Meal Name */}
                 <Card variant={isDark ? "glass" : "outline"} className="p-5 mb-4">
-                    <Text className="text-lg font-bold mb-3" style={{ color: Colors[theme].text }}>{t('nutrition.logMeal.mealName')}</Text>
+                    <AccessibleText variant="h3" weight="bold" className="text-text mb-3">{t('nutrition.logMeal.mealName')}</AccessibleText>
                     <TextInput
                         className="p-3 rounded-xl text-base border"
                         style={{
@@ -306,10 +301,10 @@ export default function LogMealScreen() {
                 {/* Quantity Calculator */}
                 <Card variant={isDark ? "glass" : "outline"} className="p-5 mb-4">
                     <View className="flex-row justify-between items-center mb-3">
-                        <Text className="text-lg font-bold" style={{ color: Colors[theme].text }}>{t('nutrition.logMeal.quantity')}</Text>
+                        <AccessibleText variant="h3" weight="bold" className="text-text">{t('nutrition.logMeal.quantity')}</AccessibleText>
                         {baseValues && (
                             <View className="bg-blue-500/20 px-2 py-1 rounded-md">
-                                <Text className="text-blue-400 text-xs font-bold">{t('nutrition.logMeal.autoCalcActive')}</Text>
+                                <AccessibleText weight="bold" className="text-blue-400 text-xs">{t('nutrition.logMeal.autoCalcActive')}</AccessibleText>
                             </View>
                         )}
                     </View>
@@ -331,39 +326,39 @@ export default function LogMealScreen() {
                     {/* Raw/Cooked Selector */}
                     {baseValues && (
                         <View className="mb-2">
-                            <Text className="text-xs mb-2" style={{ color: Colors[theme].textMuted }}>{t('nutrition.logMeal.howDidYouWeight')}</Text>
+                            <AccessibleText variant="caption" className="text-text-secondary mb-2">{t('nutrition.logMeal.howDidYouWeight')}</AccessibleText>
                             <View className="flex-row rounded-lg p-1 border" style={{ backgroundColor: isDark ? 'rgba(31, 41, 55, 0.5)' : '#f3f4f6', borderColor: Colors[theme].border }}>
                                 <TouchableOpacity
                                     onPress={() => setMeasurementType('raw')}
                                     className={`flex-1 py-1.5 rounded-md items-center ${measurementType === 'raw' ? (isDark ? 'bg-gray-700' : 'bg-white shadow-sm') : ''}`}
                                 >
-                                    <Text className={`text-xs font-bold ${measurementType === 'raw' ? (isDark ? 'text-white' : 'text-gray-900') : 'text-gray-500'}`}>{t('nutrition.logMeal.raw')}</Text>
+                                    <AccessibleText weight="bold" className={`text-xs ${measurementType === 'raw' ? (isDark ? 'text-white' : 'text-gray-900') : 'text-gray-500'}`}>{t('nutrition.logMeal.raw')}</AccessibleText>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => setMeasurementType('cooked')}
                                     className={`flex-1 py-1.5 rounded-md items-center ${measurementType === 'cooked' ? 'bg-blue-600' : ''}`}
                                 >
-                                    <Text className={`text-xs font-bold ${measurementType === 'cooked' ? 'text-white' : 'text-gray-500'}`}>{t('nutrition.logMeal.cooked')}</Text>
+                                    <AccessibleText weight="bold" className={`text-xs ${measurementType === 'cooked' ? 'text-white' : 'text-gray-500'}`}>{t('nutrition.logMeal.cooked')}</AccessibleText>
                                 </TouchableOpacity>
                             </View>
                             {measurementType === 'cooked' && (
-                                <Text className="text-blue-400 text-[10px] mt-1 italic">
+                                <AccessibleText variant="caption" className="text-blue-400 mt-1 italic">
                                     {t('nutrition.logMeal.cookedNote')}
-                                </Text>
+                                </AccessibleText>
                             )}
                         </View>
                     )}
 
-                    <Text className="text-xs mt-1" style={{ color: Colors[theme].textMuted }}>
+                    <AccessibleText variant="caption" className="text-text-muted mt-1">
                         {baseValues
                             ? t('nutrition.logMeal.autoCalcNote')
                             : t('nutrition.logMeal.manualNote')}
-                    </Text>
+                    </AccessibleText>
                 </Card>
 
                 {/* Calories */}
                 <Card variant={isDark ? "glass" : "outline"} className="p-5 mb-4">
-                    <Text className="text-lg font-bold mb-3" style={{ color: Colors[theme].text }}>{t('nutrition.logMeal.caloriesLabel')}</Text>
+                    <AccessibleText variant="h3" weight="bold" className="text-text mb-3">{t('nutrition.logMeal.caloriesLabel')}</AccessibleText>
                     <TextInput
                         className="p-3 rounded-xl text-base border"
                         style={{
@@ -396,18 +391,18 @@ export default function LogMealScreen() {
                     >
                         <View className="flex-row items-center justify-center">
                             <Ionicons name="restaurant" size={20} color="white" />
-                            <Text className="text-white font-bold text-base ml-2">{t('nutrition.logMeal.searchInDatabase')}</Text>
+                            <AccessibleText weight="bold" className="text-white text-base ml-2">{t('nutrition.logMeal.searchInDatabase')}</AccessibleText>
                         </View>
                     </LinearGradient>
                 </TouchableOpacity>
 
                 {/* Macros */}
                 <Card variant={isDark ? "glass" : "outline"} className="p-5 mb-4">
-                    <Text className="text-lg font-bold mb-4" style={{ color: Colors[theme].text }}>{t('nutrition.logMeal.macronutrients')}</Text>
+                    <AccessibleText variant="h3" weight="bold" className="text-text mb-4">{t('nutrition.logMeal.macronutrients')}</AccessibleText>
 
                     {/* Protein */}
                     <View className="mb-4">
-                        <Text className="text-sm mb-2 font-medium" style={{ color: Colors[theme].textSecondary }}>{t('nutrition.logMeal.proteinLabel')}</Text>
+                        <AccessibleText weight="medium" className="text-text-secondary text-sm mb-2">{t('nutrition.logMeal.proteinLabel')}</AccessibleText>
                         <TextInput
                             className="p-3 rounded-xl text-base border"
                             style={{
@@ -425,7 +420,7 @@ export default function LogMealScreen() {
 
                     {/* Carbs */}
                     <View className="mb-4">
-                        <Text className="text-sm mb-2 font-medium" style={{ color: Colors[theme].textSecondary }}>{t('nutrition.logMeal.carbsLabel')}</Text>
+                        <AccessibleText weight="medium" className="text-text-secondary text-sm mb-2">{t('nutrition.logMeal.carbsLabel')}</AccessibleText>
                         <TextInput
                             className="p-3 rounded-xl text-base border"
                             style={{
@@ -443,7 +438,7 @@ export default function LogMealScreen() {
 
                     {/* Fats */}
                     <View>
-                        <Text className="text-sm mb-2 font-medium" style={{ color: Colors[theme].textSecondary }}>{t('nutrition.logMeal.fatsLabel')}</Text>
+                        <AccessibleText weight="medium" className="text-text-secondary text-sm mb-2">{t('nutrition.logMeal.fatsLabel')}</AccessibleText>
                         <TextInput
                             className="p-3 rounded-xl text-base border"
                             style={{
@@ -462,7 +457,7 @@ export default function LogMealScreen() {
 
                 {/* Photo Section */}
                 <Card variant={isDark ? "glass" : "outline"} className="p-5 mb-8">
-                    <Text className="text-lg font-bold mb-4" style={{ color: Colors[theme].text }}>{t('nutrition.logMeal.photo')}</Text>
+                    <AccessibleText variant="h3" weight="bold" className="text-text mb-4">{t('nutrition.logMeal.photo')}</AccessibleText>
 
                     {photoUri ? (
                         <View>
@@ -475,7 +470,7 @@ export default function LogMealScreen() {
                                 onPress={() => setPhotoUri(null)}
                                 className="bg-red-600/80 p-3 rounded-xl border border-red-500/30"
                             >
-                                <Text className="text-white font-bold text-center">{t('nutrition.logMeal.deletePhoto')}</Text>
+                                <AccessibleText weight="bold" className="text-white text-center">{t('nutrition.logMeal.deletePhoto')}</AccessibleText>
                             </TouchableOpacity>
                         </View>
                     ) : (
@@ -486,7 +481,7 @@ export default function LogMealScreen() {
                                     className="p-4 rounded-xl flex-row items-center justify-center"
                                 >
                                     <Ionicons name="camera" size={20} color="white" />
-                                    <Text className="text-white font-bold ml-2">{t('nutrition.logMeal.camera')}</Text>
+                                    <AccessibleText weight="bold" className="text-white ml-2">{t('nutrition.logMeal.camera')}</AccessibleText>
                                 </LinearGradient>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={pickImageFromGallery} className="flex-1">
@@ -495,7 +490,7 @@ export default function LogMealScreen() {
                                     className="p-4 rounded-xl flex-row items-center justify-center"
                                 >
                                     <Ionicons name="images" size={20} color="white" />
-                                    <Text className="text-white font-bold ml-2">{t('nutrition.logMeal.gallery')}</Text>
+                                    <AccessibleText weight="bold" className="text-white ml-2">{t('nutrition.logMeal.gallery')}</AccessibleText>
                                 </LinearGradient>
                             </TouchableOpacity>
                         </View>
@@ -508,8 +503,8 @@ export default function LogMealScreen() {
                 <View className="absolute inset-0 bg-black/80 items-center justify-center z-50">
                     <View className="bg-gray-800 rounded-2xl p-6 items-center">
                         <ActivityIndicator size="large" color="#f97316" />
-                        <Text className="text-white font-bold text-lg mt-4">{t('nutrition.logMeal.analyzing')}</Text>
-                        <Text className="text-gray-400 text-sm mt-2">{t('nutrition.logMeal.analyzingNote')}</Text>
+                        <AccessibleText weight="bold" className="text-white text-lg mt-4">{t('nutrition.logMeal.analyzing')}</AccessibleText>
+                        <AccessibleText variant="caption" className="text-gray-400 mt-2">{t('nutrition.logMeal.analyzingNote')}</AccessibleText>
                     </View>
                 </View>
             )}
@@ -522,10 +517,10 @@ export default function LogMealScreen() {
             >
                 <View className="flex-1 bg-black/80 justify-end">
                     <View className="bg-gray-900 rounded-t-3xl p-6">
-                        <Text className="text-white text-2xl font-bold mb-4">{t('nutrition.logMeal.feedbackTitle')}</Text>
-                        <Text className="text-gray-400 mb-6">
+                        <AccessibleText weight="bold" className="text-white text-2xl mb-4">{t('nutrition.logMeal.feedbackTitle')}</AccessibleText>
+                        <AccessibleText className="text-gray-400 mb-6">
                             {t('nutrition.logMeal.feedbackNote')}
-                        </Text>
+                        </AccessibleText>
 
                         <View className="flex-row gap-3">
                             <TouchableOpacity
@@ -550,19 +545,14 @@ export default function LogMealScreen() {
                                         const yesterdayKey = yesterday.toISOString().split('T')[0];
                                         const yesterdayData = getDataForDate(yesterdayKey);
 
-                                        checkNutritionStreaks(todayData, yesterdayData, {
-                                            calorieGoal: profile.calorieGoal,
-                                            proteinGoal: profile.proteinGoal,
-                                            carbsGoal: profile.carbsGoal,
-                                            fatsGoal: profile.fatsGoal,
-                                        });
+                                        checkNutritionStreaks(todayData, yesterdayData, profile);
                                     }
 
-                                    router.navigate('/(tabs)/nutricion');
+                                    router.push('/(tabs)/nutricion');
                                 }}
                                 className="flex-1 bg-gray-800 py-4 rounded-xl"
                             >
-                                <Text className="text-white font-bold text-center">{t('nutrition.logMeal.noThanks')}</Text>
+                                <AccessibleText weight="bold" className="text-white text-center">{t('nutrition.logMeal.noThanks')}</AccessibleText>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -600,20 +590,15 @@ export default function LogMealScreen() {
                                         const yesterdayKey = yesterday.toISOString().split('T')[0];
                                         const yesterdayData = getDataForDate(yesterdayKey);
 
-                                        checkNutritionStreaks(todayData, yesterdayData, {
-                                            calorieGoal: profile.calorieGoal,
-                                            proteinGoal: profile.proteinGoal,
-                                            carbsGoal: profile.carbsGoal,
-                                            fatsGoal: profile.fatsGoal,
-                                        });
+                                        checkNutritionStreaks(todayData, yesterdayData, profile);
                                     }
 
                                     Alert.alert(t('common.success'), t('nutrition.logMeal.feedbackSuccess'));
-                                    router.navigate('/(tabs)/nutricion');
+                                    router.push('/(tabs)/nutricion');
                                 }}
                                 className="flex-1 bg-orange-600 py-4 rounded-xl"
                             >
-                                <Text className="text-white font-bold text-center">{t('nutrition.logMeal.yesSend')}</Text>
+                                <AccessibleText weight="bold" className="text-white text-center">{t('nutrition.logMeal.yesSend')}</AccessibleText>
                             </TouchableOpacity>
                         </View>
                     </View>

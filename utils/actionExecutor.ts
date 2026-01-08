@@ -17,13 +17,13 @@ export class ActionExecutor {
 
     private static mapKeywordToMuscleGroup(keyword: string): MuscleGroup | undefined {
         const lower = keyword.toLowerCase();
-        if (lower.includes('pierna') || lower.includes('leg') || lower.includes('inferior')) return 'Legs';
-        if (lower.includes('pecho') || lower.includes('chest') || lower.includes('torso')) return 'Chest';
-        if (lower.includes('espalda') || lower.includes('back') || lower.includes('dorsal')) return 'Back';
-        if (lower.includes('hombro') || lower.includes('shoulder')) return 'Shoulders';
-        if (lower.includes('brazo') || lower.includes('arm') || lower.includes('biceps') || lower.includes('triceps')) return 'Arms';
-        if (lower.includes('abdomen') || lower.includes('core') || lower.includes('abs')) return 'Core';
-        if (lower.includes('cardio') || lower.includes('aerobico')) return 'Cardio';
+        if (lower.includes('pierna') || lower.includes('leg') || lower.includes('inferior')) return 'legs';
+        if (lower.includes('pecho') || lower.includes('chest') || lower.includes('torso')) return 'chest';
+        if (lower.includes('espalda') || lower.includes('back') || lower.includes('dorsal')) return 'back';
+        if (lower.includes('hombro') || lower.includes('shoulder')) return 'shoulders';
+        if (lower.includes('brazo') || lower.includes('arm') || lower.includes('biceps') || lower.includes('triceps')) return 'biceps';
+        if (lower.includes('abdomen') || lower.includes('core') || lower.includes('abs')) return 'abs';
+        if (lower.includes('cardio') || lower.includes('aerobico')) return 'cardio';
         return undefined;
     }
 

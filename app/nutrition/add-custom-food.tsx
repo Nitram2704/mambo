@@ -60,7 +60,7 @@ export default function AddCustomFoodScreen() {
                 </TouchableOpacity>
                 <Text className="text-xl font-bold" style={{ color: Colors[theme].text }}>{t('nutrition.addCustomFood.title')}</Text>
                 <TouchableOpacity onPress={handleSave}>
-                    <Text className="text-lg font-bold" style={{ color: Colors.orange[500] }}>{t('common.save')}</Text>
+                    <Text className="text-lg font-bold" style={{ color: Colors[theme].orange[500] }}>{t('common.save')}</Text>
                 </TouchableOpacity>
             </View>
 

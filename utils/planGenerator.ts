@@ -268,7 +268,7 @@ export async function generateNutritionPlan(profile: UserProfile): Promise<Nutri
             advanced: 'avanzado'
         };
 
-        const prompt = `Eres un nutriólogo certificado. Genera un plan de comidas semanal en formato JSON VÁLIDO.
+        const prompt = `Eres un nutriólogo certificado. Genera un plan de comidas mensual en formato JSON VÁLIDO.
 
 PERFIL DEL USUARIO:
 - Calorías objetivo: ${profile.calorieGoal || 2000} kcal/día
@@ -281,12 +281,13 @@ PERFIL DEL USUARIO:
 - Habilidad cocina: ${skillMap[profile.cookingSkill || 'basic']}
 
 REQUISITOS:
-1. Plan de 7 días (lunes a domingo)
+1. Plan de 28 días (4 semanas completas)
 2. 3 comidas principales por día (desayuno, almuerzo, cena)
 3. Recetas simples y prácticas
 4. Ingredientes accesibles en México/LATAM con CANTIDADES ESPECÍFICAS (gramos, tazas, piezas)
 5. Cumplir macros objetivo
-6. En español
+6. Variedad suficiente para evitar monotonía
+7. En español
 
 RESPONDE SOLO CON JSON (sin texto adicional, sin markdown):
 {

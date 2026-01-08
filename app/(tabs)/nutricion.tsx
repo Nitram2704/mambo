@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Animated } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Alert, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,15 +12,11 @@ import { useUserProfileStore } from '@/store/userProfileStore';
 import { useMealPlanStore, Meal } from '@/store/mealPlanStore';
 import { WhyTooltip } from '@/components/WhyTooltip';
 import { getLocalDateString } from '@/utils/dateUtils';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
 
-// Meal type configuration
-const getMealTypes = (t: any) => [
-    { id: 'breakfast', label: t('nutrition.mealTypes.breakfast'), icon: 'sunny', color: '#f97316' },
-    { id: 'mid_morning', label: t('nutrition.mealTypes.mid_morning'), icon: 'cafe', color: '#eab308' },
-    { id: 'lunch', label: t('nutrition.mealTypes.lunch'), icon: 'restaurant', color: '#22c55e' },
-    { id: 'snack', label: t('nutrition.mealTypes.snack'), icon: 'ice-cream', color: '#a855f7' },
-    { id: 'dinner', label: t('nutrition.mealTypes.dinner'), icon: 'moon', color: '#3b82f6' },
-];
+// Meal type configuration helper moved inside component to access theme
 
 interface MealSectionProps {
     mealType: MealType;
@@ -43,6 +39,8 @@ interface MealSectionProps {
 }
 
 function MealSection({ mealType, label, icon, color, meals, plannedMeals, selectedDate, canPaste, canPasteSingleMeal, onAddFood, onDeleteMeal, onLogPlannedMeal, onCopy, onPaste, onCopySingleMeal, onPasteSingleMeal, t }: MealSectionProps) {
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const [isExpanded, setIsExpanded] = useState(true);
 
     const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
@@ -67,10 +65,10 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                             <Ionicons name={icon} size={28} color={color} />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-text font-bold text-base">{label}</Text>
-                            <Text className="text-text-muted text-xs">
+                            <AccessibleText weight="bold" className="text-text text-base">{label}</AccessibleText>
+                            <AccessibleText className="text-text-muted text-xs">
                                 {totalCalories} kcal • {meals.length} {t('nutrition.foodItems', { count: meals.length })}
-                            </Text>
+                            </AccessibleText>
                         </View>
                     </View>
                     <View className="flex-row items-center gap-3">
@@ -81,9 +79,9 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                                     e.stopPropagation();
                                     onCopy();
                                 }}
-                                className="w-16 h-16 rounded-xl items-center justify-center bg-primary/20"
+                                className="w-10 h-10 rounded-xl items-center justify-center bg-primary/20"
                             >
-                                <Ionicons name="copy-outline" size={28} color="#3b82f6" />
+                                <Ionicons name="copy-outline" size={20} color={colors.primary} />
                             </TouchableOpacity>
                         )}
                         {/* Paste Section Button */}
@@ -93,9 +91,9 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                                     e.stopPropagation();
                                     onPaste();
                                 }}
-                                className="w-16 h-16 rounded-xl items-center justify-center bg-success/20"
+                                className="w-10 h-10 rounded-xl items-center justify-center bg-success/20"
                             >
-                                <Ionicons name="layers-outline" size={28} color="#22c55e" />
+                                <Ionicons name="layers-outline" size={20} color={colors.success} />
                             </TouchableOpacity>
                         )}
                         {/* Paste Single Meal Button */}
@@ -105,23 +103,23 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                                     e.stopPropagation();
                                     onPasteSingleMeal();
                                 }}
-                                className="w-16 h-16 rounded-xl items-center justify-center bg-success/20"
+                                className="w-10 h-10 rounded-xl items-center justify-center bg-success/20"
                             >
-                                <Ionicons name="clipboard-outline" size={28} color="#22c55e" />
+                                <Ionicons name="clipboard-outline" size={20} color={colors.success} />
                             </TouchableOpacity>
                         )}
                         {/* Add Button */}
                         <TouchableOpacity
                             onPress={onAddFood}
-                            className="w-16 h-16 rounded-xl items-center justify-center"
+                            className="w-10 h-10 rounded-xl items-center justify-center"
                             style={{ backgroundColor: `${color}30` }}
                         >
-                            <Ionicons name="add" size={28} color={color} />
+                            <Ionicons name="add" size={24} color={color} />
                         </TouchableOpacity>
                         <Ionicons
                             name={isExpanded ? 'chevron-up' : 'chevron-down'}
                             size={20}
-                            color="#64748b"
+                            color={colors.textMuted}
                         />
                     </View>
                 </TouchableOpacity>
@@ -132,26 +130,26 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                         {/* Planned Meals (Ghost Items) */}
                         {plannedMeals.length > 0 && (
                             <View className="mb-3">
-                                <Text className="text-text-muted text-[10px] font-black mb-2 uppercase tracking-widest">{t('nutrition.suggestedByAI')}</Text>
+                                <AccessibleText weight="bold" className="text-text-muted text-[10px] mb-2 uppercase tracking-widest">{t('nutrition.suggestedByAI')}</AccessibleText>
                                 {plannedMeals.map((meal) => (
                                     <View key={meal.id} className="bg-primary/5 rounded-2xl p-3 mb-2 border border-primary/30 border-dashed">
                                         <View className="flex-row justify-between items-start">
                                             <View className="flex-1">
-                                                <Text className="text-text font-bold text-sm mb-1">
+                                                <AccessibleText weight="bold" className="text-text text-sm mb-1">
                                                     {meal.name}
-                                                </Text>
+                                                </AccessibleText>
                                                 <View className="flex-row gap-3 mb-1">
-                                                    <Text className="text-primary/70 text-xs">P: {Math.round(meal.protein)}g</Text>
-                                                    <Text className="text-success/70 text-xs">C: {Math.round(meal.carbs)}g</Text>
-                                                    <Text className="text-warning/70 text-xs">G: {Math.round(meal.fat)}g</Text>
+                                                    <AccessibleText className="text-primary/70 text-xs">P: {Math.round(meal.protein)}g</AccessibleText>
+                                                    <AccessibleText className="text-success/70 text-xs">C: {Math.round(meal.carbs)}g</AccessibleText>
+                                                    <AccessibleText className="text-warning/70 text-xs">G: {Math.round(meal.fat)}g</AccessibleText>
                                                 </View>
                                                 {/* Show Ingredients */}
                                                 {meal.ingredients && meal.ingredients.length > 0 && (
                                                     <View className="flex-row flex-wrap gap-1 mt-1">
                                                         {meal.ingredients.map((ing, i) => (
-                                                            <Text key={i} className="text-text-muted text-[10px] italic">
+                                                            <AccessibleText key={i} className="text-text-muted text-[10px] italic">
                                                                 • {ing}
-                                                            </Text>
+                                                            </AccessibleText>
                                                         ))}
                                                     </View>
                                                 )}
@@ -162,7 +160,7 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                                                     className="bg-primary px-3 py-1.5 rounded-full flex-row items-center"
                                                 >
                                                     <Ionicons name="checkmark" size={14} color="white" />
-                                                    <Text className="text-white text-xs font-bold ml-1">{t('nutrition.eat')}</Text>
+                                                    <AccessibleText weight="bold" className="text-white text-xs ml-1">{t('nutrition.eat')}</AccessibleText>
                                                 </TouchableOpacity>
                                             </View>
                                         </View>
@@ -173,15 +171,15 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
 
                         {meals.length === 0 && plannedMeals.length === 0 ? (
                             <View className="py-6 items-center">
-                                <Text className="text-text-muted text-sm">{t('nutrition.noFoods')}</Text>
+                                <AccessibleText className="text-text-muted text-sm">{t('nutrition.noFoods')}</AccessibleText>
                                 <TouchableOpacity
                                     onPress={onAddFood}
                                     className="mt-3 px-4 py-2 rounded-full"
                                     style={{ backgroundColor: `${color}20` }}
                                 >
-                                    <Text className="font-bold text-sm" style={{ color }}>
+                                    <AccessibleText weight="bold" className="text-sm" style={{ color }}>
                                         {t('nutrition.addFood')}
-                                    </Text>
+                                    </AccessibleText>
                                 </TouchableOpacity>
                             </View>
                         ) : (
@@ -221,13 +219,13 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                                             <View className="bg-surface-highlight/30 rounded-2xl p-3 mb-2 border border-border/5">
                                                 <View className="flex-row justify-between items-start">
                                                     <View className="flex-1">
-                                                        <Text className="text-text font-bold text-sm mb-1">
+                                                        <AccessibleText weight="bold" className="text-text text-sm mb-1">
                                                             {meal.name}
-                                                        </Text>
+                                                        </AccessibleText>
                                                         <View className="flex-row gap-3">
-                                                            <Text className="text-primary text-xs">P: {Math.round(meal.protein)}g</Text>
-                                                            <Text className="text-success text-xs">C: {Math.round(meal.carbs)}g</Text>
-                                                            <Text className="text-warning text-xs">G: {Math.round(meal.fats)}g</Text>
+                                                            <AccessibleText className="text-primary text-xs">P: {Math.round(meal.protein)}g</AccessibleText>
+                                                            <AccessibleText className="text-success text-xs">C: {Math.round(meal.carbs)}g</AccessibleText>
+                                                            <AccessibleText className="text-warning text-xs">G: {Math.round(meal.fats)}g</AccessibleText>
                                                         </View>
                                                     </View>
                                                     <View className="flex-row items-center gap-3">
@@ -235,13 +233,13 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                                                             onPress={() => onCopySingleMeal(meal)}
                                                             className="w-8 h-8 rounded-xl items-center justify-center bg-surface-highlight"
                                                         >
-                                                            <Ionicons name="copy-outline" size={16} color="#94a3b8" />
+                                                            <Ionicons name="copy-outline" size={16} color={colors.textMuted} />
                                                         </TouchableOpacity>
                                                         <View className="items-end">
-                                                            <Text className="text-warning font-black text-base">
+                                                            <AccessibleText weight="bold" className="text-warning text-base">
                                                                 {meal.calories}
-                                                            </Text>
-                                                            <Text className="text-text-muted text-[10px] font-bold uppercase">kcal</Text>
+                                                            </AccessibleText>
+                                                            <AccessibleText weight="bold" className="text-text-muted text-[10px] uppercase">kcal</AccessibleText>
                                                         </View>
                                                     </View>
                                                 </View>
@@ -253,11 +251,11 @@ function MealSection({ mealType, label, icon, color, meals, plannedMeals, select
                                 {/* Meal Totals */}
                                 <View className="mt-2 pt-3 border-t border-border/10">
                                     <View className="flex-row justify-between items-center">
-                                        <Text className="text-text-muted text-xs font-black uppercase tracking-widest">{t('nutrition.total')}</Text>
+                                        <AccessibleText weight="bold" className="text-text-muted text-xs uppercase tracking-widest">{t('nutrition.total')}</AccessibleText>
                                         <View className="flex-row gap-3">
-                                            <Text className="text-primary text-xs font-bold">P: {Math.round(totalProtein)}g</Text>
-                                            <Text className="text-success text-xs font-bold">C: {Math.round(totalCarbs)}g</Text>
-                                            <Text className="text-warning text-xs font-bold">G: {Math.round(totalFats)}g</Text>
+                                            <AccessibleText weight="bold" className="text-primary text-xs">P: {Math.round(totalProtein)}g</AccessibleText>
+                                            <AccessibleText weight="bold" className="text-success text-xs">C: {Math.round(totalCarbs)}g</AccessibleText>
+                                            <AccessibleText weight="bold" className="text-warning text-xs">G: {Math.round(totalFats)}g</AccessibleText>
                                         </View>
                                     </View>
                                 </View>
@@ -285,6 +283,8 @@ const createEmptyDay = (dateKey: string): DailyNutrition => ({
 export default function NutricionScreen() {
     const router = useRouter();
     const { t, i18n } = useTranslation();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const { profile } = useUserProfileStore();
     // Subscribe to dailyData directly for reactivity
     const dailyData = useNutritionStore((state) => state.dailyData);
@@ -296,6 +296,14 @@ export default function NutricionScreen() {
     const pasteSingleMeal = useNutritionStore((state) => state.pasteSingleMeal);
     const clipboard = useNutritionStore((state) => state.clipboard);
     const singleMealClipboard = useNutritionStore((state) => state.singleMealClipboard);
+
+    const mealTypes = useMemo(() => [
+        { id: 'breakfast', label: t('nutrition.mealTypes.breakfast'), icon: 'sunny', color: colors.orange[500] },
+        { id: 'mid_morning', label: t('nutrition.mealTypes.mid_morning'), icon: 'cafe', color: colors.yellow[500] },
+        { id: 'lunch', label: t('nutrition.mealTypes.lunch'), icon: 'restaurant', color: colors.green[500] },
+        { id: 'snack', label: t('nutrition.mealTypes.snack'), icon: 'ice-cream', color: colors.secondary },
+        { id: 'dinner', label: t('nutrition.mealTypes.dinner'), icon: 'moon', color: colors.primary },
+    ], [t, colors]);
 
     // Meal Plan Store
     const { weeklyPlan, weeklyTemplates, fetchWeeklyPlan } = useMealPlanStore();
@@ -470,37 +478,34 @@ export default function NutricionScreen() {
                             <TouchableOpacity
                                 onPress={goToPreviousDay}
                                 className="w-10 h-10 rounded-2xl bg-primary/20 items-center justify-center"
+                                accessibilityLabel={t('nutrition.previousDay')}
                             >
-                                <Ionicons name="chevron-back" size={24} color="#3b82f6" />
+                                <Ionicons name="chevron-back" size={24} color={colors.primary} />
                             </TouchableOpacity>
 
-                            <View className="flex-1 items-center mx-3">
-                                <Text className="text-text text-lg font-bold capitalize">
+                            <TouchableOpacity onPress={goToToday} className="items-center">
+                                <AccessibleText weight="bold" className="text-text text-lg">
                                     {formatDateDisplay(selectedDate)}
-                                </Text>
-                                {!isToday && (
-                                    <TouchableOpacity onPress={goToToday}>
-                                        <Text className="text-primary text-xs mt-1 font-bold">{t('nutrition.backToToday')}</Text>
-                                    </TouchableOpacity>
-                                )}
-                            </View>
+                                </AccessibleText>
+                            </TouchableOpacity>
 
                             <TouchableOpacity
                                 onPress={goToNextDay}
                                 className="w-10 h-10 rounded-2xl bg-primary/20 items-center justify-center"
+                                accessibilityLabel={t('nutrition.nextDay')}
                             >
-                                <Ionicons name="chevron-forward" size={24} color="#3b82f6" />
+                                <Ionicons name="chevron-forward" size={24} color={colors.primary} />
                             </TouchableOpacity>
                         </View>
                     </Card>
 
                     <View className="mb-6">
-                        <Text className="text-text-secondary text-xs font-black uppercase tracking-widest">
+                        <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest">
                             {isToday ? t('nutrition.today') : formatDateDisplay(selectedDate).split(' de ')[0]}
-                        </Text>
-                        <Text className="text-text text-4xl font-black mt-1">{t('nutrition.title')}</Text>
+                        </AccessibleText>
+                        <AccessibleText weight="bold" className="text-text text-4xl mt-1">{t('nutrition.title')}</AccessibleText>
                         <TouchableOpacity onPress={() => fetchWeeklyPlan()} className="absolute right-0 top-2 p-2">
-                            <Ionicons name="refresh" size={20} color="#3b82f6" />
+                            <Ionicons name="refresh" size={20} color={colors.primary} />
                         </TouchableOpacity>
                     </View>
 
@@ -509,7 +514,7 @@ export default function NutricionScreen() {
                         <View className="flex-row justify-between items-start mb-4">
                             <View>
                                 <View className="flex-row items-center mb-1">
-                                    <Text className="text-text-secondary text-xs font-black uppercase tracking-widest">{t('nutrition.caloriesRemaining')}</Text>
+                                    <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest">{t('nutrition.caloriesRemaining')}</AccessibleText>
                                     <WhyTooltip
                                         title="¿Por Qué el Balance Calórico?"
                                         explanation="El balance calórico es la relación entre las calorías que consumes y las que quemas. Es el factor determinante para el cambio de peso corporal."
@@ -521,24 +526,24 @@ export default function NutricionScreen() {
                                         scientific="La primera ley de la termodinámica dicta que la energía no se crea ni se destruye, solo se transforma. El balance energético es la base de la nutrición (Hall et al., 2012)."
                                     />
                                 </View>
-                                <Text className="text-text text-5xl font-black">
+                                <AccessibleText weight="bold" className="text-text text-5xl">
                                     {Math.round(caloriesRemaining)}
-                                </Text>
-                                <Text className="text-text-muted text-xs font-medium mt-1">
+                                </AccessibleText>
+                                <AccessibleText weight="medium" className="text-text-muted text-xs mt-1">
                                     {caloriesConsumed} {t('nutrition.caloriesConsumed')} • {caloriesBurned} {t('nutrition.caloriesBurned')}
-                                </Text>
+                                </AccessibleText>
                             </View>
                             <View className="bg-warning/20 px-3 py-1.5 rounded-full">
-                                <Text className="text-warning font-black text-sm">
+                                <AccessibleText weight="bold" className="text-warning text-sm">
                                     {Math.round(percentageComplete)}%
-                                </Text>
+                                </AccessibleText>
                             </View>
                         </View>
 
                         {/* Progress Bar */}
                         <View className="h-4 bg-surface-highlight/50 rounded-full overflow-hidden mb-3 border border-border/5">
                             <LinearGradient
-                                colors={['#f97316', '#ea580c']}
+                                colors={Colors.gradients.orange}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                                 style={{ width: `${percentageComplete}%`, height: '100%' }}
@@ -550,7 +555,7 @@ export default function NutricionScreen() {
                             {/* Protein */}
                             <Card variant="outline" className="flex-1 p-3 border-primary/20">
                                 <View className="flex-row items-center mb-1">
-                                    <Text className="text-primary text-[10px] font-black uppercase tracking-widest">{t('nutrition.protein')}</Text>
+                                    <AccessibleText weight="bold" className="text-primary text-[10px] uppercase tracking-widest">{t('nutrition.protein')}</AccessibleText>
                                     <WhyTooltip
                                         title="Importancia de la Proteína"
                                         explanation="La proteína repara los tejidos y construye músculo. Es el macronutriente más saciante, lo que ayuda a controlar el hambre."
@@ -562,9 +567,9 @@ export default function NutricionScreen() {
                                         scientific="La ingesta adecuada de proteína es crucial para mantener el balance de nitrógeno positivo necesario para la hipertrofia (Morton et al., 2018)."
                                     />
                                 </View>
-                                <Text className="text-text font-bold text-lg">
+                                <AccessibleText weight="bold" className="text-text text-lg">
                                     {Math.round(proteinConsumed)}g
-                                </Text>
+                                </AccessibleText>
                                 <View className="h-1 bg-surface-highlight rounded-full mt-2 overflow-hidden">
                                     <View
                                         className="h-full bg-primary"
@@ -575,10 +580,10 @@ export default function NutricionScreen() {
 
                             {/* Carbs */}
                             <Card variant="outline" className="flex-1 p-3 border-success/20">
-                                <Text className="text-success text-[10px] font-black uppercase tracking-widest mb-1">{t('nutrition.carbs')}</Text>
-                                <Text className="text-text font-bold text-lg">
+                                <AccessibleText weight="bold" className="text-success text-[10px] uppercase tracking-widest mb-1">{t('nutrition.carbs')}</AccessibleText>
+                                <AccessibleText weight="bold" className="text-text text-lg">
                                     {Math.round(carbsConsumed)}g
-                                </Text>
+                                </AccessibleText>
                                 <View className="h-1 bg-surface-highlight rounded-full mt-2 overflow-hidden">
                                     <View
                                         className="h-full bg-success"
@@ -589,10 +594,10 @@ export default function NutricionScreen() {
 
                             {/* Fats */}
                             <Card variant="outline" className="flex-1 p-3 border-warning/20">
-                                <Text className="text-warning text-[10px] font-black uppercase tracking-widest mb-1">{t('nutrition.fats')}</Text>
-                                <Text className="text-text font-bold text-lg">
+                                <AccessibleText weight="bold" className="text-warning text-[10px] uppercase tracking-widest mb-1">{t('nutrition.fats')}</AccessibleText>
+                                <AccessibleText weight="bold" className="text-text text-lg">
                                     {Math.round(fatsConsumed)}g
-                                </Text>
+                                </AccessibleText>
                                 <View className="h-1 bg-surface-highlight rounded-full mt-2 overflow-hidden">
                                     <View
                                         className="h-full bg-warning"
@@ -604,25 +609,25 @@ export default function NutricionScreen() {
                     </Card>
 
                     {/* Meal Sections */}
-                    {getMealTypes(t).map((mealType) => (
+                    {mealTypes.map((mealType) => (
                         <MealSection
                             key={mealType.id}
                             mealType={mealType.id as MealType}
                             label={mealType.label}
                             icon={mealType.icon}
                             color={mealType.color}
-                            meals={getMealsByType(mealType.id)}
-                            plannedMeals={getPlannedMealsByType(mealType.id)}
+                            meals={getMealsByType(mealType.id as MealType)}
+                            plannedMeals={getPlannedMealsByType(mealType.id as MealType)}
                             selectedDate={selectedDate}
                             canPaste={clipboard?.mealType === mealType.id}
                             canPasteSingleMeal={!!singleMealClipboard}
-                            onAddFood={() => handleAddFood(mealType.id)}
+                            onAddFood={() => handleAddFood(mealType.id as MealType)}
                             onDeleteMeal={handleDeleteMeal}
                             onLogPlannedMeal={handleLogPlannedMeal}
-                            onCopy={() => handleCopyMeal(mealType.id)}
+                            onCopy={() => handleCopyMeal(mealType.id as MealType)}
                             onPaste={handlePasteMeal}
                             onCopySingleMeal={handleCopySingleMeal}
-                            onPasteSingleMeal={() => handlePasteSingleMeal(mealType.id)}
+                            onPasteSingleMeal={() => handlePasteSingleMeal(mealType.id as MealType)}
                             t={t}
                         />
                     ))}
@@ -634,10 +639,10 @@ export default function NutricionScreen() {
                             className="flex-1"
                         >
                             <Card variant="glass" className="border-primary/30 items-center">
-                                <Ionicons name="search" size={24} color="#3b82f6" />
-                                <Text className="text-primary font-bold text-[10px] font-black uppercase tracking-widest mt-2 text-center">
+                                <Ionicons name="search" size={24} color={colors.primary} />
+                                <AccessibleText weight="bold" className="text-primary text-[10px] uppercase tracking-widest mt-2 text-center">
                                     {t('nutrition.foodDatabase')}
-                                </Text>
+                                </AccessibleText>
                             </Card>
                         </TouchableOpacity>
 
@@ -646,10 +651,10 @@ export default function NutricionScreen() {
                             className="flex-1"
                         >
                             <Card variant="glass" className="border-secondary/30 items-center">
-                                <Ionicons name="cart" size={24} color="#8b5cf6" />
-                                <Text className="text-secondary font-bold text-[10px] font-black uppercase tracking-widest mt-2 text-center">
+                                <Ionicons name="cart" size={24} color={colors.secondary} />
+                                <AccessibleText weight="bold" className="text-secondary text-[10px] uppercase tracking-widest mt-2 text-center">
                                     {t('nutrition.shoppingList')}
-                                </Text>
+                                </AccessibleText>
                             </Card>
                         </TouchableOpacity>
 
@@ -658,10 +663,10 @@ export default function NutricionScreen() {
                             className="flex-1"
                         >
                             <Card variant="glass" className="border-warning/30 items-center">
-                                <Ionicons name="restaurant" size={24} color="#eab308" />
-                                <Text className="text-warning font-bold text-[10px] font-black uppercase tracking-widest mt-2 text-center">
+                                <Ionicons name="restaurant" size={24} color={colors.warning} />
+                                <AccessibleText weight="bold" className="text-warning text-[10px] uppercase tracking-widest mt-2 text-center">
                                     {t('nutrition.myRecipes')}
-                                </Text>
+                                </AccessibleText>
                             </Card>
                         </TouchableOpacity>
                     </View>

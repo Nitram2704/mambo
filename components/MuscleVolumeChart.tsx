@@ -1,10 +1,15 @@
 import React, { useMemo } from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 
 export const MuscleVolumeChart = () => {
     const { workouts } = useWorkoutHistoryStore();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
 
     const chartData = useMemo(() => {
         const volumeByMuscle: Record<string, number> = {};
@@ -45,15 +50,15 @@ export const MuscleVolumeChart = () => {
 
     if (chartData.labels.length === 0) {
         return (
-            <View className="bg-gray-800 p-4 rounded-xl items-center justify-center h-64">
-                <Text className="text-gray-400">No hay datos suficientes en los últimos 30 días</Text>
+            <View className="bg-surface p-4 rounded-xl items-center justify-center h-64 border border-border/10">
+                <AccessibleText className="text-text-muted">No hay datos suficientes en los últimos 30 días</AccessibleText>
             </View>
         );
     }
 
     return (
-        <View className="bg-gray-800 p-4 rounded-xl mb-4 border border-gray-700">
-            <Text className="text-white text-lg font-bold mb-4">Volumen por Músculo (30 días)</Text>
+        <View className="bg-surface p-4 rounded-xl mb-4 border border-border/10">
+            <AccessibleText weight="bold" className="text-text text-lg mb-4">Volumen por Músculo (30 días)</AccessibleText>
             <BarChart
                 data={chartData}
                 width={Dimensions.get('window').width - 64}
@@ -61,12 +66,12 @@ export const MuscleVolumeChart = () => {
                 yAxisLabel=""
                 yAxisSuffix="k"
                 chartConfig={{
-                    backgroundColor: '#1f2937',
-                    backgroundGradientFrom: '#1f2937',
-                    backgroundGradientTo: '#1f2937',
+                    backgroundColor: colors.surface,
+                    backgroundGradientFrom: colors.surface,
+                    backgroundGradientTo: colors.surface,
                     decimalPlaces: 1,
                     color: (opacity = 1) => `rgba(96, 165, 250, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
+                    labelColor: (opacity = 1) => colors.textMuted,
                     style: {
                         borderRadius: 16
                     },
@@ -78,7 +83,7 @@ export const MuscleVolumeChart = () => {
                 }}
                 showValuesOnTopOfBars
             />
-            <Text className="text-gray-500 text-xs text-center mt-2">* Volumen total en miles de kg (toneladas)</Text>
+            <AccessibleText className="text-text-muted text-[10px] text-center mt-2">* Volumen total en miles de kg (toneladas)</AccessibleText>
         </View>
     );
 };

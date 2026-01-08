@@ -2,6 +2,7 @@ import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { cssInterop } from 'react-native-css-interop';
+import { useAppTheme } from '@/hooks/use-app-theme';
 
 // Allow Tailwind classes on Ionicons
 cssInterop(Ionicons, {
@@ -31,17 +32,18 @@ export const Icon = ({
     variant,
     className,
 }: IconProps) => {
+    const { theme } = useAppTheme();
     let iconColor = color;
 
     if (variant && !color) {
-        iconColor = Colors[variant as keyof typeof Colors] as string;
+        iconColor = Colors[theme][variant as keyof typeof Colors.light] as string;
     }
 
     return (
         <Ionicons
             name={name}
             size={size}
-            color={iconColor || Colors.text}
+            color={iconColor || Colors[theme].text}
             className={className}
         />
     );

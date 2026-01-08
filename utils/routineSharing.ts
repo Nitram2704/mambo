@@ -131,7 +131,7 @@ export async function importSharedRoutine(shareCode: string): Promise<SavedRouti
                 plannedSets: re.planned_sets,
                 restTime: re.rest_time,
             })),
-            createdAt: new Date(),
+            createdAt: new Date().toISOString(),
         };
 
         console.log(`✅ Imported routine: ${routine.name}`);

@@ -1,19 +1,20 @@
 export const Colors = {
     light: {
-        primary: '#3b82f6',
-        secondary: '#8b5cf6',
-        accent: '#f43f5e',
-        background: '#f8fafc',
-        surface: '#ffffff',
-        surfaceHighlight: '#f1f5f9',
-        text: '#0f172a',
-        textSecondary: '#475569',
-        textMuted: '#94a3b8',
-        success: '#22c55e',
-        warning: '#eab308',
-        error: '#ef4444',
-        border: '#e2e8f0',
-        tabIconSelected: '#3b82f6',
+        primary: '#2563eb', // Blue 600 - Stronger contrast
+        secondary: '#7c3aed', // Violet 600
+        accent: '#f43f5e', // Rose 500
+        background: '#f8fafc', // Slate 50
+        surface: '#ffffff', // White
+        surfaceHighlight: '#f1f5f9', // Slate 100
+        text: '#0f172a', // Slate 900
+        textSecondary: '#475569', // Slate 600
+        textMuted: '#94a3b8', // Slate 400
+        success: '#16a34a', // Green 600
+        warning: '#ca8a04', // Yellow 600
+        error: '#dc2626', // Red 600
+        info: '#0ea5e9', // Sky 500
+        border: '#e2e8f0', // Slate 200
+        tabIconSelected: '#2563eb',
         orange: {
             400: '#fb923c',
             500: '#f97316',
@@ -35,25 +36,26 @@ export const Colors = {
             600: '#2563eb',
         },
         purple: {
-            500: '#a78bfa',
+            500: '#8b5cf6',
         },
         pink: {
-            500: '#f472b6',
+            500: '#ec4899',
         },
     },
     dark: {
-        primary: '#3b82f6',
-        secondary: '#8b5cf6',
+        primary: '#60a5fa', // Lighter blue for better contrast on dark bg
+        secondary: '#a78bfa', // Lighter purple
         accent: '#f43f5e',
         background: '#0f172a',
         surface: '#1e293b',
         surfaceHighlight: '#334155',
         text: '#f8fafc',
-        textSecondary: '#94a3b8',
-        textMuted: '#64748b',
+        textSecondary: '#cbd5e1', // Improved contrast (was #94a3b8)
+        textMuted: '#94a3b8', // Improved contrast (was #64748b)
         success: '#22c55e',
         warning: '#eab308',
         error: '#ef4444',
+        info: '#38bdf8', // Sky 400 (lighter for dark mode)
         border: '#334155',
         tabIconSelected: '#60a5fa',
         orange: {

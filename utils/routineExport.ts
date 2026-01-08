@@ -1,4 +1,4 @@
-import { SavedRoutine } from '@/store/savedRoutinesStore';
+import { SavedRoutine } from '@/types/schema';
 
 /**
  * Export a routine as a JSON string for sharing
@@ -10,7 +10,7 @@ export function exportRoutineAsJSON(routine: SavedRoutine): string {
         exercises: routine.exercises.map(ex => ({
             exerciseId: ex.id,
             plannedSets: ex.plannedSets,
-            plannedReps: ex.plannedReps,
+            plannedReps: (ex as any).plannedReps || 10,
             restTime: ex.restTime,
         })),
         version: '1.0',
@@ -31,7 +31,7 @@ export function exportRoutineAsText(routine: SavedRoutine): string {
 
     routine.exercises.forEach((ex, index) => {
         text += `${index + 1}. ${ex.name}\n`;
-        text += `   • ${ex.plannedSets || 3} series x ${ex.plannedReps || 10} reps\n`;
+        text += `   • ${ex.plannedSets || 3} series x ${(ex as any).plannedReps || 10} reps\n`;
         text += `   • Descanso: ${ex.restTime || 60}s\n`;
         text += `\n`;
     });

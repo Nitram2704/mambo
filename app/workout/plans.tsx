@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 import { WORKOUT_TEMPLATES, WorkoutTemplate, listWorkoutTemplates } from '@/utils/planTemplates';
 import { useSavedRoutinesStore } from '@/store/savedRoutinesStore';
 import { useWeeklyScheduleStore } from '@/store/weeklyScheduleStore';
 import { DAY_NAMES } from '@/utils/scheduleUtils';
 import { Card } from '@/components/ui/Card';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { a11y } from '@/utils/accessibility';
+import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/use-app-theme';
 
 type GoalFilter = 'all' | 'hypertrophy' | 'strength' | 'endurance' | 'general';
 type LevelFilter = 'all' | 'beginner' | 'intermediate' | 'advanced';
@@ -17,6 +20,8 @@ type LevelFilter = 'all' | 'beginner' | 'intermediate' | 'advanced';
 export default function WorkoutPlansScreen() {
     const router = useRouter();
     const { t } = useTranslation();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const { addRoutine } = useSavedRoutinesStore();
     const { scheduleWorkout, clearSchedule } = useWeeklyScheduleStore();
     const [adoptingId, setAdoptingId] = useState<string | null>(null);
@@ -32,7 +37,7 @@ export default function WorkoutPlansScreen() {
     const templates = listWorkoutTemplates();
 
     const GOAL_OPTIONS: { key: GoalFilter; label: string; icon: string; color: string }[] = [
-        { key: 'all', label: t('workoutPlans.goals.all'), icon: 'apps', color: '#60a5fa' },
+        { key: 'all', label: t('workoutPlans.goals.all'), icon: 'apps', color: colors.primary },
         { key: 'hypertrophy', label: t('workoutPlans.goals.hypertrophy'), icon: 'body', color: '#f97316' },
         { key: 'strength', label: t('workoutPlans.goals.strength'), icon: 'barbell', color: '#ef4444' },
         { key: 'endurance', label: t('workoutPlans.goals.endurance'), icon: 'fitness', color: '#10b981' },
@@ -40,7 +45,7 @@ export default function WorkoutPlansScreen() {
     ];
 
     const LEVEL_OPTIONS: { key: LevelFilter; label: string; color: string }[] = [
-        { key: 'all', label: t('workoutPlans.levels.all'), color: '#60a5fa' },
+        { key: 'all', label: t('workoutPlans.levels.all'), color: colors.primary },
         { key: 'beginner', label: t('workoutPlans.levels.beginner'), color: '#22c55e' },
         { key: 'intermediate', label: t('workoutPlans.levels.intermediate'), color: '#f59e0b' },
         { key: 'advanced', label: t('workoutPlans.levels.advanced'), color: '#ef4444' },
@@ -151,7 +156,7 @@ export default function WorkoutPlansScreen() {
                     days: dayNames,
                     total: smartSchedule.length
                 }),
-                [{ text: t('workoutPlans.alerts.viewSchedule'), onPress: () => router.push('/(tabs)/workout') }]
+                [{ text: t('workoutPlans.alerts.viewSchedule'), onPress: () => router.push('/workout/schedule') }]
             );
 
         } catch (error) {
@@ -168,7 +173,7 @@ export default function WorkoutPlansScreen() {
             case 'beginner': return '#22c55e';
             case 'intermediate': return '#f59e0b';
             case 'advanced': return '#ef4444';
-            default: return '#60a5fa';
+            default: return colors.primary;
         }
     };
 
@@ -192,27 +197,29 @@ export default function WorkoutPlansScreen() {
     };
 
     return (
-        <ScreenWrapper>
-            {/* Header */}
-            <View className="flex-row items-center p-4 border-b border-border/10">
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    className="bg-surface-highlight/50 p-2 rounded-full mr-4"
-                >
-                    <Ionicons name="arrow-back" size={24} color="#f8fafc" />
-                </TouchableOpacity>
-                <View>
-                    <Text className="text-text-secondary text-xs font-black uppercase tracking-widest">
-                        {t('workoutPlans.title')}
-                    </Text>
-                    <Text className="text-text text-2xl font-black">Mambo Plans</Text>
+        <ScreenWrapper
+            header={
+                <View className="flex-row items-center p-4 border-b border-white/5 bg-background">
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        className="bg-surface-highlight/50 p-2 rounded-full mr-4"
+                        {...a11y.button('Volver', 'Regresa a la pantalla anterior')}
+                    >
+                        <Ionicons name="arrow-back" size={24} color="white" />
+                    </TouchableOpacity>
+                    <View>
+                        <AccessibleText variant="caption" weight="bold" className="text-text-secondary uppercase tracking-widest">
+                            {t('workoutPlans.title')}
+                        </AccessibleText>
+                        <AccessibleText variant="h2" weight="bold" className="text-white">Mambo Plans</AccessibleText>
+                    </View>
                 </View>
-            </View>
-
+            }
+        >
             <ScrollView className="flex-1">
                 {/* Goal Filter */}
                 <View className="p-4">
-                    <Text className="text-text-muted text-xs mb-3 font-black uppercase tracking-widest">{t('workoutPlans.objective')}</Text>
+                    <AccessibleText variant="caption" weight="bold" className="text-text-muted mb-3 uppercase tracking-widest">{t('workoutPlans.objective')}</AccessibleText>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         <View className="flex-row gap-2">
                             {GOAL_OPTIONS.map((option) => (
@@ -221,18 +228,18 @@ export default function WorkoutPlansScreen() {
                                     onPress={() => setGoalFilter(option.key)}
                                     className={`px-4 py-2 rounded-full flex-row items-center ${goalFilter === option.key
                                         ? 'bg-primary'
-                                        : 'bg-surface-highlight/50 border border-border/10'
+                                        : 'bg-surface-highlight/50 border border-white/5'
                                         }`}
+                                    {...a11y.button(`Filtrar por ${option.label}`, `Muestra solo planes de ${option.label}`)}
                                 >
                                     <Ionicons
                                         name={option.icon as any}
                                         size={16}
                                         color={goalFilter === option.key ? 'white' : option.color}
                                     />
-                                    <Text className={`ml-2 font-medium ${goalFilter === option.key ? 'text-white' : 'text-text-muted'
-                                        }`}>
+                                    <AccessibleText weight="medium" className={`ml-2 ${goalFilter === option.key ? 'text-white' : 'text-text-muted'}`}>
                                         {option.label}
-                                    </Text>
+                                    </AccessibleText>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -241,7 +248,7 @@ export default function WorkoutPlansScreen() {
 
                 {/* Level Filter */}
                 <View className="px-4 pb-4">
-                    <Text className="text-text-muted text-xs mb-3 font-black uppercase tracking-widest">{t('workoutPlans.level')}</Text>
+                    <AccessibleText variant="caption" weight="bold" className="text-text-muted mb-3 uppercase tracking-widest">{t('workoutPlans.level')}</AccessibleText>
                     <View className="flex-row gap-2 flex-wrap">
                         {LEVEL_OPTIONS.map((option) => (
                             <TouchableOpacity
@@ -249,13 +256,13 @@ export default function WorkoutPlansScreen() {
                                 onPress={() => setLevelFilter(option.key)}
                                 className={`px-4 py-2 rounded-full ${levelFilter === option.key
                                     ? 'bg-primary'
-                                    : 'bg-surface-highlight/50 border border-border/10'
+                                    : 'bg-surface-highlight/50 border border-white/5'
                                     }`}
+                                {...a11y.button(`Filtrar por nivel ${option.label}`, `Muestra solo planes para nivel ${option.label}`)}
                             >
-                                <Text className={`font-medium ${levelFilter === option.key ? 'text-white' : 'text-text-muted'
-                                    }`}>
+                                <AccessibleText weight="medium" className={`${levelFilter === option.key ? 'text-white' : 'text-text-muted'}`}>
                                     {option.label}
-                                </Text>
+                                </AccessibleText>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -263,14 +270,14 @@ export default function WorkoutPlansScreen() {
 
                 {/* Templates List */}
                 <View className="px-4 pb-8">
-                    <Text className="text-text-muted text-[10px] font-black uppercase tracking-widest mb-3">
+                    <AccessibleText variant="caption" weight="bold" className="text-text-muted mb-3 uppercase tracking-widest">
                         {t('workoutPlans.availablePlans', { count: filteredTemplates.length })}
-                    </Text>
+                    </AccessibleText>
 
                     {filteredTemplates.length === 0 ? (
                         <View className="items-center py-12">
-                            <Ionicons name="search" size={48} color="#4b5563" />
-                            <Text className="text-text-muted mt-4 font-bold">{t('workoutPlans.noPlans')}</Text>
+                            <Ionicons name="search" size={48} color={colors.textMuted} />
+                            <AccessibleText weight="bold" className="text-text-muted mt-4">{t('workoutPlans.noPlans')}</AccessibleText>
                         </View>
                     ) : (
                         <View className="gap-4">
@@ -279,42 +286,47 @@ export default function WorkoutPlansScreen() {
                                     key={template.id}
                                     onPress={() => setSelectedTemplate(WORKOUT_TEMPLATES[template.id])}
                                     activeOpacity={0.8}
+                                    {...a11y.button(
+                                        `${template.name}. ${template.description}. Nivel ${getLevelLabel(template.level)}. ${template.daysPerWeek} días por semana.`,
+                                        'Toca para ver detalles de este plan'
+                                    )}
                                 >
-                                    <Card variant="glass" className="p-5 border-border/10">
+                                    <Card variant="glass" className="p-5 border-white/5">
                                         <View className="flex-row justify-between items-start mb-3">
                                             <View className="flex-1 mr-3">
-                                                <Text className="text-text text-lg font-bold mb-1">
+                                                <AccessibleText variant="h3" weight="bold" className="text-white mb-1">
                                                     {template.name}
-                                                </Text>
-                                                <Text className="text-text-muted text-sm mb-2" numberOfLines={2}>
+                                                </AccessibleText>
+                                                <AccessibleText variant="caption" className="text-text-secondary mb-2" numberOfLines={2}>
                                                     {template.description}
-                                                </Text>
+                                                </AccessibleText>
                                             </View>
                                             <View
                                                 className="px-3 py-1 rounded-full"
                                                 style={{ backgroundColor: getLevelColor(template.level) + '30' }}
                                             >
-                                                <Text
-                                                    className="font-bold text-xs"
+                                                <AccessibleText
+                                                    weight="bold"
+                                                    variant="caption"
                                                     style={{ color: getLevelColor(template.level) }}
                                                 >
                                                     {getLevelLabel(template.level)}
-                                                </Text>
+                                                </AccessibleText>
                                             </View>
                                         </View>
 
                                         <View className="flex-row items-center gap-4">
                                             <View className="flex-row items-center">
-                                                <Ionicons name="calendar" size={14} color="#60a5fa" />
-                                                <Text className="text-primary text-sm ml-1">
+                                                <Ionicons name="calendar" size={14} color={colors.primary} />
+                                                <AccessibleText variant="caption" className="text-primary ml-1">
                                                     {t('workoutPlans.daysPerWeek', { count: template.daysPerWeek })}
-                                                </Text>
+                                                </AccessibleText>
                                             </View>
                                             <View className="flex-row items-center">
                                                 <Ionicons name="trending-up" size={14} color="#f97316" />
-                                                <Text className="text-orange-400 text-sm ml-1">
+                                                <AccessibleText variant="caption" className="text-orange-400 ml-1">
                                                     {getGoalLabel(template.goal)}
-                                                </Text>
+                                                </AccessibleText>
                                             </View>
                                         </View>
                                     </Card>
@@ -336,14 +348,18 @@ export default function WorkoutPlansScreen() {
                     <View className="bg-surface rounded-t-3xl max-h-[85%]">
                         {selectedTemplate && (
                             <>
-                                <View className="p-6 border-b border-border/10">
+                                <View className="p-6 border-b border-white/5">
                                     <View className="flex-row justify-between items-start">
                                         <View className="flex-1">
-                                            <Text className="text-text text-2xl font-black">{selectedTemplate.name}</Text>
-                                            <Text className="text-text-muted mt-1">{selectedTemplate.description}</Text>
+                                            <AccessibleText variant="h2" weight="bold" className="text-white">{selectedTemplate.name}</AccessibleText>
+                                            <AccessibleText className="text-text-secondary mt-1">{selectedTemplate.description}</AccessibleText>
                                         </View>
-                                        <TouchableOpacity onPress={() => setSelectedTemplate(null)} className="p-2">
-                                            <Ionicons name="close" size={24} color="#94a3b8" />
+                                        <TouchableOpacity
+                                            onPress={() => setSelectedTemplate(null)}
+                                            className="p-2"
+                                            {...a11y.button('Cerrar', 'Cierra los detalles del plan')}
+                                        >
+                                            <Ionicons name="close" size={24} color={colors.textMuted} />
                                         </TouchableOpacity>
                                     </View>
 
@@ -352,47 +368,51 @@ export default function WorkoutPlansScreen() {
                                             className="px-3 py-1 rounded-full"
                                             style={{ backgroundColor: getLevelColor(selectedTemplate.level) + '30' }}
                                         >
-                                            <Text style={{ color: getLevelColor(selectedTemplate.level) }} className="font-bold text-sm">
+                                            <AccessibleText style={{ color: getLevelColor(selectedTemplate.level) }} weight="bold" variant="caption">
                                                 {getLevelLabel(selectedTemplate.level)}
-                                            </Text>
+                                            </AccessibleText>
                                         </View>
                                         <View className="bg-orange-500/20 px-3 py-1 rounded-full">
-                                            <Text className="text-orange-400 font-bold text-sm">
+                                            <AccessibleText className="text-orange-400 font-bold" variant="caption">
                                                 {getGoalLabel(selectedTemplate.goal)}
-                                            </Text>
+                                            </AccessibleText>
                                         </View>
                                         <View className="bg-primary/20 px-3 py-1 rounded-full">
-                                            <Text className="text-primary font-bold text-sm">
+                                            <AccessibleText className="text-primary font-bold" variant="caption">
                                                 {selectedTemplate.daysPerWeek} {t('workoutPlans.daysPerWeek', { count: selectedTemplate.daysPerWeek }).split(' ')[1]}
-                                            </Text>
+                                            </AccessibleText>
                                         </View>
                                     </View>
                                 </View>
 
                                 <ScrollView className="p-6">
-                                    <Text className="text-text-muted text-xs font-black uppercase tracking-widest mb-4">{t('workoutPlans.structure')}</Text>
+                                    <AccessibleText variant="caption" weight="bold" className="text-text-muted uppercase tracking-widest mb-4">{t('workoutPlans.structure')}</AccessibleText>
                                     {selectedTemplate.days.map((day, index) => (
-                                        <View key={index} className="bg-surface-highlight/30 rounded-xl p-4 mb-3 border border-border/5">
-                                            <Text className="text-text font-bold mb-2">{day.dayName}</Text>
+                                        <View key={index} className="bg-surface-highlight/30 rounded-xl p-4 mb-3 border border-white/5">
+                                            <AccessibleText weight="bold" className="text-white mb-2">{day.dayName}</AccessibleText>
                                             {day.exercises.map((ex, exIndex) => (
                                                 <View key={exIndex} className="flex-row justify-between py-1">
-                                                    <Text className="text-text-secondary flex-1" numberOfLines={1}>{ex.name}</Text>
-                                                    <Text className="text-text-muted text-sm">{ex.sets}×{ex.reps}</Text>
+                                                    <AccessibleText className="text-text-secondary flex-1" numberOfLines={1}>{ex.name}</AccessibleText>
+                                                    <AccessibleText variant="caption" className="text-text-muted">{ex.sets}×{ex.reps}</AccessibleText>
                                                 </View>
                                             ))}
                                         </View>
                                     ))}
                                 </ScrollView>
 
-                                <View className="p-6 border-t border-border/10">
+                                <View className="p-6 border-t border-white/5">
                                     <TouchableOpacity
                                         onPress={() => handleAdoptClick(selectedTemplate.id)}
                                         disabled={adoptingId !== null}
                                         className={`p-4 rounded-2xl items-center ${adoptingId ? 'bg-surface-highlight/50' : 'bg-primary'}`}
+                                        {...a11y.button(
+                                            adoptingId ? t('workoutPlans.adopting') : t('workoutPlans.adopt'),
+                                            'Toca para adoptar este plan de entrenamiento'
+                                        )}
                                     >
-                                        <Text className="text-white font-black uppercase tracking-widest">
+                                        <AccessibleText weight="bold" className="text-white uppercase tracking-widest">
                                             {adoptingId ? t('workoutPlans.adopting') : t('workoutPlans.adopt')}
-                                        </Text>
+                                        </AccessibleText>
                                     </TouchableOpacity>
                                 </View>
                             </>
@@ -412,11 +432,15 @@ export default function WorkoutPlansScreen() {
                     <View className="bg-surface rounded-t-3xl p-6">
                         <View className="flex-row justify-between items-center mb-6">
                             <View>
-                                <Text className="text-text text-xl font-black">{t('workoutPlans.daysQuestion')}</Text>
-                                <Text className="text-text-muted text-sm">{t('workoutPlans.daysSubtitle')}</Text>
+                                <AccessibleText variant="h2" weight="bold" className="text-white">{t('workoutPlans.daysQuestion')}</AccessibleText>
+                                <AccessibleText className="text-text-secondary text-sm">{t('workoutPlans.daysSubtitle')}</AccessibleText>
                             </View>
-                            <TouchableOpacity onPress={() => setShowDaySelector(false)} className="bg-surface-highlight/50 p-2 rounded-full">
-                                <Ionicons name="close" size={24} color="#94a3b8" />
+                            <TouchableOpacity
+                                onPress={() => setShowDaySelector(false)}
+                                className="bg-surface-highlight/50 p-2 rounded-full"
+                                {...a11y.button('Cerrar', 'Cierra el selector de días')}
+                            >
+                                <Ionicons name="close" size={24} color={colors.textMuted} />
                             </TouchableOpacity>
                         </View>
 
@@ -427,24 +451,27 @@ export default function WorkoutPlansScreen() {
                                     onPress={() => toggleDay(index)}
                                     className={`w-11 h-11 rounded-full items-center justify-center border-2 ${selectedDays.includes(index)
                                         ? 'bg-primary border-primary'
-                                        : 'bg-surface-highlight/30 border-border/10'
+                                        : 'bg-surface-highlight/30 border-white/5'
                                         }`}
+                                    {...a11y.button(
+                                        `Seleccionar ${day}`,
+                                        `Toca para ${selectedDays.includes(index) ? 'deseleccionar' : 'seleccionar'} este día`
+                                    )}
                                 >
-                                    <Text className={`font-black ${selectedDays.includes(index) ? 'text-white' : 'text-text-muted'
-                                        }`}>
+                                    <AccessibleText weight="bold" className={`${selectedDays.includes(index) ? 'text-white' : 'text-text-muted'}`}>
                                         {day}
-                                    </Text>
+                                    </AccessibleText>
                                 </TouchableOpacity>
                             ))}
                         </View>
 
                         <View className="mb-6 flex-row items-center justify-between">
-                            <Text className="text-text-muted font-bold">
+                            <AccessibleText weight="bold" className="text-text-secondary">
                                 {t('workoutPlans.daysSelected', { count: selectedDays.length })}
-                            </Text>
-                            <Text className={`font-black ${selectedDays.length === selectedTemplate?.daysPerWeek ? 'text-success' : 'text-warning'}`}>
+                            </AccessibleText>
+                            <AccessibleText weight="bold" className={`${selectedDays.length === selectedTemplate?.daysPerWeek ? 'text-success' : 'text-warning'}`}>
                                 {selectedDays.length}/{selectedTemplate?.daysPerWeek}
-                            </Text>
+                            </AccessibleText>
                         </View>
 
                         <TouchableOpacity
@@ -452,10 +479,14 @@ export default function WorkoutPlansScreen() {
                             disabled={selectedDays.length === 0 || adoptingId !== null}
                             className={`py-5 rounded-3xl items-center shadow-lg ${selectedDays.length === 0 || adoptingId !== null ? 'bg-surface-highlight/50' : 'bg-primary'
                                 }`}
+                            {...a11y.button(
+                                adoptingId ? t('workoutPlans.creating') : t('workoutPlans.confirmAdopt'),
+                                'Toca para confirmar los días y adoptar el plan'
+                            )}
                         >
-                            <Text className="text-white font-black text-lg uppercase tracking-widest">
+                            <AccessibleText weight="bold" variant="h3" className="text-white uppercase tracking-widest">
                                 {adoptingId ? t('workoutPlans.creating') : t('workoutPlans.confirmAdopt')}
-                            </Text>
+                            </AccessibleText>
                         </TouchableOpacity>
                     </View>
                 </View>

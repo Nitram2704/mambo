@@ -1,16 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Modal, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, TouchableOpacity, FlatList, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, Link } from 'expo-router';
 import { useSavedRoutinesStore, SavedRoutine } from '@/store/savedRoutinesStore';
-import { WorkoutStreakCard } from '@/components/WorkoutStreakBadge';
+import { RoutineCard } from '@/components/workout/RoutineCard';
 import { RecoverySuggestionCard } from '@/components/RecoverySuggestionCard';
 import { ScheduleConfigurator } from '@/components/ScheduleConfigurator';
+import { getLocalDateString } from '@/utils/dateUtils';
+import Animated from 'react-native-reanimated';
+import { useUIStore } from '@/store/uiStore';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { a11y } from '@/utils/accessibility';
+import { Colors } from '@/constants/Colors';
+import { useActiveWorkoutStore } from '@/store/activeWorkoutStore';
+import { useAppTheme } from '@/hooks/use-app-theme';
 
 export default function StartWorkoutScreen() {
     const router = useRouter();
     const { routines, duplicateRoutine, updateRoutine } = useSavedRoutinesStore();
+    const { startWorkout } = useActiveWorkoutStore();
+    const { showToast } = useUIStore();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
 
     // Scheduling Modal State
     const [schedulingRoutineId, setSchedulingRoutineId] = useState<string | null>(null);
@@ -29,7 +42,7 @@ export default function StartWorkoutScreen() {
             type: routine.scheduleType || 'specific_days',
             days: routine.scheduleDays || [],
             interval: routine.scheduleInterval || 4,
-            startDate: routine.scheduleStartDate || new Date().toISOString().split('T')[0]
+            startDate: routine.scheduleStartDate || getLocalDateString()
         });
     };
 
@@ -43,7 +56,7 @@ export default function StartWorkoutScreen() {
                 scheduleInterval: tempSchedule.type === 'interval' ? tempSchedule.interval : undefined,
                 scheduleStartDate: tempSchedule.startDate
             });
-            Alert.alert('Programación Actualizada', 'La rutina se ha programado correctamente.');
+            showToast('Programación Actualizada', 'success');
         } else {
             // Disable schedule
             updateRoutine(schedulingRoutineId, {
@@ -52,100 +65,116 @@ export default function StartWorkoutScreen() {
                 scheduleInterval: undefined,
                 scheduleStartDate: undefined
             });
-            Alert.alert('Programación Eliminada', 'La rutina ya no está programada.');
+            showToast('Programación Eliminada', 'info');
         }
         setSchedulingRoutineId(null);
     };
 
     const renderItem = ({ item }: { item: SavedRoutine }) => (
-        <View className="bg-gray-800 rounded-xl mb-3 border border-gray-700 flex-row items-center overflow-hidden">
-            <TouchableOpacity
-                className="flex-1 p-4 active:bg-gray-750"
-                onPress={() => router.push(`/workout/active?routineId=${item.id}`)}
-            >
-                <View className="flex-row items-center gap-2 mb-1">
-                    <Text className="text-white font-bold text-xl">{item.name}</Text>
-                    {item.scheduleType && (
-                        <View className="bg-blue-500/20 px-2 py-0.5 rounded text-xs">
-                            <Text className="text-blue-400 text-[10px] font-bold uppercase">
-                                {item.scheduleType === 'specific_days' ? 'Semanal' : 'Intervalo'}
-                            </Text>
-                        </View>
-                    )}
-                </View>
-                <Text className="text-gray-400 text-sm">{item.exercises.length} ejercicios</Text>
-            </TouchableOpacity>
+        <Animated.View
+            // @ts-ignore - sharedTransitionTag is valid in Reanimated 3+
+            sharedTransitionTag={`routine-${item.id}`}
+            className="mb-4"
+        >
+            <RoutineCard
+                title={item.name}
+                duration={item.exercises.reduce((acc, ex) => acc + (ex.restTime || 120) + (ex.plannedSets || 3) * 45, 0) / 60 | 0} // Estimate: rest + 45s per set
+                difficulty="intermediate" // Default for now
+                exercises={item.exercises.map(ex => ({
+                    id: ex.id,
+                    name: ex.name,
+                    muscleGroup: ex.muscleGroup,
+                    // TODO: Add image mapping from exercise ID
+                }))}
+                onStart={() => {
+                    startWorkout(item);
+                    router.push('/workout/active');
+                }}
+                onPress={() => {
+                    // For now, just start. Later: Show details modal
+                    startWorkout(item);
+                    router.push('/workout/active');
+                }}
+            />
 
-            <View className="flex-row border-l border-gray-700">
+            {/* Actions Row */}
+            <View className="flex-row justify-end gap-2 px-2 -mt-2">
                 <TouchableOpacity
                     onPress={() => router.push(`/routines/create?routineId=${item.id}`)}
-                    className="p-4 active:bg-gray-750 border-r border-gray-700"
+                    className="p-2 bg-surface-highlight/50 rounded-full border border-white/5"
+                    {...a11y.button('Editar rutina', 'Modifica los ejercicios de esta rutina')}
                 >
-                    <Ionicons name="pencil-outline" size={20} color="#9ca3af" />
+                    <Ionicons name="pencil-outline" size={18} color={colors.textMuted} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => handleOpenSchedule(item)}
-                    className="p-4 active:bg-gray-750 border-r border-gray-700"
+                    className={`p-2 rounded-full border border-white/5 ${item.scheduleType ? 'bg-primary/10' : 'bg-surface-highlight/50'}`}
+                    {...a11y.button('Programar rutina', 'Configura los días o intervalos para esta rutina')}
                 >
-                    <Ionicons name="calendar-outline" size={20} color={item.scheduleType ? "#60a5fa" : "#9ca3af"} />
+                    <Ionicons name="calendar-outline" size={18} color={item.scheduleType ? colors.primary : colors.textMuted} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => {
-                        duplicateRoutine(item.id);
-                    }}
-                    className="p-4 active:bg-gray-750"
+                    onPress={() => duplicateRoutine(item.id)}
+                    className="p-2 bg-surface-highlight/50 rounded-full border border-white/5"
+                    {...a11y.button('Duplicar rutina', 'Crea una copia de esta rutina')}
                 >
-                    <Ionicons name="copy-outline" size={20} color="#9ca3af" />
+                    <Ionicons name="copy-outline" size={18} color={colors.textMuted} />
                 </TouchableOpacity>
             </View>
-        </View>
+        </Animated.View>
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
-            {/* Header */}
-            <View className="flex-row items-center p-4 border-b border-gray-800">
-                <TouchableOpacity onPress={() => router.back()} className="mr-4">
-                    <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
-                <Text className="text-white text-xl font-bold">Iniciar Entreno</Text>
-            </View>
-
+        <ScreenWrapper
+            header={
+                <View className="flex-row items-center p-4 border-b border-border/10 bg-background">
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        className="mr-4"
+                        {...a11y.button('Volver', 'Regresa a la pantalla anterior')}
+                    >
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <AccessibleText variant="h2" weight="bold" className="text-text">Iniciar Entreno</AccessibleText>
+                </View>
+            }
+        >
             <View className="flex-1 p-4">
                 {/* Recovery Suggestion Card */}
                 <RecoverySuggestionCard />
 
-                <Text className="text-gray-400 mb-4 text-sm">Selecciona una rutina para comenzar</Text>
+                <AccessibleText variant="caption" className="text-text-secondary mb-4">Selecciona una rutina para comenzar</AccessibleText>
 
                 {routines.length === 0 ? (
-                    <View className="flex-1 items-center justify-center">
-                        <Ionicons name="barbell-outline" size={64} color="#4b5563" />
-                        <Text className="text-gray-500 text-lg mt-4">No hay rutinas creadas</Text>
-                        <Text className="text-gray-600 text-sm mt-2 text-center px-8">
-                            Crea tu primera rutina para comenzar a entrenar
-                        </Text>
-                        <Link href="/routines/create" asChild>
-                            <TouchableOpacity className="bg-blue-600 px-6 py-3 rounded-xl mt-6 active:bg-blue-700">
-                                <Text className="text-white font-bold">Crear Rutina</Text>
-                            </TouchableOpacity>
-                        </Link>
-                    </View>
+                    <EmptyState
+                        icon="barbell-outline"
+                        title="No hay rutinas creadas"
+                        description="Crea tu primera rutina para comenzar a entrenar y llevar un seguimiento de tu progreso."
+                        actionLabel="Crear Rutina"
+                        onAction={() => router.push('/routines/create')}
+                    />
                 ) : (
                     <>
                         {/* Action Buttons */}
                         <View className="flex-row gap-3 mb-4">
                             <Link href="/routines/create" asChild>
-                                <TouchableOpacity className="flex-1 bg-blue-600 p-4 rounded-xl flex-row items-center justify-center active:bg-blue-700">
+                                <TouchableOpacity
+                                    className="flex-1 bg-primary p-4 rounded-xl flex-row items-center justify-center active:bg-primary/80"
+                                    {...a11y.button('Crear Rutina', 'Crea una nueva rutina personalizada')}
+                                >
                                     <Ionicons name="add" size={20} color="white" />
-                                    <Text className="text-white font-bold ml-2">Crear Rutina</Text>
+                                    <AccessibleText weight="bold" className="text-white ml-2">Crear Rutina</AccessibleText>
                                 </TouchableOpacity>
                             </Link>
                             <Link href="/workout/plans" asChild>
-                                <TouchableOpacity className="flex-1 bg-gray-800 border border-gray-700 p-4 rounded-xl flex-row items-center justify-center active:bg-gray-700">
-                                    <Ionicons name="layers" size={20} color="#60a5fa" />
-                                    <Text className="text-blue-400 font-bold ml-2">Ver Planes</Text>
+                                <TouchableOpacity
+                                    className="flex-1 bg-surface border border-border/10 p-4 rounded-xl flex-row items-center justify-center active:bg-surface-highlight/10"
+                                    {...a11y.button('Ver Planes', 'Explora planes de entrenamiento predefinidos')}
+                                >
+                                    <Ionicons name="layers" size={20} color={colors.primary} />
+                                    <AccessibleText weight="bold" className="text-primary ml-2">Ver Planes</AccessibleText>
                                 </TouchableOpacity>
                             </Link>
                         </View>
@@ -169,11 +198,14 @@ export default function StartWorkoutScreen() {
                 onRequestClose={() => setSchedulingRoutineId(null)}
             >
                 <View className="flex-1 bg-black/80 justify-end">
-                    <View className="bg-gray-900 rounded-t-3xl p-6 border-t border-gray-800 h-[70%]">
+                    <View className="bg-surface rounded-t-3xl p-6 border-t border-border/10 h-[70%]">
                         <View className="flex-row justify-between items-center mb-6">
-                            <Text className="text-white text-xl font-bold">Programar Rutina</Text>
-                            <TouchableOpacity onPress={() => setSchedulingRoutineId(null)}>
-                                <Ionicons name="close" size={24} color="#9ca3af" />
+                            <AccessibleText variant="h2" weight="bold" className="text-text">Programar Rutina</AccessibleText>
+                            <TouchableOpacity
+                                onPress={() => setSchedulingRoutineId(null)}
+                                {...a11y.button('Cerrar', 'Cierra el configurador de programación')}
+                            >
+                                <Ionicons name="close" size={24} color={colors.textMuted} />
                             </TouchableOpacity>
                         </View>
 
@@ -188,13 +220,14 @@ export default function StartWorkoutScreen() {
 
                         <TouchableOpacity
                             onPress={handleSaveSchedule}
-                            className="bg-blue-600 p-4 rounded-xl items-center mt-4"
+                            className="bg-primary p-4 rounded-xl items-center mt-4"
+                            {...a11y.button('Guardar Cambios', 'Guarda la configuración de programación para esta rutina')}
                         >
-                            <Text className="text-white font-bold text-lg">Guardar Cambios</Text>
+                            <AccessibleText weight="bold" variant="h3" className="text-white">Guardar Cambios</AccessibleText>
                         </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 }

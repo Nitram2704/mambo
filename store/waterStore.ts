@@ -27,6 +27,7 @@ interface WaterState {
     // Selectors
     getTodayWater: () => DailyWater;
     getWeeklyAverage: () => number;
+    clearData: () => void;
 }
 
 import { getLocalDateString } from '@/utils/dateUtils';
@@ -151,6 +152,12 @@ export const useWaterStore = create<WaterState>()(
 
                 return days > 0 ? Math.round(total / days) : 0;
             },
+
+            clearData: () =>
+                set({
+                    dailyWater: {},
+                    defaultGoal: 2500,
+                }),
         }),
         {
             name: 'water-storage',

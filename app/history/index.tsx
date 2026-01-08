@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 
 type HistoryType = 'all' | 'workouts' | 'meals' | 'sleep' | 'water';
 
@@ -18,6 +19,7 @@ export default function HistoryScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const { theme, isDark } = useAppTheme();
+  const colors = Colors[theme];
   const [activeTab, setActiveTab] = useState<HistoryType>('all');
 
   const { workouts } = useWorkoutHistoryStore();
@@ -109,7 +111,7 @@ export default function HistoryScreen() {
   };
 
   const tabs: { id: HistoryType; label: string; color: string }[] = [
-    { id: 'all', label: t('history.tabs.all'), color: Colors[theme].primary },
+    { id: 'all', label: t('history.tabs.all'), color: colors.primary },
     { id: 'workouts', label: t('history.tabs.workouts'), color: '#f97316' },
     { id: 'meals', label: t('history.tabs.meals'), color: '#22c55e' },
     { id: 'sleep', label: t('history.tabs.sleep'), color: '#a855f7' },
@@ -119,11 +121,11 @@ export default function HistoryScreen() {
   return (
     <ScreenWrapper>
       {/* Header */}
-      <View className="p-4 border-b" style={{ borderBottomColor: Colors[theme].border }}>
-        <Text style={{ color: Colors[theme].textSecondary }} className="text-sm font-medium uppercase tracking-wider">
+      <View className="p-4 border-b" style={{ borderBottomColor: colors.border }}>
+        <AccessibleText className="text-text-secondary text-sm font-medium uppercase tracking-wider">
           {t('history.subtitle')}
-        </Text>
-        <Text style={{ color: Colors[theme].text }} className="text-3xl font-bold mt-1 mb-4">{t('history.title')}</Text>
+        </AccessibleText>
+        <AccessibleText weight="bold" className="text-text text-3xl mt-1 mb-4">{t('history.title')}</AccessibleText>
 
         {/* Category Tabs */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -139,15 +141,16 @@ export default function HistoryScreen() {
                 style={[
                   activeTab === tab.id
                     ? { backgroundColor: tab.color }
-                    : { backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }
+                    : { backgroundColor: colors.surface, borderColor: colors.border }
                 ]}
               >
-                <Text
-                  className="font-semibold text-sm"
-                  style={{ color: activeTab === tab.id ? 'white' : Colors[theme].textSecondary }}
+                <AccessibleText
+                  weight="bold"
+                  className="text-sm"
+                  style={{ color: activeTab === tab.id ? 'white' : colors.textSecondary }}
                 >
                   {tab.label}
-                </Text>
+                </AccessibleText>
               </TouchableOpacity>
             ))}
           </View>
@@ -158,13 +161,13 @@ export default function HistoryScreen() {
       <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
         {history.length === 0 ? (
           <View className="flex-1 items-center justify-center py-20">
-            <View style={{ backgroundColor: Colors[theme].surface }} className="w-24 h-24 rounded-full items-center justify-center mb-4">
-              <Ionicons name="time-outline" size={40} color={Colors[theme].textMuted} />
+            <View style={{ backgroundColor: colors.surface }} className="w-24 h-24 rounded-full items-center justify-center mb-4">
+              <Ionicons name="time-outline" size={40} color={colors.textMuted} />
             </View>
-            <Text style={{ color: Colors[theme].textSecondary }} className="text-lg font-medium">{t('history.empty')}</Text>
-            <Text style={{ color: Colors[theme].textMuted }} className="text-sm mt-2 text-center px-8">
+            <AccessibleText weight="bold" className="text-text-secondary text-lg">{t('history.empty')}</AccessibleText>
+            <AccessibleText className="text-text-muted text-sm mt-2 text-center px-8">
               {t('history.emptyDesc')}
-            </Text>
+            </AccessibleText>
           </View>
         ) : (
           history.map((item) => (
@@ -185,24 +188,24 @@ export default function HistoryScreen() {
                           <Ionicons name="barbell" size={22} color="#f97316" />
                         </View>
                         <View className="flex-1">
-                          <Text style={{ color: Colors[theme].text }} className="font-bold text-base">{item.data.routineName}</Text>
-                          <Text style={{ color: Colors[theme].textSecondary }} className="text-xs">{formatDate(item.date)} • {formatTime(item.date)}</Text>
+                          <AccessibleText weight="bold" className="text-text text-base">{item.data.routineName}</AccessibleText>
+                          <AccessibleText className="text-text-secondary text-xs">{formatDate(item.date)} • {formatTime(item.date)}</AccessibleText>
                         </View>
                       </View>
                       <Ionicons name="chevron-forward" size={20} color="#f97316" />
                     </View>
                     <View className="flex-row gap-3">
-                      <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                        <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.duration')}</Text>
-                        <Text style={{ color: Colors[theme].text }} className="font-bold text-sm">{Math.round(item.data.durationSeconds / 60)}min</Text>
+                      <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                        <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.duration')}</AccessibleText>
+                        <AccessibleText weight="bold" className="text-text text-sm">{Math.round(item.data.durationSeconds / 60)}min</AccessibleText>
                       </View>
-                      <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                        <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.volume')}</Text>
-                        <Text style={{ color: Colors[theme].text }} className="font-bold text-sm">{item.data.volume.toLocaleString()}kg</Text>
+                      <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                        <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.volume')}</AccessibleText>
+                        <AccessibleText weight="bold" className="text-text text-sm">{item.data.volume.toLocaleString()}kg</AccessibleText>
                       </View>
-                      <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                        <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.exercises')}</Text>
-                        <Text style={{ color: Colors[theme].text }} className="font-bold text-sm">{item.data.exercises.length}</Text>
+                      <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                        <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.exercises')}</AccessibleText>
+                        <AccessibleText weight="bold" className="text-text text-sm">{item.data.exercises.length}</AccessibleText>
                       </View>
                     </View>
                   </LinearGradient>
@@ -218,24 +221,24 @@ export default function HistoryScreen() {
                       <Ionicons name="moon" size={22} color="#a855f7" />
                     </View>
                     <View className="flex-1">
-                      <Text style={{ color: Colors[theme].text }} className="font-bold text-base">{t('history.tabs.sleep')}</Text>
-                      <Text style={{ color: Colors[theme].textSecondary }} className="text-xs">{formatDate(item.date)}</Text>
+                      <AccessibleText weight="bold" className="text-text text-base">{t('history.tabs.sleep')}</AccessibleText>
+                      <AccessibleText className="text-text-secondary text-xs">{formatDate(item.date)}</AccessibleText>
                     </View>
                   </View>
                   <View className="flex-row gap-3">
-                    <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                      <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.duration')}</Text>
-                      <Text style={{ color: Colors[theme].text }} className="font-bold text-sm">{formatSleepDuration(item.data.duration)}</Text>
+                    <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                      <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.duration')}</AccessibleText>
+                      <AccessibleText weight="bold" className="text-text text-sm">{formatSleepDuration(item.data.duration)}</AccessibleText>
                     </View>
-                    <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                      <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.quality')}</Text>
+                    <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                      <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.quality')}</AccessibleText>
                       <View className="flex-row">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Ionicons
                             key={star}
                             name={item.data.quality >= star ? 'star' : 'star-outline'}
                             size={12}
-                            color={item.data.quality >= star ? '#fbbf24' : Colors[theme].textMuted}
+                            color={item.data.quality >= star ? '#fbbf24' : colors.textMuted}
                           />
                         ))}
                       </View>
@@ -253,15 +256,15 @@ export default function HistoryScreen() {
                       <Ionicons name="water" size={22} color="#60a5fa" />
                     </View>
                     <View className="flex-1">
-                      <Text style={{ color: Colors[theme].text }} className="font-bold text-base">{t('history.tabs.water')}</Text>
-                      <Text style={{ color: Colors[theme].textSecondary }} className="text-xs">{formatDate(item.date)} • {formatTime(item.date)}</Text>
+                      <AccessibleText weight="bold" className="text-text text-base">{t('history.tabs.water')}</AccessibleText>
+                      <AccessibleText className="text-text-secondary text-xs">{formatDate(item.date)} • {formatTime(item.date)}</AccessibleText>
                     </View>
                   </View>
-                  <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="rounded-xl p-2.5 border">
-                    <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.amount')}</Text>
-                    <Text className={`font-bold text-lg ${item.data.amount > 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                  <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="rounded-xl p-2.5 border">
+                    <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.amount')}</AccessibleText>
+                    <AccessibleText weight="bold" className={`text-lg ${item.data.amount > 0 ? 'text-blue-400' : 'text-red-400'}`}>
                       {item.data.amount > 0 ? '+' : ''}{item.data.amount} ml
-                    </Text>
+                    </AccessibleText>
                   </View>
                 </LinearGradient>
               ) : (
@@ -275,26 +278,26 @@ export default function HistoryScreen() {
                       <Ionicons name="restaurant" size={22} color="#22c55e" />
                     </View>
                     <View className="flex-1">
-                      <Text style={{ color: Colors[theme].text }} className="font-bold text-base">{item.data.name}</Text>
-                      <Text style={{ color: Colors[theme].textSecondary }} className="text-xs">{formatDate(item.date)} • {formatTime(item.date)}</Text>
+                      <AccessibleText weight="bold" className="text-text text-base">{item.data.name}</AccessibleText>
+                      <AccessibleText className="text-text-secondary text-xs">{formatDate(item.date)} • {formatTime(item.date)}</AccessibleText>
                     </View>
                   </View>
                   <View className="flex-row gap-2">
-                    <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                      <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.cal')}</Text>
-                      <Text style={{ color: Colors[theme].text }} className="font-bold text-sm">{item.data.calories}</Text>
+                    <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                      <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.cal')}</AccessibleText>
+                      <AccessibleText weight="bold" className="text-text text-sm">{item.data.calories}</AccessibleText>
                     </View>
-                    <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                      <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.prot')}</Text>
-                      <Text className="text-blue-400 font-bold text-sm">{item.data.protein}g</Text>
+                    <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                      <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.prot')}</AccessibleText>
+                      <AccessibleText weight="bold" className="text-blue-400 text-sm">{item.data.protein}g</AccessibleText>
                     </View>
-                    <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                      <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.carbs')}</Text>
-                      <Text className="text-green-400 font-bold text-sm">{item.data.carbs}g</Text>
+                    <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                      <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.carbs')}</AccessibleText>
+                      <AccessibleText weight="bold" className="text-green-400 text-sm">{item.data.carbs}g</AccessibleText>
                     </View>
-                    <View style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }} className="flex-1 rounded-xl p-2.5 border">
-                      <Text style={{ color: Colors[theme].textMuted }} className="text-xs mb-0.5">{t('history.items.fat')}</Text>
-                      <Text className="text-yellow-400 font-bold text-sm">{item.data.fats}g</Text>
+                    <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-1 rounded-xl p-2.5 border">
+                      <AccessibleText className="text-text-muted text-xs mb-0.5">{t('history.items.fat')}</AccessibleText>
+                      <AccessibleText weight="bold" className="text-yellow-400 text-sm">{item.data.fats}g</AccessibleText>
                     </View>
                   </View>
                 </LinearGradient>

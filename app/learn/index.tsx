@@ -126,109 +126,107 @@ export default function LearnScreen() {
 
     const renderLearningPath = (path: LearningPath) => {
         const progress = getPathProgress(path);
-
         return (
             <Animated.View
                 key={path.id}
-                entering={FadeInUp.delay(200)}
-                className="mb-4">
-                <Card
+                entering={FadeInUp.delay(400)}
+                className="mb-6">
+                <TouchableOpacity
                     onPress={() => handlePathPress(path)}
-                    className="p-6">
-                    {/* Header */}
-                    <View className="flex-row items-center justify-between mb-4">
-                        <View className="flex-row items-center">
-                            <View className="w-12 h-12 rounded-xl items-center justify-center mr-4"
-                                style={{ backgroundColor: path.color + '20' }}>
-                                <Ionicons
-                                    name={path.icon as any}
-                                    size={24}
-                                    color={path.color}
-                                />
-                            </View>
-                            <View className="flex-1">
-                                <Text
-                                    style={{ color: Colors[theme].text }}
-                                    className="text-xl font-bold mb-1"
-                                    numberOfLines={1}
-                                    adjustsFontSizeToFit
-                                >
-                                    {path.title}
-                                </Text>
-                                <Text style={{ color: Colors[theme].textSecondary }} className="text-sm">
-                                    {path.description}
-                                </Text>
-                            </View>
-                        </View>
-                        <Ionicons name="chevron-forward" size={24} color={Colors[theme].textSecondary} />
-                    </View>
-
-                    {/* Stats */}
-                    <View className="flex-row items-center justify-between mb-4">
-                        <View className="flex-row items-center gap-4">
-                            <View className={`px-3 py-1 rounded-full ${getDifficultyColor(path.difficulty)}`}>
-                                <Text style={{ color: getDifficultyTextColor(path.difficulty) }} className="text-xs font-bold">
-                                    {getDifficultyText(path.difficulty)}
-                                </Text>
-                            </View>
-                            <View className="flex-row items-center">
-                                <Ionicons name="time-outline" size={14} color={Colors[theme].textSecondary} />
-                                <Text style={{ color: Colors[theme].textSecondary }} className="text-sm ml-1">
-                                    {path.estimatedTime}
-                                </Text>
-                            </View>
-                            <View className="flex-row items-center">
-                                <Ionicons name="list-outline" size={14} color={Colors[theme].textSecondary} />
-                                <Text style={{ color: Colors[theme].textSecondary }} className="text-sm ml-1">
-                                    {path.exerciseCount} {t('workout.exercises')}
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    {/* Progress Bar */}
-                    <View className="mb-2">
-                        <View className="flex-row justify-between items-center mb-2">
-                            <Text style={{ color: Colors[theme].textSecondary }} className="text-sm">{t('learn.learningPaths.progress')}</Text>
-                            <Text style={{ color: Colors[theme].text }} className="text-sm font-bold">{progress}%</Text>
-                        </View>
-                        <View style={{ backgroundColor: isDark ? '#374151' : '#e5e7eb' }} className="w-full rounded-full h-2">
-                            <View
-                                className="h-2 rounded-full"
-                                style={{
-                                    width: `${progress}%`,
-                                    backgroundColor: path.color
-                                }}
-                            />
-                        </View>
-                    </View>
-
-                    {/* Exercise Previews */}
-                    <View className="flex-row items-center">
-                        <Text style={{ color: Colors[theme].textSecondary }} className="text-sm mr-3">{t('learn.learningPaths.pathExercises')}:</Text>
-                        <View className="flex-row">
-                            {path.exerciseNames.slice(0, 4).map((name, index) => {
-                                return (
-                                    <View
-                                        key={index}
-                                        style={{ backgroundColor: isDark ? '#4b5563' : '#f3f4f6' }}
-                                        className="w-8 h-8 rounded-full items-center justify-center mr-1">
-                                        <Text style={{ color: Colors[theme].text }} className="text-xs font-bold">
-                                            {index + 1}
-                                        </Text>
-                                    </View>
-                                );
-                            })}
-                            {path.exerciseNames.length > 4 && (
-                                <View style={{ backgroundColor: isDark ? '#4b5563' : '#f3f4f6' }} className="w-8 h-8 rounded-full items-center justify-center">
-                                    <Text style={{ color: Colors[theme].text }} className="text-xs font-bold">
-                                        +{path.exerciseNames.length - 4}
+                    activeOpacity={0.7}
+                >
+                    <Card className="p-5">
+                        <View className="flex-row items-center justify-between mb-4">
+                            <View className="flex-row items-center flex-1">
+                                <View
+                                    style={{ backgroundColor: path.color + '20' }}
+                                    className="w-12 h-12 rounded-2xl items-center justify-center mr-4">
+                                    <Ionicons name={path.icon as any} size={24} color={path.color} />
+                                </View>
+                                <View className="flex-1">
+                                    <Text
+                                        style={{ color: Colors[theme].text }}
+                                        className="text-xl font-bold mb-1"
+                                        numberOfLines={1}
+                                        adjustsFontSizeToFit
+                                    >
+                                        {path.title}
+                                    </Text>
+                                    <Text style={{ color: Colors[theme].textSecondary }} className="text-sm">
+                                        {path.description}
                                     </Text>
                                 </View>
-                            )}
+                            </View>
+                            <Ionicons name="chevron-forward" size={24} color={Colors[theme].textSecondary} />
                         </View>
-                    </View>
-                </Card>
+
+                        {/* Stats */}
+                        <View className="flex-row items-center justify-between mb-4">
+                            <View className="flex-row items-center gap-4">
+                                <View className={`px-3 py-1 rounded-full ${getDifficultyColor(path.difficulty)}`}>
+                                    <Text style={{ color: getDifficultyTextColor(path.difficulty) }} className="text-xs font-bold">
+                                        {getDifficultyText(path.difficulty)}
+                                    </Text>
+                                </View>
+                                <View className="flex-row items-center">
+                                    <Ionicons name="time-outline" size={14} color={Colors[theme].textSecondary} />
+                                    <Text style={{ color: Colors[theme].textSecondary }} className="text-sm ml-1">
+                                        {path.estimatedTime}
+                                    </Text>
+                                </View>
+                                <View className="flex-row items-center">
+                                    <Ionicons name="list-outline" size={14} color={Colors[theme].textSecondary} />
+                                    <Text style={{ color: Colors[theme].textSecondary }} className="text-sm ml-1">
+                                        {path.exerciseCount} {t('workout.exercises')}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Progress Bar */}
+                        <View className="mb-2">
+                            <View className="flex-row justify-between items-center mb-2">
+                                <Text style={{ color: Colors[theme].textSecondary }} className="text-sm">{t('learn.learningPaths.progress')}</Text>
+                                <Text style={{ color: Colors[theme].text }} className="text-sm font-bold">{progress}%</Text>
+                            </View>
+                            <View style={{ backgroundColor: isDark ? '#374151' : '#e5e7eb' }} className="w-full rounded-full h-2">
+                                <View
+                                    className="h-2 rounded-full"
+                                    style={{
+                                        width: `${progress}%`,
+                                        backgroundColor: path.color
+                                    }}
+                                />
+                            </View>
+                        </View>
+
+                        {/* Exercise Previews */}
+                        <View className="flex-row items-center">
+                            <Text style={{ color: Colors[theme].textSecondary }} className="text-sm mr-3">{t('learn.learningPaths.pathExercises')}:</Text>
+                            <View className="flex-row">
+                                {path.exerciseNames.slice(0, 4).map((name, index) => {
+                                    return (
+                                        <View
+                                            key={index}
+                                            style={{ backgroundColor: isDark ? '#4b5563' : '#f3f4f6' }}
+                                            className="w-8 h-8 rounded-full items-center justify-center mr-1">
+                                            <Text style={{ color: Colors[theme].text }} className="text-xs font-bold">
+                                                {index + 1}
+                                            </Text>
+                                        </View>
+                                    );
+                                })}
+                                {path.exerciseNames.length > 4 && (
+                                    <View style={{ backgroundColor: isDark ? '#4b5563' : '#f3f4f6' }} className="w-8 h-8 rounded-full items-center justify-center">
+                                        <Text style={{ color: Colors[theme].text }} className="text-xs font-bold">
+                                            +{path.exerciseNames.length - 4}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    </Card>
+                </TouchableOpacity>
             </Animated.View>
         );
     };

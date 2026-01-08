@@ -1,6 +1,11 @@
 import React from 'react';
-import { Text, TouchableOpacity, ActivityIndicator, TouchableOpacityProps, View, Platform } from 'react-native';
+import { TouchableOpacity, ActivityIndicator, TouchableOpacityProps, View, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { cssInterop } from 'react-native-css-interop';
+import { a11y } from '@/utils/accessibility';
+import { AccessibleText } from './AccessibleText';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
 
 interface ButtonProps extends TouchableOpacityProps {
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -11,6 +16,7 @@ interface ButtonProps extends TouchableOpacityProps {
     iconPosition?: 'left' | 'right';
     className?: string;
     textClassName?: string;
+    accessibilityHint?: string;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -24,8 +30,12 @@ export const Button: React.FC<ButtonProps> = ({
     textClassName,
     onPress,
     disabled,
+    accessibilityHint,
     ...props
 }) => {
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
+
     const handlePress = (e: any) => {
         if (Platform.OS !== 'web') {
             Haptics.selectionAsync();
@@ -55,6 +65,8 @@ export const Button: React.FC<ButtonProps> = ({
             case 'outline':
             case 'ghost':
                 return 'text-primary';
+            case 'secondary':
+                return 'text-text';
             default:
                 return 'text-white';
         }
@@ -87,6 +99,7 @@ export const Button: React.FC<ButtonProps> = ({
             onPress={handlePress}
             disabled={disabled || loading}
             activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             className={`
                 flex-row items-center justify-center rounded-xl
                 ${getVariantStyles()}
@@ -94,30 +107,41 @@ export const Button: React.FC<ButtonProps> = ({
                 ${disabled ? 'opacity-50' : ''}
                 ${className || ''}
             `}
+            {...a11y.button(label, accessibilityHint, { disabled: disabled || loading, busy: loading })}
             {...props}
         >
             {loading ? (
-                <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? '#3b82f6' : '#ffffff'} />
+                <ActivityIndicator
+                    color={variant === 'outline' || variant === 'ghost' ? colors.primary : '#ffffff'}
+                    {...a11y.decorative()}
+                />
             ) : (
                 <>
                     {icon && iconPosition === 'left' && (
-                        <View className="mr-2">{icon}</View>
+                        <View className="mr-2" {...a11y.decorative()}>{icon}</View>
                     )}
-                    <Text
+                    <AccessibleText
+                        weight="bold"
                         className={`
-                            font-bold text-center
+                            text-center
                             ${getTextVariantStyles()}
                             ${getTextSizeStyles()}
                             ${textClassName || ''}
                         `}
                     >
                         {label}
-                    </Text>
+                    </AccessibleText>
                     {icon && iconPosition === 'right' && (
-                        <View className="ml-2">{icon}</View>
+                        <View className="ml-2" {...a11y.decorative()}>{icon}</View>
                     )}
                 </>
             )}
         </TouchableOpacity>
     );
 };
+
+cssInterop(Button, {
+    className: {
+        target: 'style',
+    },
+});

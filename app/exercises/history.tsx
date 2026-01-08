@@ -5,7 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
-import ExerciseProgressChart from '@/components/ExerciseProgressChart';
+import { ExerciseProgressChart } from '@/components/ExerciseProgressChart';
 
 export default function ExerciseHistoryScreen() {
     const router = useRouter();

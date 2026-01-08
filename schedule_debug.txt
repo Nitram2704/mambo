@@ -1,0 +1,75 @@
+
+> mambo@1.1.0 test
+> jest utils/__tests__/scheduleUtils.test.ts --verbose
+
+  console.log
+    Debug: week=0, dayOffset=0, todayDayOfWeek=0, today=2023-10-09T06:00:00.000Z
+
+      at generateSmartSchedule (utils/scheduleUtils.ts:97:25)
+
+  console.log
+    Debug: week=0, dayOffset=2, todayDayOfWeek=0, today=2023-10-09T06:00:00.000Z
+
+      at generateSmartSchedule (utils/scheduleUtils.ts:97:25)
+
+  console.log
+    Debug: week=0, dayOffset=4, todayDayOfWeek=0, today=2023-10-09T06:00:00.000Z
+
+      at generateSmartSchedule (utils/scheduleUtils.ts:97:25)
+
+  console.log
+    Debug: week=0, dayOffset=0, todayDayOfWeek=2, today=2023-10-11T06:00:00.000Z
+
+      at generateSmartSchedule (utils/scheduleUtils.ts:97:25)
+
+  console.log
+    Debug: week=0, dayOffset=2, todayDayOfWeek=2, today=2023-10-11T06:00:00.000Z
+
+      at generateSmartSchedule (utils/scheduleUtils.ts:97:25)
+
+  console.log
+    Debug: week=0, dayOffset=4, todayDayOfWeek=2, today=2023-10-11T06:00:00.000Z
+
+      at generateSmartSchedule (utils/scheduleUtils.ts:97:25)
+
+FAIL utils/__tests__/scheduleUtils.test.ts (5.961 s)
+  scheduleUtils
+    getMondayOfWeek
+      ÔêÜ should return Monday for a Wednesday (5 ms)
+      ÔêÜ should return Monday for a Sunday (1 ms)
+      ÔêÜ should return same day if it is Monday (1 ms)
+    getDayOfWeekMondayBased
+      ÔêÜ should return 0 for Monday (1 ms)
+      ÔêÜ should return 6 for Sunday
+    isSunday
+      ÔêÜ should return true for Sunday
+      ÔêÜ should return false for Monday
+    getOptimalWorkoutDays
+      ÔêÜ should return Mon, Wed, Fri for 3 days (2 ms)
+      ÔêÜ should return Mon-Fri for 5 days (1 ms)
+    generateSmartSchedule
+      ÔêÜ should generate schedule for 3 days/week (51 ms)
+      ├ù should skip past days in current week (8 ms)
+
+  ÔùÅ scheduleUtils ÔÇ║ generateSmartSchedule ÔÇ║ should skip past days in current week
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "B"
+    Received: "A"
+
+      103 |             // Should skip Monday, keep Wed (today) and Fri
+      104 |             expect(schedule).toHaveLength(2);
+    > 105 |             expect(schedule[0].routineId).toBe('B'); // Wed
+          |                                           ^
+      106 |             expect(schedule[1].routineId).toBe('C'); // Fri
+      107 |
+      108 |             jest.useRealTimers();
+
+      at Object.<anonymous> (utils/__tests__/scheduleUtils.test.ts:105:43)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 10 passed, 11 total
+Snapshots:   0 total
+Time:        6.476 s, estimated 10 s
+Ran all test suites matching utils/__tests__/scheduleUtils.test.ts.

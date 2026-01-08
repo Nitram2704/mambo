@@ -1,0 +1,52 @@
+
+> mambo@1.1.0 test
+> jest utils/__tests__/WeaknessAnalyzer.test.ts
+
+FAIL utils/__tests__/WeaknessAnalyzer.test.ts (5.126 s)
+  WeaknessAnalyzer
+    ├ù should identify push imbalance (too much push) (6 ms)
+    ├ù should identify pull imbalance (too much pull) (6 ms)
+    ÔêÜ should identify skipped leg day (2 ms)
+    ÔêÜ should identify low nutritional adherence (1 ms)
+
+  ÔùÅ WeaknessAnalyzer ÔÇ║ should identify push imbalance (too much push)
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 2
+    Received array:  [{"description": "Tu volumen de empuje es un 100% mayor que el de jale.", "recommendation": "A├▒ade m├ís ejercicios de tracci├│n (remos, dominadas) para proteger la salud de tus hombros.", "severity": "medium", "title": "Desbalance de Empuje", "type": "balance"}, {"description": "El volumen de piernas representa menos del 20% de tu entrenamiento total.", "recommendation": "No te saltes el d├¡a de pierna. La base de un f├¡sico fuerte son las piernas.", "severity": "high", "title": "D├¡a de Pierna Olvidado", "type": "balance"}]
+
+      29 |
+      30 |         const insights = analyzeWeaknesses();
+    > 31 |         expect(insights).toHaveLength(1);
+         |                          ^
+      32 |         expect(insights[0].type).toBe('balance');
+      33 |         expect(insights[0].title).toBe('Desbalance de Empuje');
+      34 |     });
+
+      at Object.<anonymous> (utils/__tests__/WeaknessAnalyzer.test.ts:31:26)
+
+  ÔùÅ WeaknessAnalyzer ÔÇ║ should identify pull imbalance (too much pull)
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 2
+    Received array:  [{"description": "Tu volumen de jale es significativamente mayor que el de empuje.", "recommendation": "Considera equilibrar con m├ís press de banca o press militar.", "severity": "low", "title": "Desbalance de Tracci├│n", "type": "balance"}, {"description": "El volumen de piernas representa menos del 20% de tu entrenamiento total.", "recommendation": "No te saltes el d├¡a de pierna. La base de un f├¡sico fuerte son las piernas.", "severity": "high", "title": "D├¡a de Pierna Olvidado", "type": "balance"}]
+
+      42 |
+      43 |         const insights = analyzeWeaknesses();
+    > 44 |         expect(insights).toHaveLength(1);
+         |                          ^
+      45 |         expect(insights[0].title).toBe('Desbalance de Tracci├│n');
+      46 |     });
+      47 |
+
+      at Object.<anonymous> (utils/__tests__/WeaknessAnalyzer.test.ts:44:26)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 2 passed, 4 total
+Snapshots:   0 total
+Time:        5.536 s, estimated 6 s
+Ran all test suites matching utils/__tests__/WeaknessAnalyzer.test.ts.

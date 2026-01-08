@@ -62,8 +62,7 @@ export const useMealPlanStore = create<MealPlanState>((set, get) => ({
                 .from('meal_plans')
                 .select('id, user_id, date, day_of_week, created_at, updated_at, meals(*)')
                 .eq('user_id', user.id)
-                .gte('date', getLocalDateKey(start))
-                .lte('date', getLocalDateKey(end))
+                .or(`and(date.gte.${getLocalDateKey(start)},date.lte.${getLocalDateKey(end)}),day_of_week.not.is.null`)
                 .order('date');
 
             if (mealPlansError) {

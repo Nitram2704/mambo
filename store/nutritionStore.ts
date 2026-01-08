@@ -70,6 +70,7 @@ interface NutritionState {
     saveMealTemplate: (template: Omit<MealTemplate, 'id' | 'createdAt'>) => void;
     loadMealTemplate: (templateId: string) => void;
     deleteMealTemplate: (templateId: string) => void;
+    clearData: () => void;
 }
 
 const getTodayKey = () => {
@@ -297,6 +298,13 @@ export const useNutritionStore = create<NutritionState>()(
                 set((state) => ({
                     mealTemplates: state.mealTemplates.filter((t) => t.id !== templateId),
                 })),
+            clearData: () =>
+                set({
+                    dailyData: {},
+                    mealTemplates: [],
+                    clipboard: null,
+                    singleMealClipboard: null,
+                }),
         }),
         {
             name: 'nutrition-storage',

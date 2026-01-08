@@ -1,302 +1,233 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View, AppState, TextInput, TouchableOpacity, Text, ActivityIndicator, Modal, ScrollView } from 'react-native';
-import { supabase } from '../lib/supabase';
-import { Stack } from 'expo-router';
+import { View, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { Stack } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+import { AuthInput } from '@/components/auth/AuthInput';
+import { validateEmail } from '@/utils/authValidation';
+import { performSocialLogin } from '@/utils/authUtils';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 
-// Tells Supabase Auth to continuously refresh the session automatically if
-// the app is in the foreground. When this is added, you will continue to receive
-// `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
-// if the user's session is terminated. This should only be registered once.
-AppState.addEventListener('change', (state) => {
-    if (state === 'active') {
-        supabase.auth.startAutoRefresh();
-    } else {
-        supabase.auth.stopAutoRefresh();
-    }
-});
+export default function LoginScreen() {
+    const { t } = useTranslation();
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
-export default function Auth() {
+    // Form state
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [isLogin, setIsLogin] = useState(true);
-    const [termsAccepted, setTermsAccepted] = useState(false);
-    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
 
-    async function signInWithEmail() {
-        setLoading(true);
-        const { error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
+    // Error state
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
-        if (error) Alert.alert(error.message);
-        setLoading(false);
-    }
-
-    async function signUpWithEmail() {
-        if (!termsAccepted) {
-            Alert.alert('Terms Required', 'Please accept the Terms and Conditions to create an account.');
-            return;
+    const handleEmailChange = (text: string) => {
+        setEmail(text);
+        if (emailError) {
+            const validation = validateEmail(text);
+            setEmailError(validation.error ? t('auth.validation.emailInvalid') : '');
         }
-        setLoading(true);
-        const {
-            data: { session },
-            error,
-        } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-        });
+    };
 
-        if (error) Alert.alert(error.message);
-        if (!session) Alert.alert('Please check your inbox for email verification!');
-        setLoading(false);
-    }
+    const handlePasswordChange = (text: string) => {
+        setPassword(text);
+        if (passwordError) {
+            setPasswordError('');
+        }
+    };
+
+    const validateForm = (): boolean => {
+        let isValid = true;
+
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.valid) {
+            setEmailError(t('auth.validation.emailInvalid'));
+            isValid = false;
+        }
+
+        if (!password || password.trim() === '') {
+            setPasswordError(t('auth.validation.passwordTooShort'));
+            isValid = false;
+        }
+
+        return isValid;
+    };
+
+    const handleLogin = async () => {
+        if (!validateForm()) return;
+
+        setLoading(true);
+
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email.trim(),
+                password: password,
+            });
+
+            if (error) {
+                if (error.message.includes('Invalid login credentials')) {
+                    Alert.alert(t('common.error'), t('auth.validation.emailInvalid'));
+                } else if (error.message.includes('Email not confirmed')) {
+                    Alert.alert(t('common.error'), t('auth.checkInbox'));
+                } else {
+                    Alert.alert(t('common.error'), error.message);
+                }
+                return;
+            }
+
+            // Login successful - navigation handled by auth state change
+        } catch (error: any) {
+            Alert.alert(t('common.error'), t('onboarding.generating.error'));
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1">
             <Stack.Screen options={{ headerShown: false }} />
-            <View style={styles.header}>
-                <Ionicons name="fitness" size={60} color="#4F46E5" />
-                <Text style={styles.title}>Mambo Fitness</Text>
-                <Text style={styles.subtitle}>{isLogin ? 'Welcome back' : 'Create an account'}</Text>
-            </View>
 
-            <View style={styles.form}>
-                <View style={styles.inputContainer}>
-                    <Ionicons name="mail-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={(text) => setEmail(text)}
-                        value={email}
-                        placeholder="email@address.com"
-                        placeholderTextColor="#9CA3AF"
-                        autoCapitalize="none"
-                    />
-                </View>
-                <View style={styles.inputContainer}>
-                    <Ionicons name="lock-closed-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={(text) => setPassword(text)}
-                        value={password}
-                        secureTextEntry={true}
-                        placeholder="Password"
-                        placeholderTextColor="#9CA3AF"
-                        autoCapitalize="none"
-                    />
-                </View>
-
-                {!isLogin && (
-                    <View style={styles.termsContainer}>
-                        <TouchableOpacity
-                            style={styles.checkbox}
-                            onPress={() => setTermsAccepted(!termsAccepted)}
-                        >
-                            <Ionicons
-                                name={termsAccepted ? "checkbox" : "square-outline"}
-                                size={24}
-                                color={termsAccepted ? "#4F46E5" : "#6B7280"}
-                            />
-                        </TouchableOpacity>
-                        <View style={styles.termsTextContainer}>
-                            <Text style={styles.termsText}>I accept the </Text>
-                            <TouchableOpacity onPress={() => setShowTermsModal(true)}>
-                                <Text style={styles.termsLink}>Terms and Conditions</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                )}
-
-                <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={isLogin ? signInWithEmail : signUpWithEmail}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.buttonText}>{isLogin ? 'Sign In' : 'Sign Up'}</Text>
-                    )}
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => setIsLogin(!isLogin)} style={styles.switchButton}>
-                    <Text style={styles.switchText}>
-                        {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={showTermsModal}
-                onRequestClose={() => setShowTermsModal(false)}
+            <LinearGradient
+                colors={['#1a1a2e', '#16213e', '#0f3460']}
+                className="flex-1"
             >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Terms and Conditions</Text>
-                            <TouchableOpacity onPress={() => setShowTermsModal(false)}>
-                                <Ionicons name="close" size={24} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
-                        <ScrollView style={styles.modalBody}>
-                            <Text style={styles.modalText}>
-                                1. Acceptance of Terms{'\n'}
-                                By accessing and using Mambo Fitness, you accept and agree to be bound by the terms and provision of this agreement.{'\n\n'}
-                                2. Health Disclaimer{'\n'}
-                                This app offers health and fitness information and is designed for educational and entertainment purposes only. You should consult your physician or general practitioner before beginning a new fitness program.{'\n\n'}
-                                3. User Accounts{'\n'}
-                                You are responsible for maintaining the confidentiality of your account and password. You agree to accept responsibility for all activities that occur under your account.{'\n\n'}
-                                4. Privacy Policy{'\n'}
-                                Your use of the app is also governed by our Privacy Policy. Please review our Privacy Policy for information on how we collect and use your data.{'\n\n'}
-                                5. Modifications{'\n'}
-                                We reserve the right to modify these terms at any time. Please check these terms periodically for changes.
-                            </Text>
+                <SafeAreaView className="flex-1">
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        className="flex-1"
+                    >
+                        <ScrollView
+                            className="flex-1"
+                            contentContainerStyle={{ flexGrow: 1 }}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            {/* Header */}
+                            <Animated.View
+                                entering={FadeInUp.delay(100).springify()}
+                                className="items-center pt-16 pb-8"
+                            >
+                                <View className="w-20 h-20 bg-blue-500 rounded-3xl items-center justify-center mb-4">
+                                    <Ionicons name="fitness" size={48} color="white" />
+                                </View>
+                                <AccessibleText className="text-white text-3xl font-bold">{t('auth.welcome')}</AccessibleText>
+                                <AccessibleText className="text-gray-400 text-base mt-2">{t('auth.signIn')}</AccessibleText>
+                            </Animated.View>
+
+                            {/* Form */}
+                            <View className="flex-1 px-6">
+                                <Animated.View entering={FadeInDown.delay(200).springify()}>
+                                    <AuthInput
+                                        icon="mail-outline"
+                                        placeholder={t('auth.emailPlaceholder')}
+                                        value={email}
+                                        onChangeText={handleEmailChange}
+                                        error={emailError}
+                                        keyboardType="email-address"
+                                        autoCapitalize="none"
+                                    />
+
+                                    <AuthInput
+                                        icon="lock-closed-outline"
+                                        placeholder={t('auth.passwordPlaceholder')}
+                                        value={password}
+                                        onChangeText={handlePasswordChange}
+                                        error={passwordError}
+                                        isPassword
+                                        autoCapitalize="none"
+                                    />
+
+                                    {/* Remember Me & Forgot Password */}
+                                    <View className="flex-row justify-between items-center mb-6">
+                                        <TouchableOpacity
+                                            onPress={() => setRememberMe(!rememberMe)}
+                                            className="flex-row items-center"
+                                        >
+                                            <Ionicons
+                                                name={rememberMe ? 'checkbox' : 'square-outline'}
+                                                size={20}
+                                                color={rememberMe ? '#60a5fa' : '#6B7280'}
+                                            />
+                                            <AccessibleText className="text-gray-400 text-sm ml-2">{t('profile.settings')}</AccessibleText>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity onPress={() => router.push('/forgot-password')}>
+                                            <AccessibleText className="text-blue-500 text-sm font-semibold">
+                                                {t('auth.forgotPassword')}
+                                            </AccessibleText>
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    {/* Login Button */}
+                                    <TouchableOpacity
+                                        onPress={handleLogin}
+                                        disabled={loading}
+                                        className="mb-6"
+                                    >
+                                        <LinearGradient
+                                            colors={loading ? ['#6B7280', '#4B5563'] : ['#3b82f6', '#60a5fa']}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 0 }}
+                                            className="rounded-2xl py-4 items-center"
+                                        >
+                                            {loading ? (
+                                                <ActivityIndicator color="white" />
+                                            ) : (
+                                                <AccessibleText className="text-white text-lg font-bold">{t('auth.signIn')}</AccessibleText>
+                                            )}
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+
+                                    {/* Divider */}
+                                    <View className="flex-row items-center mb-6">
+                                        <View className="flex-1 h-px bg-gray-700" />
+                                        <AccessibleText className="text-gray-500 text-sm mx-4">{t('common.continue')}</AccessibleText>
+                                        <View className="flex-1 h-px bg-gray-700" />
+                                    </View>
+
+                                    {/* Social Login */}
+                                    <View className="flex-row justify-between gap-4 mb-6">
+                                        <TouchableOpacity
+                                            onPress={() => performSocialLogin('google')}
+                                            className="flex-1 flex-row items-center justify-center bg-white/5 border border-white/10 rounded-2xl py-4"
+                                        >
+                                            <Ionicons name="logo-google" size={20} color="white" />
+                                            <AccessibleText className="text-white font-semibold ml-2">{t('auth.continueWithGoogle')}</AccessibleText>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            onPress={() => performSocialLogin('apple')}
+                                            className="flex-1 flex-row items-center justify-center bg-white/5 border border-white/10 rounded-2xl py-4"
+                                        >
+                                            <Ionicons name="logo-apple" size={20} color="white" />
+                                            <AccessibleText className="text-white font-semibold ml-2">{t('auth.continueWithApple')}</AccessibleText>
+                                        </TouchableOpacity>
+                                    </View>
+                                </Animated.View>
+                            </View>
+
+                            {/* Register Link */}
+                            <Animated.View
+                                entering={FadeInUp.delay(300).springify()}
+                                className="items-center pb-8"
+                            >
+                                <TouchableOpacity onPress={() => router.push('/register')}>
+                                    <AccessibleText className="text-gray-400">
+                                        {t('auth.noAccount')}{' '}
+                                        <AccessibleText className="text-blue-500 font-semibold">{t('auth.signUp')}</AccessibleText>
+                                    </AccessibleText>
+                                </TouchableOpacity>
+                            </Animated.View>
                         </ScrollView>
-                    </View>
-                </View>
-            </Modal>
-        </View >
+                    </KeyboardAvoidingView>
+                </SafeAreaView>
+            </LinearGradient>
+        </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#111827', // Dark background
-        padding: 20,
-        justifyContent: 'center',
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#F9FAFB',
-        marginTop: 10,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#9CA3AF',
-        marginTop: 5,
-    },
-    form: {
-        width: '100%',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#1F2937',
-        borderRadius: 12,
-        marginBottom: 16,
-        paddingHorizontal: 12,
-        height: 50,
-        borderWidth: 1,
-        borderColor: '#374151',
-    },
-    inputIcon: {
-        marginRight: 10,
-    },
-    input: {
-        flex: 1,
-        color: '#F9FAFB',
-        fontSize: 16,
-    },
-    button: {
-        backgroundColor: '#4F46E5',
-        borderRadius: 12,
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    buttonDisabled: {
-        opacity: 0.7,
-    },
-    buttonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    switchButton: {
-        marginTop: 20,
-        alignItems: 'center',
-    },
-    switchText: {
-        color: '#6366F1',
-        fontSize: 14,
-    },
-
-    termsContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-        paddingHorizontal: 4,
-    },
-    checkbox: {
-        marginRight: 10,
-    },
-    termsTextContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    termsText: {
-        color: '#9CA3AF',
-        fontSize: 14,
-    },
-    termsLink: {
-        color: '#4F46E5',
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        padding: 20,
-    },
-    modalContent: {
-        backgroundColor: '#1F2937',
-        borderRadius: 16,
-        width: '100%',
-        maxHeight: '80%',
-        padding: 20,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#374151',
-        paddingBottom: 10,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#F9FAFB',
-    },
-    modalBody: {
-        marginBottom: 10,
-    },
-    modalText: {
-        color: '#D1D5DB',
-        fontSize: 14,
-        lineHeight: 22,
-    },
-});

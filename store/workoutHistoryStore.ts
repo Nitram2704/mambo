@@ -1,17 +1,35 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
-import { ExerciseSession, WorkoutSet } from './activeWorkoutStore';
+import { CompletedWorkout, ExerciseSession, WorkoutSet } from '@/types/schema';
 
-export interface CompletedWorkout {
+// Helper type for DB response
+type WorkoutDBResponse = {
     id: string;
-    routineId: string | null;
-    routineName: string;
-    startTime: Date;
-    endTime: Date;
-    durationSeconds: number;
+    routine_id: string | null;
+    routine_name: string;
+    start_time: string;
+    end_time: string;
+    duration_seconds: number;
     volume: number;
-    exercises: ExerciseSession[];
-}
+    workout_exercises: {
+        id: string;
+        exercise_id: string;
+        exercise_name: string;
+        muscle_group: string;
+        note: string | null;
+        rest_time: number | null;
+        workout_sets: {
+            id: string;
+            weight: number;
+            reps: number;
+            rir: number;
+            set_type: string;
+            completed: boolean;
+        }[];
+    }[];
+};
 
 interface WorkoutHistoryState {
     workouts: CompletedWorkout[];
@@ -21,22 +39,24 @@ interface WorkoutHistoryState {
     clearHistory: () => void;
 }
 
-export const useWorkoutHistoryStore = create<WorkoutHistoryState>((set, get) => ({
-    workouts: [],
-    loading: false,
+export const useWorkoutHistoryStore = create<WorkoutHistoryState>()(
+    persist(
+        (set, get) => ({
+            workouts: [],
+            loading: false,
 
-    fetchWorkouts: async () => {
-        set({ loading: true });
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                set({ workouts: [], loading: false });
-                return;
-            }
+            fetchWorkouts: async () => {
+                set({ loading: true });
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) {
+                        set({ workouts: [], loading: false });
+                        return;
+                    }
 
-            const { data, error } = await supabase
-                .from('workouts')
-                .select(`
+                    const { data, error } = await supabase
+                        .from('workouts')
+                        .select(`
                     *,
                     workout_exercises (
                         id,
@@ -50,129 +70,152 @@ export const useWorkoutHistoryStore = create<WorkoutHistoryState>((set, get) => 
                             weight,
                             reps,
                             rir,
-                            completed
+                            set_type,
+                            completed,
+                            form_check_id
                         )
                     )
                 `)
-                .order('start_time', { ascending: false });
+                        .order('start_time', { ascending: false });
 
-            if (error) throw error;
+                    if (error) throw error;
 
-            if (data) {
-                const formattedWorkouts: CompletedWorkout[] = data.map((w: any) => {
-                    const exercises: ExerciseSession[] = w.workout_exercises.map((we: any) => {
-                        const sets: WorkoutSet[] = we.workout_sets.map((ws: any) => ({
-                            id: ws.id,
-                            weight: ws.weight,
-                            reps: ws.reps,
-                            rir: ws.rir,
-                            type: ws.set_type || 'normal',
-                            completed: ws.completed,
-                            isEmpty: false // History sets are never empty
+                    if (data) {
+                        const formattedWorkouts: CompletedWorkout[] = (data as any[]).map((w: any) => {
+                            const exercises: ExerciseSession[] = w.workout_exercises.map((we: any) => {
+                                const sets: WorkoutSet[] = we.workout_sets.map((ws: any) => ({
+                                    id: ws.id,
+                                    weight: ws.weight,
+                                    reps: ws.reps,
+                                    rir: ws.rir,
+                                    type: ws.set_type as any || 'normal',
+                                    completed: ws.completed,
+                                    isEmpty: false, // History sets are never empty
+                                    formCheckId: ws.form_check_id
+                                }));
+
+                                return {
+                                    exerciseId: we.exercise_id,
+                                    exerciseName: we.exercise_name,
+                                    muscleGroup: we.muscle_group,
+                                    note: we.note || '',
+                                    restTime: we.rest_time || 120,
+                                    sets
+                                } as ExerciseSession;
+                            });
+
+                            return {
+                                id: w.id,
+                                routineId: w.routine_id || '',
+                                routineName: w.routine_name,
+                                startTime: new Date(w.start_time),
+                                endTime: new Date(w.end_time),
+                                durationSeconds: w.duration_seconds,
+                                volume: w.volume,
+                                exercises
+                            };
+                        });
+
+                        set({ workouts: formattedWorkouts });
+                    }
+                } catch (e) {
+                    console.error('Error fetching history:', e);
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            addWorkout: async (workout) => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return null;
+
+                try {
+                    // 1. Create Workout
+                    const { data: workoutData, error: workoutError } = await supabase
+                        .from('workouts')
+                        .insert({
+                            user_id: user.id,
+                            routine_id: workout.routineId,
+                            routine_name: workout.routineName,
+                            start_time: workout.startTime,
+                            end_time: workout.endTime,
+                            duration_seconds: workout.durationSeconds,
+                            volume: workout.volume
+                        })
+                        .select()
+                        .single();
+
+                    if (workoutError) throw workoutError;
+
+                    // FIXED: Store Supabase ID to return later
+                    const supabaseWorkoutId = workoutData.id;
+
+                    // 2. Create Exercises and Sets
+                    // We need to do this sequentially or carefully to get IDs
+                    for (const ex of workout.exercises) {
+                        const { data: exerciseData, error: exerciseError } = await supabase
+                            .from('workout_exercises')
+                            .insert({
+                                workout_id: workoutData.id,
+                                exercise_id: ex.exerciseId,
+                                exercise_name: ex.exerciseName,
+                                muscle_group: ex.muscleGroup,
+                                note: ex.note,
+                                rest_time: ex.restTime,
+                                video_url: ex.videoUrl
+                            })
+                            .select()
+                            .single();
+
+                        if (exerciseError) throw exerciseError;
+
+                        const setsToInsert = ex.sets.map(s => ({
+                            workout_exercise_id: exerciseData.id,
+                            weight: s.weight,
+                            reps: s.reps,
+                            rir: s.rir,
+                            set_type: s.type || 'normal',
+                            completed: s.completed,
+                            form_check_id: s.formCheckId
                         }));
 
-                        return {
-                            exerciseId: we.exercise_id,
-                            exerciseName: we.exercise_name,
-                            muscleGroup: we.muscle_group,
-                            note: we.note || '',
-                            restTime: we.rest_time || 120,
-                            sets
-                        };
+                        const { error: setsError } = await supabase
+                            .from('workout_sets')
+                            .insert(setsToInsert);
+
+                        if (setsError) throw setsError;
+                    }
+
+                    // Refresh history and wait for it
+                    await get().fetchWorkouts();
+
+                    // FIXED: Return the Supabase-generated ID
+                    return supabaseWorkoutId;
+
+                } catch (e) {
+                    console.error('Error saving workout:', e);
+                    return null;
+                }
+            },
+
+            clearHistory: () => set({ workouts: [] }),
+        }),
+        {
+            name: 'workout-history-storage',
+            storage: {
+                getItem: async (name) => {
+                    const str = await AsyncStorage.getItem(name);
+                    if (!str) return null;
+                    return JSON.parse(str, (key, value) => {
+                        if (key === 'startTime' || key === 'endTime') return new Date(value);
+                        return value;
                     });
-
-                    return {
-                        id: w.id,
-                        routineId: w.routine_id,
-                        routineName: w.routine_name,
-                        startTime: new Date(w.start_time),
-                        endTime: new Date(w.end_time),
-                        durationSeconds: w.duration_seconds,
-                        volume: w.volume,
-                        exercises
-                    };
-                });
-
-                set({ workouts: formattedWorkouts });
-            }
-        } catch (e) {
-            console.error('Error fetching history:', e);
-        } finally {
-            set({ loading: false });
+                },
+                setItem: async (name, value) => {
+                    await AsyncStorage.setItem(name, JSON.stringify(value));
+                },
+                removeItem: async (name) => await AsyncStorage.removeItem(name),
+            },
         }
-    },
-
-    addWorkout: async (workout) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return null;
-
-        try {
-            // 1. Create Workout
-            const { data: workoutData, error: workoutError } = await supabase
-                .from('workouts')
-                .insert({
-                    user_id: user.id,
-                    routine_id: workout.routineId,
-                    routine_name: workout.routineName,
-                    start_time: workout.startTime,
-                    end_time: workout.endTime,
-                    duration_seconds: workout.durationSeconds,
-                    volume: workout.volume
-                })
-                .select()
-                .single();
-
-            if (workoutError) throw workoutError;
-
-            // FIXED: Store Supabase ID to return later
-            const supabaseWorkoutId = workoutData.id;
-
-            // 2. Create Exercises and Sets
-            // We need to do this sequentially or carefully to get IDs
-            for (const ex of workout.exercises) {
-                const { data: exerciseData, error: exerciseError } = await supabase
-                    .from('workout_exercises')
-                    .insert({
-                        workout_id: workoutData.id,
-                        exercise_id: ex.exerciseId,
-                        exercise_name: ex.exerciseName,
-                        muscle_group: ex.muscleGroup,
-                        note: ex.note,
-                        rest_time: ex.restTime,
-                        video_url: ex.videoUrl
-                    })
-                    .select()
-                    .single();
-
-                if (exerciseError) throw exerciseError;
-
-                const setsToInsert = ex.sets.map(s => ({
-                    workout_exercise_id: exerciseData.id,
-                    weight: s.weight,
-                    reps: s.reps,
-                    rir: s.rir,
-                    set_type: s.type || 'normal',
-                    completed: s.completed
-                }));
-
-                const { error: setsError } = await supabase
-                    .from('workout_sets')
-                    .insert(setsToInsert);
-
-                if (setsError) throw setsError;
-            }
-
-            // Refresh history and wait for it
-            await get().fetchWorkouts();
-
-            // FIXED: Return the Supabase-generated ID
-            return supabaseWorkoutId;
-
-        } catch (e) {
-            console.error('Error saving workout:', e);
-            return null;
-        }
-    },
-
-    clearHistory: () => set({ workouts: [] }),
-}));
+    )
+);

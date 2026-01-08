@@ -1,4 +1,7 @@
 import React from 'react';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 import { View, Image, ActivityIndicator, Dimensions } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,17 +22,19 @@ export function ExerciseGifPlayer({
 }: ExerciseGifPlayerProps) {
     const [isLoading, setIsLoading] = React.useState(true);
     const [hasError, setHasError] = React.useState(false);
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
 
     if (!gifUrl) {
         return (
-            <View className={`bg-gray-800 rounded-xl items-center justify-center ${className}`}
+            <View className={`bg-surface-highlight border border-border/10 rounded-xl items-center justify-center ${className}`}
                 style={{ height: GIF_HEIGHT }}>
-                <Ionicons name="image-outline" size={48} color="#6b7280" />
-                <Animated.Text
-                    entering={FadeIn}
-                    className="text-gray-400 text-center mt-2 px-4">
+                <Ionicons name="image-outline" size={48} color={colors.textMuted} />
+                <AccessibleText
+
+                    className="text-text-muted text-center mt-2 px-4">
                     {fallbackText}
-                </Animated.Text>
+                </AccessibleText>
             </View>
         );
     }
@@ -53,19 +58,19 @@ export function ExerciseGifPlayer({
             />
 
             {isLoading && (
-                <View className="absolute inset-0 bg-gray-800 rounded-xl items-center justify-center">
-                    <ActivityIndicator size="large" color="#60a5fa" />
+                <View className="absolute inset-0 bg-surface-highlight border border-border/10 rounded-xl items-center justify-center">
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             )}
 
             {hasError && (
-                <View className="absolute inset-0 bg-gray-800 rounded-xl items-center justify-center">
-                    <Ionicons name="image-outline" size={48} color="#6b7280" />
-                    <Animated.Text
-                        entering={FadeIn}
-                        className="text-gray-400 text-center mt-2 px-4">
+                <View className="absolute inset-0 bg-surface-highlight border border-border/10 rounded-xl items-center justify-center">
+                    <Ionicons name="image-outline" size={48} color={colors.textMuted} />
+                    <AccessibleText
+
+                        className="text-text-muted text-center mt-2 px-4">
                         Error al cargar GIF
-                    </Animated.Text>
+                    </AccessibleText>
                 </View>
             )}
         </View>

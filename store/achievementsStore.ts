@@ -2,7 +2,9 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ACHIEVEMENTS, Achievement } from '@/constants/achievements';
-import { CompletedWorkout } from './workoutHistoryStore';
+import { CompletedWorkout, WorkoutSet, ExerciseSession, UserProfile } from '@/types/schema';
+import { DailyNutrition } from './nutritionStore';
+import { isNutritionGoalHit, isCleanEatingHit, calculateNewStreak } from '@/utils/streakUtils';
 
 // Definición de rangos de niveles
 const LEVEL_RANGES = [
@@ -43,7 +45,7 @@ interface AchievementsState {
 
     // Acciones para ganar XP
     addXp: (amount: number, source: string) => void;
-    checkNutritionStreaks: (dailyNutrition: any, yesterdayNutrition: any, goals: any) => void;
+    checkNutritionStreaks: (dailyNutrition: DailyNutrition, yesterdayNutrition: DailyNutrition | undefined, goals: UserProfile) => void;
     incrementLessonsCompleted: () => void;
 
     checkAchievements: (
@@ -60,6 +62,7 @@ interface AchievementsState {
     getUnlockedCount: () => number;
     getTotalXp: () => number;
     getCurrentLevel: () => { level: number; title: string; progress: number; currentLevelXp: number; nextLevelXp: number; totalXp: number };
+    reset: () => void;
 }
 
 export const useAchievementsStore = create<AchievementsState>()(
@@ -99,15 +102,15 @@ export const useAchievementsStore = create<AchievementsState>()(
 
                         case 'TOTAL_VOLUME':
                             if (history) {
-                                const totalVolume = history.reduce((sum, w) => sum + w.volume, 0);
+                                const totalVolume = history.reduce((sum: number, w: CompletedWorkout) => sum + w.volume, 0);
                                 if (totalVolume >= achievement.targetValue) isUnlocked = true;
                             }
                             break;
 
                         case 'TOTAL_SETS':
                             if (history) {
-                                const totalSets = history.reduce((sum, w) => {
-                                    return sum + w.exercises.reduce((exSum, ex) => exSum + ex.sets.length, 0);
+                                const totalSets = history.reduce((sum: number, w: CompletedWorkout) => {
+                                    return sum + w.exercises.reduce((exSum: number, ex: ExerciseSession) => exSum + ex.sets.length, 0);
                                 }, 0);
                                 if (totalSets >= achievement.targetValue) isUnlocked = true;
                             }
@@ -172,8 +175,8 @@ export const useAchievementsStore = create<AchievementsState>()(
                                 const targetExercises = exerciseNames[achievement.id as keyof typeof exerciseNames] || [];
                                 if (targetExercises.length > 0) {
                                     let totalSets = 0;
-                                    history.forEach(workout => {
-                                        workout.exercises.forEach(exercise => {
+                                    history.forEach((workout: CompletedWorkout) => {
+                                        workout.exercises.forEach((exercise: ExerciseSession) => {
                                             const exerciseName = exercise.exerciseName.toLowerCase();
                                             if (targetExercises.some(name => exerciseName.includes(name.toLowerCase()))) {
                                                 totalSets += exercise.sets.length;
@@ -189,12 +192,12 @@ export const useAchievementsStore = create<AchievementsState>()(
                             if (lastWorkout && userWeight) {
                                 if (achievement.id === 'squat_1_5_bw') {
                                     const squatKeywords = ['sentadilla', 'squat'];
-                                    const squatExercises = lastWorkout.exercises.filter(ex =>
+                                    const squatExercises = lastWorkout.exercises.filter((ex: ExerciseSession) =>
                                         squatKeywords.some(k => ex.exerciseName.toLowerCase().includes(k))
                                     );
 
-                                    const maxWeight = squatExercises.reduce((max, ex) => {
-                                        const exMax = ex.sets.reduce((sMax, set) => Math.max(sMax, set.weight), 0);
+                                    const maxWeight = squatExercises.reduce((max: number, ex: ExerciseSession) => {
+                                        const exMax = ex.sets.reduce((sMax: number, set: WorkoutSet) => Math.max(sMax, set.weight), 0);
                                         return Math.max(max, exMax);
                                     }, 0);
 
@@ -267,45 +270,19 @@ export const useAchievementsStore = create<AchievementsState>()(
             },
 
             checkNutritionStreaks: (dailyNutrition, yesterdayNutrition, goals) => {
-                // Check if macros were hit today
-                const macrosHit = dailyNutrition.caloriesConsumed <= goals.calorieGoal * 1.05 && // 5% tolerance
-                    dailyNutrition.proteinConsumed >= goals.proteinGoal * 0.95 &&
-                    dailyNutrition.carbsConsumed >= goals.carbsGoal * 0.95 &&
-                    dailyNutrition.fatsConsumed >= goals.fatsGoal * 0.95;
+                const macrosHit = isNutritionGoalHit(dailyNutrition, goals);
+                const cleanEating = isCleanEatingHit(dailyNutrition, goals);
 
-                // Check if clean eating (no excess calories)
-                const cleanEating = dailyNutrition.caloriesConsumed <= goals.calorieGoal * 1.1; // 10% tolerance
+                const yesterdayMacrosHit = yesterdayNutrition && isNutritionGoalHit(yesterdayNutrition, goals);
+                const yesterdayClean = yesterdayNutrition && isCleanEatingHit(yesterdayNutrition, goals);
+
+                set((state) => ({
+                    nutritionStreak: calculateNewStreak(macrosHit, !!yesterdayMacrosHit, state.nutritionStreak),
+                    cleanEatingStreak: calculateNewStreak(cleanEating, !!yesterdayClean, state.cleanEatingStreak)
+                }));
 
                 if (macrosHit) {
-                    // Check if yesterday also hit macros
-                    const yesterdayMacrosHit = yesterdayNutrition && yesterdayNutrition.caloriesConsumed <= goals.calorieGoal * 1.05 &&
-                        yesterdayNutrition.proteinConsumed >= goals.proteinGoal * 0.95 &&
-                        yesterdayNutrition.carbsConsumed >= goals.carbsGoal * 0.95 &&
-                        yesterdayNutrition.fatsConsumed >= goals.fatsGoal * 0.95;
-
-                    if (yesterdayMacrosHit) {
-                        set((state) => ({ nutritionStreak: state.nutritionStreak + 1 }));
-                    } else {
-                        set({ nutritionStreak: 1 });
-                    }
-
-                    // Add XP for hitting macros
                     get().addXp(5, 'Hit daily macros');
-                } else {
-                    set({ nutritionStreak: 0 });
-                }
-
-                if (cleanEating) {
-                    // Check if yesterday also clean eating
-                    const yesterdayClean = yesterdayNutrition && yesterdayNutrition.caloriesConsumed <= goals.calorieGoal * 1.1;
-
-                    if (yesterdayClean) {
-                        set((state) => ({ cleanEatingStreak: state.cleanEatingStreak + 1 }));
-                    } else {
-                        set({ cleanEatingStreak: 1 });
-                    }
-                } else {
-                    set({ cleanEatingStreak: 0 });
                 }
             },
 
@@ -313,6 +290,15 @@ export const useAchievementsStore = create<AchievementsState>()(
                 set((state) => ({ lessonsCompleted: state.lessonsCompleted + 1 }));
                 get().addXp(15, 'Completed lesson');
             },
+
+            reset: () =>
+                set({
+                    unlockedAchievements: [],
+                    accumulatedXp: 0,
+                    nutritionStreak: 0,
+                    cleanEatingStreak: 0,
+                    lessonsCompleted: 0,
+                }),
         }),
         {
             name: 'achievements-storage',

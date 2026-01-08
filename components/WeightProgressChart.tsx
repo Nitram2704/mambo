@@ -1,12 +1,16 @@
 import React from 'react';
 import { View, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
 
 interface WeightProgressChartProps {
     weights: { date: string; value: number }[];
 }
 
 export default function WeightProgressChart({ weights }: WeightProgressChartProps) {
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const screenWidth = Dimensions.get('window').width - 32;
 
     if (weights.length === 0) {
@@ -31,7 +35,7 @@ export default function WeightProgressChart({ weights }: WeightProgressChartProp
                     datasets: [
                         {
                             data: values,
-                            color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`, // Blue
+                            color: (opacity = 1) => colors.primary,
                             strokeWidth: 3,
                         },
                     ],
@@ -39,19 +43,19 @@ export default function WeightProgressChart({ weights }: WeightProgressChartProp
                 width={screenWidth}
                 height={220}
                 chartConfig={{
-                    backgroundColor: '#1f2937',
-                    backgroundGradientFrom: '#1f2937',
-                    backgroundGradientTo: '#111827',
+                    backgroundColor: colors.surface,
+                    backgroundGradientFrom: colors.surface,
+                    backgroundGradientTo: colors.background,
                     decimalPlaces: 1,
-                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
+                    color: (opacity = 1) => colors.text,
+                    labelColor: (opacity = 1) => colors.textMuted,
                     style: {
                         borderRadius: 16,
                     },
                     propsForDots: {
                         r: '5',
                         strokeWidth: '2',
-                        stroke: '#3b82f6',
+                        stroke: colors.primary,
                     },
                 }}
                 bezier

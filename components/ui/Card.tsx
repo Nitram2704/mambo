@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, ViewProps } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { cssInterop } from 'react-native-css-interop';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
 
 interface CardProps extends ViewProps {
     variant?: 'solid' | 'glass' | 'outline';
@@ -8,9 +11,6 @@ interface CardProps extends ViewProps {
     className?: string;
     children: React.ReactNode;
 }
-
-import { useAppTheme } from '@/hooks/use-app-theme';
-import { Colors } from '@/constants/Colors';
 
 export const Card: React.FC<CardProps> = ({
     variant = 'solid',
@@ -84,3 +84,9 @@ export const Card: React.FC<CardProps> = ({
         </View>
     );
 };
+
+cssInterop(Card, {
+    className: {
+        target: 'style',
+    },
+});

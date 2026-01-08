@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Platform, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useRoutineStore } from '@/store/routineStore';
 import { useSavedRoutinesStore } from '@/store/savedRoutinesStore';
 import { ScheduleConfigurator } from '@/components/ScheduleConfigurator';
+import { useUIStore } from '@/store/uiStore';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 export default function CreateRoutineScreen() {
     const router = useRouter();
@@ -18,8 +22,12 @@ export default function CreateRoutineScreen() {
     } = useRoutineStore();
 
     const { addRoutine, updateRoutine, routines } = useSavedRoutinesStore();
+    const { showToast } = useUIStore();
 
     const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
+    const [showRestTimerPicker, setShowRestTimerPicker] = useState(false);
+    const [selectedRestTime, setSelectedRestTime] = useState(120);
+    const [currentEditingExerciseId, setCurrentEditingExerciseId] = useState<string | null>(null);
 
     // Schedule State
     const [isScheduled, setIsScheduled] = useState(false);
@@ -49,12 +57,12 @@ export default function CreateRoutineScreen() {
 
     const handleSave = async () => {
         if (!name.trim()) {
-            alert('Por favor, ingresa un nombre para la rutina');
+            showToast('Por favor, ingresa un nombre para la rutina', 'warning');
             return;
         }
 
         if (exercises.length === 0) {
-            alert('Por favor, añade al menos un ejercicio');
+            showToast('Por favor, añade al menos un ejercicio', 'warning');
             return;
         }
 
@@ -75,16 +83,16 @@ export default function CreateRoutineScreen() {
                     scheduleInterval: scheduleData?.interval,
                     scheduleStartDate: scheduleData?.startDate
                 });
-                alert(`Rutina "${name}" actualizada correctamente`);
+                showToast(`Rutina "${name}" actualizada correctamente`, 'success');
             } else {
                 await addRoutine(name, exercises, scheduleData);
-                alert(`Rutina "${name}" guardada con ${exercises.length} ejercicios`);
+                showToast(`Rutina "${name}" guardada con éxito`, 'success');
             }
             resetRoutine();
             router.back();
         } catch (error) {
             console.error('Error saving routine:', error);
-            alert('Hubo un error al guardar la rutina. Por favor intenta de nuevo.');
+            showToast('No pudimos guardar tu rutina. Revisa tu conexión.', 'error');
         }
     };
 
@@ -154,10 +162,13 @@ export default function CreateRoutineScreen() {
                     </Text>
 
                     {exercises.length === 0 ? (
-                        <View className="bg-gray-800/50 rounded-xl p-8 items-center justify-center border border-gray-700 border-dashed mb-4">
-                            <Ionicons name="barbell-outline" size={48} color="#4b5563" />
-                            <Text className="text-gray-500 mt-2 text-center">Aún no hay ejercicios</Text>
-                        </View>
+                        <EmptyState
+                            icon="barbell-outline"
+                            title="Aún no hay ejercicios"
+                            description="Añade ejercicios de nuestra biblioteca para empezar a construir tu rutina."
+                            actionLabel="Añadir Ejercicio"
+                            onAction={() => router.push('/exercises')}
+                        />
                     ) : (
                         <View className="mb-4">
                             {exercises.map((exercise, index) => (
@@ -238,23 +249,23 @@ export default function CreateRoutineScreen() {
                                         <View className="px-4 pb-4 border-t border-gray-700 pt-4">
                                             {/* Rest Timer Input */}
                                             <View className="mb-4">
-                                                <Text className="text-gray-400 text-sm mb-2">Tiempo de Descanso (segundos)</Text>
-                                                <TextInput
-                                                    className="bg-gray-700 text-white p-3 rounded-lg text-center text-lg border border-gray-600"
-                                                    placeholder="120"
-                                                    placeholderTextColor="#6b7280"
-                                                    keyboardType="number-pad"
-                                                    value={(exercise.restTime || 120).toString()}
-                                                    onChangeText={(text) => {
-                                                        const seconds = parseInt(text) || 120;
-                                                        // Max 10 minutes = 600 seconds
-                                                        const clamped = Math.min(Math.max(seconds, 0), 600);
-                                                        updateRestTime(exercise.id, clamped);
+                                                <Text className="text-gray-400 text-sm mb-2">Tiempo de Descanso</Text>
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setCurrentEditingExerciseId(exercise.id);
+                                                        setSelectedRestTime(exercise.restTime || 120);
+                                                        setShowRestTimerPicker(true);
                                                     }}
-                                                />
-                                                <Text className="text-gray-500 text-xs mt-1 text-center">
-                                                    Máximo: 10 minutos (600s)
-                                                </Text>
+                                                    className="bg-gray-700 p-4 rounded-lg flex-row items-center justify-between border border-gray-600"
+                                                >
+                                                    <View className="flex-row items-center gap-2">
+                                                        <Ionicons name="timer-outline" size={20} color="#a78bfa" />
+                                                        <Text className="text-white font-bold text-lg">
+                                                            {Math.floor((exercise.restTime || 120) / 60)}:{((exercise.restTime || 120) % 60).toString().padStart(2, '0')}
+                                                        </Text>
+                                                    </View>
+                                                    <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                                                </TouchableOpacity>
                                             </View>
 
                                             {/* Quick Presets */}
@@ -333,6 +344,90 @@ export default function CreateRoutineScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Rest Timer Picker Modal */}
+            <Modal
+                visible={showRestTimerPicker}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowRestTimerPicker(false)}
+            >
+                <View className="flex-1 justify-end bg-black/60">
+                    <Card variant="glass" className="rounded-t-3xl border-white/10 pb-8">
+                        <View className="p-6">
+                            <View className="flex-row justify-between items-center mb-6">
+                                <Text className="text-white font-black text-xl uppercase tracking-widest">Descanso</Text>
+                                <TouchableOpacity
+                                    onPress={() => setShowRestTimerPicker(false)}
+                                    className="bg-gray-700 p-2 rounded-full"
+                                >
+                                    <Ionicons name="close" size={20} color="#f8fafc" />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Current Selection Display */}
+                            <View className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 mb-6 items-center">
+                                <Text className="text-gray-400 text-xs font-black uppercase tracking-widest mb-2">Tiempo Seleccionado</Text>
+                                <Text className="text-blue-500 text-5xl font-black">
+                                    {Math.floor(selectedRestTime / 60)}:{(selectedRestTime % 60).toString().padStart(2, '0')}
+                                </Text>
+                                <Text className="text-gray-500 text-xs mt-1">minutos</Text>
+                            </View>
+
+                            {/* Quick Presets */}
+                            <Text className="text-gray-400 text-xs font-black uppercase tracking-widest mb-3">Presets Rápidos</Text>
+                            <View className="flex-row gap-2 mb-6">
+                                {[60, 90, 120, 180].map((seconds) => (
+                                    <TouchableOpacity
+                                        key={seconds}
+                                        onPress={() => setSelectedRestTime(seconds)}
+                                        className={`flex-1 py-3 rounded-xl border ${selectedRestTime === seconds
+                                            ? 'bg-blue-600 border-blue-500/50'
+                                            : 'bg-gray-700 border-gray-600'
+                                            }`}
+                                    >
+                                        <Text className={`text-center font-black text-xs ${selectedRestTime === seconds ? 'text-white' : 'text-gray-400'}`}>
+                                            {seconds < 60 ? `${seconds}s` : `${seconds / 60}m`}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            {/* Time Picker - 15 second increments */}
+                            <Text className="text-gray-400 text-xs font-black uppercase tracking-widest mb-3">Personalizado</Text>
+                            <ScrollView
+                                className="max-h-48 bg-gray-800 rounded-xl border border-gray-700"
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {Array.from({ length: 25 }, (_, i) => i * 15).map((seconds) => (
+                                    <TouchableOpacity
+                                        key={seconds}
+                                        onPress={() => setSelectedRestTime(seconds)}
+                                        className={`p-4 border-b border-gray-700 ${selectedRestTime === seconds ? 'bg-blue-600/20' : ''}`}
+                                    >
+                                        <Text className={`text-center font-bold ${selectedRestTime === seconds ? 'text-blue-500' : 'text-white'}`}>
+                                            {Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+
+                            {/* Confirm Button */}
+                            <Button
+                                onPress={() => {
+                                    if (currentEditingExerciseId) {
+                                        updateRestTime(currentEditingExerciseId, selectedRestTime);
+                                    }
+                                    setShowRestTimerPicker(false);
+                                }}
+                                variant="primary"
+                                label="Confirmar"
+                                className="mt-6"
+                            />
+                        </View>
+                    </Card>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }

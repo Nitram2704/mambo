@@ -36,45 +36,48 @@ export async function mapExerciseToDatabase(
  * Infers the muscle group from an exercise name using keywords
  * Improved with accent-insensitivity and better priority
  */
-function inferMuscleGroup(exerciseName: string): 'Chest' | 'Back' | 'Legs' | 'Shoulders' | 'Arms' | 'Core' | 'Cardio' {
+function inferMuscleGroup(exerciseName: string): 'chest' | 'back' | 'legs' | 'shoulders' | 'biceps' | 'triceps' | 'abs' | 'cardio' | 'full_body' | 'other' {
     const nameLower = exerciseName.toLowerCase();
 
     // 1. Legs (High priority for specific keywords)
     if (nameLower.match(/sentadilla|squat|zancada|lunge|prensa|press.*pierna|cu[aá]dricep|quad|femoral|curl.*femoral|gemelo|calf|aductor|abductor|gl[uú]teo|glute|hip|cadera|peso muerto rumano|romanian deadlift|buenos d[ií]as|good morning|pierna|leg/)) {
-        return 'Legs';
+        return 'legs';
     }
 
     // 2. Chest
     if (nameLower.match(/press.*banca|bench.*press|pecho|chest|pec|apertura|fly|flyes|fondo|dip|flexi[oó]n|push.*up/)) {
-        return 'Chest';
+        return 'chest';
     }
 
     // 3. Back
     if (nameLower.match(/dominada|pull.*up|jal[oó]n|pulldown|remo|row|espalda|back|peso muerto(?!.*rumano)|deadlift(?!.*romanian)/)) {
-        return 'Back';
+        return 'back';
     }
 
     // 4. Shoulders
     if (nameLower.match(/hombro|shoulder|press.*militar|military.*press|elevaci[oó]n.*lateral|lateral.*raise|p[aá]jaro|rear.*delt|face.*pull|arnold|overhead/)) {
-        return 'Shoulders';
+        return 'shoulders';
     }
 
     // 5. Arms
-    if (nameLower.match(/bicep|curl|tricep|brazo|arm|extensi[oó]n|press.*franc[eé]s|skull.*crusher|martillo|hammer/)) {
-        return 'Arms';
+    if (nameLower.match(/tr[ií]cep|extensi[oó]n|press.*franc[eé]s|skull.*crusher/)) {
+        return 'triceps';
+    }
+    if (nameLower.match(/bicep|curl|brazo|arm|martillo|hammer/)) {
+        return 'biceps';
     }
 
     // 6. Core
     if (nameLower.match(/abdominal|abs|crunch|core|plancha|plank|russian.*twist|elevaci[oó]n.*pierna|leg.*raise|mountain.*climber|wood.*chop/)) {
-        return 'Core';
+        return 'abs';
     }
 
     // 7. Cardio
     if (nameLower.match(/burpee|sprint|cardio|carrera|run|bicicleta|bike|el[ií]ptica|elliptical|remo.*erg[oó]metro|rower|salto|jump|correr/)) {
-        return 'Cardio';
+        return 'cardio';
     }
 
-    return 'Core';
+    return 'other';
 }
 
 /**
@@ -84,18 +87,18 @@ function inferMuscleGroup(exerciseName: string): 'Chest' | 'Back' | 'Legs' | 'Sh
 function inferEquipment(exerciseName: string): string {
     const nameLower = exerciseName.toLowerCase();
 
-    if (nameLower.match(/barra(?!.*z)|barbell/)) return 'Barbell';
-    if (nameLower.match(/mancuerna|dumbbell/)) return 'Dumbbells';
-    if (nameLower.match(/polea|cable|cuerda/)) return 'Cable Machine';
-    if (nameLower.match(/m[aá]quina|machine|prensa|press.*machine|pec.*deck|smith/)) return 'Machine';
-    if (nameLower.match(/barra.*z|ez.*bar/)) return 'EZ-Bar';
-    if (nameLower.match(/banda|band/)) return 'Resistance Band';
-    if (nameLower.match(/disco|plate/)) return 'Weight Plate';
-    if (nameLower.match(/rueda|wheel/)) return 'Ab Wheel';
-    if (nameLower.match(/battle.*rope|cuerda.*batalla/)) return 'Battle Rope';
-    if (nameLower.match(/trap.*bar|barra.*hexagonal/)) return 'Trap Bar';
+    if (nameLower.match(/barra(?!.*z)|barbell/)) return 'barbell';
+    if (nameLower.match(/mancuerna|dumbbell/)) return 'dumbbell';
+    if (nameLower.match(/polea|cable|cuerda/)) return 'cable';
+    if (nameLower.match(/m[aá]quina|machine|prensa|press.*machine|pec.*deck|smith/)) return 'machine';
+    if (nameLower.match(/barra.*z|ez.*bar/)) return 'barbell'; // EZ-Bar mapped to barbell for schema compatibility
+    if (nameLower.match(/banda|band/)) return 'band';
+    if (nameLower.match(/disco|plate/)) return 'other';
+    if (nameLower.match(/rueda|wheel/)) return 'other';
+    if (nameLower.match(/battle.*rope|cuerda.*batalla/)) return 'other';
+    if (nameLower.match(/trap.*bar|barra.*hexagonal/)) return 'barbell';
 
-    return 'Bodyweight';
+    return 'bodyweight';
 }
 
 /**
@@ -153,12 +156,12 @@ export async function processWorkoutExercises(
 ): Promise<Array<{
     id: string;
     name: string;
-    muscleGroup: 'Chest' | 'Back' | 'Legs' | 'Shoulders' | 'Arms' | 'Core' | 'Cardio';
-    equipment: string;
+    muscleGroup: 'other' | 'chest' | 'back' | 'legs' | 'shoulders' | 'cardio' | 'biceps' | 'triceps' | 'abs' | 'full_body';
+    equipment: 'other' | 'barbell' | 'dumbbell' | 'machine' | 'bodyweight' | 'cable' | 'band' | 'kettlebell';
     plannedSets: number;
     restTime: number;
 }>> {
-    const validMuscleGroups = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'] as const;
+    const validMuscleGroups = ['chest', 'back', 'legs', 'shoulders', 'biceps', 'triceps', 'abs', 'cardio', 'full_body', 'other'] as const;
 
     // Extract all exercise names
     const exerciseNames = exercises.map(ex => ex.name.trim());
@@ -271,16 +274,16 @@ export async function processWorkoutExercises(
         }
 
         // Normalize muscle_group
-        const dbMuscleGroup = dbExercise.muscle_group || 'Chest';
+        const dbMuscleGroup = dbExercise.muscle_group || 'chest';
         const muscleGroup = validMuscleGroups.find(mg =>
             dbMuscleGroup.toLowerCase().includes(mg.toLowerCase())
-        ) || 'Chest';
+        ) || 'chest';
 
         return {
             id: dbExercise.id,
             name: dbExercise.name,
             muscleGroup,
-            equipment: dbExercise.equipment || 'Bodyweight',
+            equipment: dbExercise.equipment?.toLowerCase() || 'bodyweight',
             plannedSets: ex.sets,
             restTime: ex.rest,
         };

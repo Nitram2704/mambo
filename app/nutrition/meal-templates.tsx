@@ -116,19 +116,19 @@ export default function MealTemplatesScreen() {
                                 </View>
                                 <View>
                                     <Text className="text-xs" style={{ color: Colors[theme].textSecondary }}>{t('nutrition.logMeal.protein')}</Text>
-                                    <Text className="font-bold text-lg" style={{ color: Colors.blue[400] }}>
+                                    <Text className="font-bold text-lg" style={{ color: Colors[theme].blue[400] }}>
                                         {template.totalProtein}g
                                     </Text>
                                 </View>
                                 <View>
                                     <Text className="text-xs" style={{ color: Colors[theme].textSecondary }}>{t('nutrition.logMeal.carbs')}</Text>
-                                    <Text className="font-bold text-lg" style={{ color: Colors.yellow[500] }}>
+                                    <Text className="font-bold text-lg" style={{ color: Colors[theme].yellow[500] }}>
                                         {template.totalCarbs}g
                                     </Text>
                                 </View>
                                 <View>
                                     <Text className="text-xs" style={{ color: Colors[theme].textSecondary }}>{t('nutrition.logMeal.fats')}</Text>
-                                    <Text className="font-bold text-lg" style={{ color: Colors.orange[400] }}>
+                                    <Text className="font-bold text-lg" style={{ color: Colors[theme].orange[400] }}>
                                         {template.totalFats}g
                                     </Text>
                                 </View>

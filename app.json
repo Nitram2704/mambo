@@ -2,19 +2,33 @@
   "expo": {
     "name": "mambo",
     "slug": "mambo-fitness",
-    "version": "1.1.2",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mambo",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "bundleIdentifier": "com.mambo.app",
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Esta app necesita acceso a tu cámara para tomar fotos de tus comidas.",
         "NSPhotoLibraryUsageDescription": "Esta app necesita acceso a tus fotos para seleccionar imágenes de tus comidas.",
+        "NSHealthShareUsageDescription": "Mambo necesita acceso a tus datos de salud para analizar tu recuperación y actividad.",
+        "NSHealthUpdateUsageDescription": "Mambo necesita acceso a tus datos de salud para sincronizar tus entrenamientos.",
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "usesAppleSignIn": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.applesignin": [
+          "Default"
+        ],
+        "com.apple.security.application-groups": [
+          "group.com.mambo.app"
+        ]
       }
     },
     "android": {
@@ -30,7 +44,10 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_SLEEP",
+        "android.permission.health.READ_HEART_RATE"
       ]
     },
     "web": {
@@ -52,7 +69,16 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "mambo-fitness",
+          "project": "mambo-react-native"
+        }
+      ],
+      "@sentry/react-native",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

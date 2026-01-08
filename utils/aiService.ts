@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
-import { ActionExecutor } from '@/app/assistant/actionExecutor';
+import { ActionExecutor } from '@/services/actionExecutor';
 import { Platform } from 'react-native';
+import { SubscriptionTier } from '@/constants/SubscriptionConfig';
 
 // Google Speech-to-Text API
 const SPEECH_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_SPEECH_API_KEY || '';
@@ -21,6 +22,9 @@ export interface UserContext {
         fats: number;
     };
     currentScreen?: string;
+    tier?: SubscriptionTier;
+    coachStyle?: 'sargento' | 'cientifico' | 'amigo';
+    userFacts?: string[];
 }
 
 // Define Tools
@@ -50,7 +54,11 @@ const tools: any[] = [
                         protein: { type: SchemaType.NUMBER, description: "Proteínas en gramos (opcional)" },
                         carbs: { type: SchemaType.NUMBER, description: "Carbohidratos en gramos (opcional)" },
                         fats: { type: SchemaType.NUMBER, description: "Grasas en gramos (opcional)" },
-                        mealType: { type: SchemaType.STRING, description: "Tipo de comida: 'breakfast', 'lunch', 'dinner', 'snack'" }
+                        mealType: {
+                            type: SchemaType.STRING,
+                            description: "Tipo de comida.",
+                            enum: ["breakfast", "mid_morning", "lunch", "snack", "dinner"]
+                        }
                     },
                     required: ["foodName", "calories", "mealType"]
                 }
@@ -105,7 +113,7 @@ const tools: any[] = [
             },
             {
                 name: "generate_meal_plan",
-                description: "Genera un nuevo plan nutricional semanal completo.",
+                description: "Genera un nuevo plan nutricional mensual completo (28 días).",
                 parameters: {
                     type: SchemaType.OBJECT,
                     properties: {
@@ -267,10 +275,97 @@ async function transcribeAudio(audioBase64: string): Promise<string> {
     }
 }
 
-export async function askAssistant(question: string, context: UserContext, history: any[] = [], audioBase64?: string): Promise<string> {
+function getSystemPrompt(tier: SubscriptionTier = 'STARTER', context: UserContext): string {
+    const style = context.coachStyle || 'amigo';
+
+    let stylePrompt = '';
+    switch (style) {
+        case 'sargento':
+            stylePrompt = `TU ESTILO ES "SARGENTO" 🪖:
+- Eres directo, exigente y motivador de forma dura.
+- No aceptas excusas.
+- Usa frases cortas y contundentes.
+- Tu objetivo es que el usuario no se rinda y dé el 100%.`;
+            break;
+        case 'cientifico':
+            stylePrompt = `TU ESTILO ES "CIENTÍFICO" 🧪:
+- Eres analítico, detallado y te basas en la ciencia del deporte.
+- Explica el "por qué" de las cosas (biomecánica, fisiología).
+- Usa terminología técnica pero asegúrate de que se entienda.
+- Tu objetivo es la optimización máxima basada en datos.`;
+            break;
+        case 'amigo':
+        default:
+            stylePrompt = `TU ESTILO ES "AMIGO" 🤝:
+- Eres empático, cercano y relajado.
+- Usa un lenguaje coloquial y motivador.
+- Celebra los pequeños logros como si fueran tuyos.
+- Tu objetivo es que el usuario disfrute el proceso y se sienta apoyado.`;
+            break;
+    }
+
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const dayOfWeek = now.toLocaleDateString('es-ES', { weekday: 'long' });
+
+    const basePrompt = `Eres Mambo Coach 💪, tu compa de fitness.
+Hoy es ${dayOfWeek}, ${dateStr}.
+Contexto del usuario:
+${JSON.stringify(context)}
+
+${context.userFacts && context.userFacts.length > 0 ? `HECHOS SOBRE EL USUARIO (RAG Memory):
+${context.userFacts.map(f => `- ${f}`).join('\n')}` : ''}
+
+${stylePrompt}
+
+REGLAS GENERALES:
+- BALANCEADO: Respuestas de 3-5 líneas.
+- AMIGABLE: Usa emojis.
+- PRÁCTICO: Si puedes hacer algo por el usuario (ajustar rutina, plan, etc.), USA LAS HERRAMIENTAS.
+- Si usas una herramienta, NO digas "voy a hacerlo", solo hazlo (llama a la función).
+- Después de llamar a la función, confirma lo que hiciste.
+
+INSTRUCCIÓN ESPECIAL:
+- Si el mensaje del usuario empieza con [NUDGE_TRIGGER: ...], significa que el sistema ha detectado un evento importante. 
+- Tu tarea es convertir esa información técnica en un mensaje motivador y cercano siguiendo tu ESTILO asignado.
+- NO menciones que es un "trigger" o un "nudge", simplemente actúa como si te hubieras dado cuenta tú mismo.`;
+
+    switch (tier) {
+        case 'ELITE':
+            return `${basePrompt}
+- Eres el Mambo Coach de Élite 🥇. Tu objetivo es el éxito total del usuario a largo plazo.
+- No solo respondas, ANTICIPA. Si ves que el usuario está progresando, sugiere retos. Si ves que falla, crea un plan de rescate.
+- Usa un tono de mentor experto y cercano.
+- Analiza tendencias de semanas anteriores si están disponibles en el contexto.
+- Tienes permiso para ser muy detallado en tus explicaciones científicas si el usuario lo requiere.`;
+
+        case 'PRO':
+            return `${basePrompt}
+- Eres un entrenador personal optimizador 🥈.
+- Analiza el contexto del usuario (peso, macros, volumen).
+- Si detectas que el usuario no está llegando a sus objetivos, sugiérele usar las herramientas para ajustar su plan.
+- Sé motivador y enfócate en la eficiencia del entrenamiento.`;
+
+        case 'STARTER':
+        default:
+            return `${basePrompt}
+- Eres un asistente de fitness básico 🥉.
+- Responde de forma concisa y directa.
+- No sugieras cambios proactivos en la rutina a menos que te lo pidan explícitamente.
+- Limítate a responder dudas sobre ejercicios o nutrición básica de forma reactiva.`;
+    }
+}
+
+export async function askAssistant(
+    question: string,
+    context: UserContext,
+    history: any[] = [],
+    audioBase64?: string,
+    imageBase64?: string
+): Promise<{ response: string; transcription?: string }> {
     try {
         if (!API_KEY) {
-            return "Por favor configura tu API Key de Gemini en el archivo .env (EXPO_PUBLIC_GEMINI_API_KEY)";
+            return { response: "Por favor configura tu API Key de Gemini en el archivo .env (EXPO_PUBLIC_GEMINI_API_KEY)" };
         }
 
         // Handle voice input: transcribe audio to text first
@@ -288,26 +383,24 @@ export async function askAssistant(question: string, context: UserContext, histo
 
         return await retryWithBackoff(async () => {
             const model = genAI.getGenerativeModel({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-2.0-flash-exp',
                 tools: tools
             });
 
-            const systemPrompt = `
-Eres Mambo Coach 💪, tu compa de fitness.
-Contexto del usuario:
-${JSON.stringify(context)}
-
-TU ESTILO:
-- BALANCEADO: Respuestas de 3-5 líneas.
-- AMIGABLE: Usa emojis.
-- PRÁCTICO: Si puedes hacer algo por el usuario (ajustar rutina, plan, etc.), USA LAS HERRAMIENTAS.
-- Si usas una herramienta, NO digas "voy a hacerlo", solo hazlo (llama a la función).
-- Después de llamar a la función, confirma lo que hiciste.
-`;
+            const systemPrompt = getSystemPrompt(context.tier, context);
 
             const userParts: any[] = [];
             // Now we send transcribed text instead of raw audio
             userParts.push({ text: finalQuestion });
+
+            if (imageBase64) {
+                userParts.push({
+                    inlineData: {
+                        data: imageBase64,
+                        mimeType: 'image/jpeg'
+                    }
+                });
+            }
 
             const chat = model.startChat({
                 history: [
@@ -400,15 +493,15 @@ TU ESTILO:
 
                     const finalResponse = result2.response.text();
                     if (!finalResponse) {
-                        return functionResult; // Fallback to the tool output if model is silent
+                        return { response: functionResult, transcription: audioBase64 ? finalQuestion : undefined }; // Fallback to the tool output if model is silent
                     }
-                    return finalResponse;
+                    return { response: finalResponse, transcription: audioBase64 ? finalQuestion : undefined };
                 }
 
-                return toolResponseText; // Fallback
+                return { response: toolResponseText, transcription: audioBase64 ? finalQuestion : undefined }; // Fallback
             }
 
-            return response.text();
+            return { response: response.text(), transcription: audioBase64 ? finalQuestion : undefined };
         });
 
     } catch (error: any) {
@@ -416,25 +509,25 @@ TU ESTILO:
 
         // Enhanced error handling
         if (error.message?.includes('429') || error.toString().includes('429')) {
-            return "⚠️ La IA está muy ocupada ahora (límite de cuota excedido). He intentado varias veces, pero sigue fallando. Por favor, espera 5-10 minutos y vuelve a intentarlo.";
+            return { response: "⚠️ La IA está muy ocupada ahora (límite de cuota excedido). He intentado varias veces, pero sigue fallando. Por favor, espera 5-10 minutos y vuelve a intentarlo." };
         }
         if (error.message?.includes('500') || error.message?.includes('502') || error.message?.includes('503')) {
-            return "🔧 Hay un problema temporal con el servidor de IA. He intentado reconectar automáticamente, pero sigue fallando. Inténtalo de nuevo en unos minutos.";
+            return { response: "🔧 Hay un problema temporal con el servidor de IA. He intentado reconectar automáticamente, pero sigue fallando. Inténtalo de nuevo en unos minutos." };
         }
         if (error.message?.includes('network') || error.code === 'NETWORK_ERROR') {
-            return "📶 Problema de conexión a internet. Verifica tu conexión y vuelve a intentarlo.";
+            return { response: "📶 Problema de conexión a internet. Verifica tu conexión y vuelve a intentarlo." };
         }
         if (error.message?.includes('audio') || error.message?.includes('multimodal') || error.message?.includes('unsupported')) {
-            return "🎤 Lo siento, actualmente no puedo procesar audio directamente. Por favor, escribe tu mensaje en texto para que pueda ayudarte mejor.";
+            return { response: "🎤 Lo siento, actualmente no puedo procesar audio directamente. Por favor, escribe tu mensaje en texto para que pueda ayudarte mejor." };
         }
 
-        return "Lo siento, tuve un problema técnico después de varios intentos. ¿Podrías repetirlo?";
+        return { response: "Lo siento, tuve un problema técnico después de varios intentos. ¿Podrías repetirlo?" };
     }
 }
 
 export async function generateRecipe(prompt: string): Promise<any> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
         const systemPrompt = `
         You are an expert nutritionist and chef. Create a recipe based on the user's request.
@@ -477,7 +570,7 @@ export async function generateRecipe(prompt: string): Promise<any> {
 
 export async function predict1RM(exerciseName: string, history: { date: string, weight: number, reps: number }[]): Promise<string> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
         const prompt = `
         Basado en este historial de entrenamiento para ${exerciseName}:
         ${JSON.stringify(history)}
@@ -497,7 +590,7 @@ export async function predict1RM(exerciseName: string, history: { date: string, 
 
 export async function predictWeightTrend(currentWeight: number, targetWeight: number, adherence: number): Promise<string> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
         const prompt = `
         Usuario actual: ${currentWeight}kg. Objetivo: ${targetWeight}kg.
         Adherencia nutricional actual: ${adherence}%.

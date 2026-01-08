@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocalDateString, parseLocalDate } from '@/utils/dateUtils';
+import { SavedRoutine } from '@/types/schema';
 
 export interface ScheduledWorkout {
     id: string;
@@ -23,7 +24,7 @@ interface WeeklyScheduleState {
     getWorkoutsForDate: (date: string) => ScheduledWorkout[];
     getWorkoutStreak: () => { days: number; weeks: number; isActive: boolean };
     getWeeklyProgress: () => { scheduled: number; completed: number; percentage: number };
-    generateScheduledWorkouts: (routines: any[]) => void;
+    generateScheduledWorkouts: (routines: SavedRoutine[]) => void;
     exitCurrentPlan: () => void;
     removeFutureWorkoutsOfRoutine: (routineId: string) => void;
 }
@@ -213,8 +214,8 @@ export const useWeeklyScheduleStore = create<WeeklyScheduleState>()(
                             // Calculate next occurrence if start date is in past
                             const diffTime = Math.abs(currentDate.getTime() - startDate.getTime());
                             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                            const daysToNext = routine.scheduleInterval - (diffDays % routine.scheduleInterval);
-                            currentDate.setDate(currentDate.getDate() + (daysToNext === routine.scheduleInterval ? 0 : daysToNext));
+                            const daysToNext = (routine.scheduleInterval || 1) - (diffDays % (routine.scheduleInterval || 1));
+                            currentDate.setDate(currentDate.getDate() + (daysToNext === (routine.scheduleInterval || 1) ? 0 : daysToNext));
                         }
                     }
 

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
@@ -10,22 +11,23 @@ import { getLocalDateString } from '@/utils/dateUtils';
 import SleepLogModal from '@/components/SleepLogModal';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { AccessibleText } from '@/components/ui/AccessibleText';
 
 const { width } = Dimensions.get('window');
 
 export default function SleepScreen() {
     const { t } = useTranslation();
     const { theme } = useAppTheme();
+    const router = useRouter();
     const isDark = theme === 'dark';
-    const { sleepLogs, getWeeklyStats } = useSleepStore();
+    const { sleepLogs, getWeeklyStats, getLastNightSleep, fetchSleepLogs } = useSleepStore();
     const [isModalVisible, setIsModalVisible] = useState(false);
 
-    const lastNightSleep = useMemo(() => {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = getLocalDateString(yesterday);
-        return sleepLogs[yesterdayStr] || null;
-    }, [sleepLogs]);
+    React.useEffect(() => {
+        fetchSleepLogs();
+    }, []);
+
+    const lastNightSleep = useMemo(() => getLastNightSleep(), [sleepLogs, getLastNightSleep]);
 
     const weeklyStats = useMemo(() => getWeeklyStats(), [getWeeklyStats]);
 
@@ -50,44 +52,40 @@ export default function SleepScreen() {
             <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
                 {/* Header */}
                 <View className="mb-8 mt-2">
-                    <Text className="text-4xl font-black" style={{ color: Colors[theme].text }}>{t('sleep.title')}</Text>
+                    <AccessibleText variant="h1" weight="bold" className="text-text text-4xl font-black">{t('sleep.title')}</AccessibleText>
                 </View>
 
                 {/* Last Night Summary */}
-                <Card className="p-6 mb-6 overflow-hidden">
-                    <LinearGradient
-                        colors={isDark ? ['rgba(59, 130, 246, 0.1)', 'transparent'] : ['rgba(59, 130, 246, 0.05)', 'transparent']}
-                        className="absolute inset-0"
-                    />
+                <Card variant="glass" className="p-6 mb-6 overflow-hidden">
                     <View className="flex-row justify-between items-start mb-6">
                         <View>
-                            <Text className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: Colors[theme].textSecondary }}>
+                            <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest mb-1">
                                 {t('sleep.lastNight')}
-                            </Text>
+                            </AccessibleText>
                             {lastNightSleep ? (
-                                <Text className="text-4xl font-black" style={{ color: Colors[theme].text }}>
+                                <AccessibleText weight="bold" className="text-text text-4xl font-black">
                                     {formatSleepDuration(lastNightSleep.duration)}
-                                </Text>
+                                </AccessibleText>
                             ) : (
-                                <Text className="text-2xl font-bold" style={{ color: Colors[theme].textMuted }}>
+                                <AccessibleText weight="bold" className="text-text-muted text-2xl font-bold">
                                     {t('sleep.noLogs')}
-                                </Text>
+                                </AccessibleText>
                             )}
                         </View>
-                        <View className="bg-blue-500/10 p-3 rounded-2xl">
-                            <Ionicons name="moon" size={32} color="#3b82f6" />
+                        <View className="bg-primary/10 p-3 rounded-2xl">
+                            <Ionicons name="moon" size={32} color={Colors[theme].primary} />
                         </View>
                     </View>
 
                     {lastNightSleep && (
                         <View className="flex-row gap-4">
-                            <View className="flex-1 bg-blue-500/5 p-3 rounded-xl border" style={{ borderColor: 'rgba(59, 130, 246, 0.1)' }}>
-                                <Text className="text-[10px] font-bold uppercase mb-1" style={{ color: Colors[theme].textMuted }}>{t('sleep.quality')}</Text>
-                                <Text className="font-bold" style={{ color: Colors[theme].text }}>{lastNightSleep.quality}/10</Text>
+                            <View className="flex-1 bg-primary/5 p-3 rounded-xl border border-primary/20">
+                                <AccessibleText weight="bold" className="text-text-muted text-[10px] uppercase mb-1">{t('sleep.quality')}</AccessibleText>
+                                <AccessibleText weight="bold" className="text-text font-bold">{lastNightSleep.quality}/10</AccessibleText>
                             </View>
-                            <View className="flex-1 bg-blue-500/5 p-3 rounded-xl border" style={{ borderColor: 'rgba(59, 130, 246, 0.1)' }}>
-                                <Text className="text-[10px] font-bold uppercase mb-1" style={{ color: Colors[theme].textMuted }}>{t('sleep.lastSession')}</Text>
-                                <Text className="font-bold" style={{ color: Colors[theme].text }}>{new Date(lastNightSleep.bedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                            <View className="flex-1 bg-primary/5 p-3 rounded-xl border border-primary/20">
+                                <AccessibleText weight="bold" className="text-text-muted text-[10px] uppercase mb-1">{t('sleep.lastSession')}</AccessibleText>
+                                <AccessibleText weight="bold" className="text-text font-bold">{new Date(lastNightSleep.bedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</AccessibleText>
                             </View>
                         </View>
                     )}
@@ -96,8 +94,9 @@ export default function SleepScreen() {
                         <TouchableOpacity
                             onPress={() => setIsModalVisible(true)}
                             className="bg-blue-600 py-4 rounded-2xl items-center"
+                            style={{ backgroundColor: Colors[theme].primary }}
                         >
-                            <Text className="text-white font-bold">{t('sleep.register')}</Text>
+                            <AccessibleText weight="bold" className="text-white font-bold">{t('sleep.register')}</AccessibleText>
                         </TouchableOpacity>
                     )}
                 </Card>
@@ -105,13 +104,13 @@ export default function SleepScreen() {
                 {/* Weekly Activity */}
                 <View className="mb-8">
                     <View className="flex-row justify-between items-end mb-4">
-                        <Text className="text-xl font-bold" style={{ color: Colors[theme].text }}>{t('sleep.thisWeek')}</Text>
-                        <Text className="text-xs font-bold" style={{ color: Colors[theme].textSecondary }}>
+                        <AccessibleText weight="bold" className="text-text text-xl font-bold">{t('sleep.thisWeek')}</AccessibleText>
+                        <AccessibleText weight="bold" className="text-text-secondary text-xs font-bold">
                             {t('sleep.average')}: {formatSleepDuration(weeklyStats.avgDuration)}
-                        </Text>
+                        </AccessibleText>
                     </View>
 
-                    <Card className="p-4 flex-row justify-between items-end h-40">
+                    <Card variant="glass" className="p-4 flex-row justify-between items-end h-40">
                         {weekDays.map((day, index) => {
                             const height = day.log ? Math.min((day.log.duration / 600) * 100, 100) : 0;
                             const isToday = index === 6;
@@ -123,14 +122,14 @@ export default function SleepScreen() {
                                             className="w-full rounded-t-lg"
                                             style={{
                                                 height: `${height}%`,
-                                                backgroundColor: isToday ? '#3b82f6' : 'rgba(59, 130, 246, 0.3)',
+                                                backgroundColor: isToday ? Colors[theme].primary : Colors[theme].primary + '50',
                                                 minHeight: day.log ? 4 : 0
                                             }}
                                         />
                                     </View>
-                                    <Text className="text-[10px] font-bold" style={{ color: isToday ? '#3b82f6' : Colors[theme].textMuted }}>
+                                    <AccessibleText weight="bold" className="text-[10px]" style={{ color: isToday ? Colors[theme].primary : Colors[theme].textMuted }}>
                                         {day.dayName}
-                                    </Text>
+                                    </AccessibleText>
                                 </View>
                             );
                         })}
@@ -143,29 +142,35 @@ export default function SleepScreen() {
                         onPress={() => setIsModalVisible(true)}
                         className="flex-1"
                     >
-                        <Card className="p-5 items-center">
-                            <View className="bg-blue-500/10 p-3 rounded-full mb-3">
-                                <Ionicons name="add" size={24} color="#3b82f6" />
+                        <Card variant="glass" className="p-5 items-center">
+                            <View className="bg-primary/10 p-3 rounded-full mb-3">
+                                <Ionicons name="add" size={24} color={Colors[theme].primary} />
                             </View>
-                            <Text className="font-bold text-sm" style={{ color: Colors[theme].text }}>{t('sleep.register')}</Text>
+                            <AccessibleText weight="bold" className="text-text font-bold text-sm">{t('sleep.register')}</AccessibleText>
                         </Card>
                     </TouchableOpacity>
 
-                    <TouchableOpacity className="flex-1">
-                        <Card className="p-5 items-center">
-                            <View className="bg-indigo-500/10 p-3 rounded-full mb-3">
-                                <Ionicons name="stats-chart" size={24} color="#6366f1" />
+                    <TouchableOpacity
+                        onPress={() => router.push('/sleep/sleep-report')}
+                        className="flex-1"
+                    >
+                        <Card variant="glass" className="p-5 items-center">
+                            <View className="bg-secondary/10 p-3 rounded-full mb-3">
+                                <Ionicons name="stats-chart" size={24} color={Colors[theme].secondary} />
                             </View>
-                            <Text className="font-bold text-sm" style={{ color: Colors[theme].text }}>{t('sleep.reports')}</Text>
+                            <AccessibleText weight="bold" className="text-text font-bold text-sm">{t('sleep.reports')}</AccessibleText>
                         </Card>
                     </TouchableOpacity>
 
-                    <TouchableOpacity className="flex-1">
-                        <Card className="p-5 items-center">
-                            <View className="bg-purple-500/10 p-3 rounded-full mb-3">
-                                <Ionicons name="trophy" size={24} color="#a855f7" />
+                    <TouchableOpacity
+                        onPress={() => router.push('/sleep/sleep-goals')}
+                        className="flex-1"
+                    >
+                        <Card variant="glass" className="p-5 items-center">
+                            <View className="bg-warning/10 p-3 rounded-full mb-3">
+                                <Ionicons name="trophy" size={24} color={Colors[theme].warning} />
                             </View>
-                            <Text className="font-bold text-sm" style={{ color: Colors[theme].text }}>{t('sleep.goals.title')}</Text>
+                            <AccessibleText weight="bold" className="text-text font-bold text-sm">{t('sleep.goals.title')}</AccessibleText>
                         </Card>
                     </TouchableOpacity>
                 </View>

@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withSpring
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { AccessibleText } from './ui/AccessibleText';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
 
 interface LevelProgressBarProps {
     level: number;
@@ -22,6 +25,7 @@ export const LevelProgressBar: React.FC<LevelProgressBarProps> = ({
     currentXp,
     nextLevelXp
 }) => {
+    const { theme } = useAppTheme();
     const progressWidth = useSharedValue(0);
 
     useEffect(() => {
@@ -36,34 +40,37 @@ export const LevelProgressBar: React.FC<LevelProgressBarProps> = ({
 
     return (
         <LinearGradient
-            colors={['rgba(30, 41, 59, 0.7)', 'rgba(15, 23, 42, 0.8)']}
-            className="rounded-2xl p-5 border border-white/10 mb-6"
+            colors={theme === 'dark'
+                ? ['rgba(30, 41, 59, 0.7)', 'rgba(15, 23, 42, 0.8)']
+                : [Colors[theme].surfaceHighlight + '20', Colors[theme].surfaceHighlight + '40']}
+            className="rounded-2xl p-5 border border-border/10 mb-6"
+            accessibilityLabel={`Nivel ${level}, ${title}, ${Math.round(progress * 100)}% de progreso hacia el siguiente nivel`}
         >
             <View className="flex-row justify-between items-end mb-3">
                 <View>
-                    <Text className="text-gray-400 text-xs uppercase font-bold mb-1 tracking-wider">Nivel Actual</Text>
+                    <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase mb-1 tracking-wider">Nivel Actual</AccessibleText>
                     <View className="flex-row items-baseline">
-                        <Text className="text-white text-4xl font-bold mr-2">{level}</Text>
+                        <AccessibleText weight="bold" className="text-text text-4xl mr-2">{level}</AccessibleText>
                         <LinearGradient
                             colors={['#60a5fa', '#a78bfa']}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 0 }}
                             className="px-2 py-0.5 rounded-md"
                         >
-                            <Text className="text-white font-bold text-xs uppercase">{title}</Text>
+                            <AccessibleText weight="bold" className="text-white text-xs uppercase">{title}</AccessibleText>
                         </LinearGradient>
                     </View>
                 </View>
                 <View className="items-end">
-                    <Text className="text-gray-400 text-xs mb-1 font-medium">XP Total</Text>
-                    <Text className="text-white font-bold text-lg">
-                        {currentXp.toLocaleString()} <Text className="text-gray-500 text-sm">/ {nextLevelXp.toLocaleString()}</Text>
-                    </Text>
+                    <AccessibleText weight="medium" className="text-text-secondary text-xs mb-1">XP Total</AccessibleText>
+                    <AccessibleText weight="bold" className="text-text text-lg">
+                        {currentXp.toLocaleString()} <AccessibleText className="text-text-muted text-sm">/ {nextLevelXp.toLocaleString()}</AccessibleText>
+                    </AccessibleText>
                 </View>
             </View>
 
             {/* Progress Bar Container */}
-            <View className="h-4 bg-gray-900/50 rounded-full overflow-hidden border border-white/5 relative mb-2">
+            <View className="h-4 bg-surface-highlight/30 rounded-full overflow-hidden border border-border/10 relative mb-2">
                 {/* Animated Fill */}
                 <Animated.View style={[styles.fill, animatedStyle]}>
                     <LinearGradient
@@ -75,9 +82,9 @@ export const LevelProgressBar: React.FC<LevelProgressBarProps> = ({
                 </Animated.View>
             </View>
 
-            <Text className="text-gray-400 text-xs text-center font-medium">
+            <AccessibleText weight="medium" className="text-text-secondary text-xs text-center">
                 Faltan {Math.round(nextLevelXp - currentXp).toLocaleString()} XP para subir de nivel
-            </Text>
+            </AccessibleText>
         </LinearGradient>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Alert } from 'react-native';
+import { View, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,10 @@ import { useSavedRoutinesStore } from '@/store/savedRoutinesStore';
 import { generateWorkoutPlan, generateNutritionPlan } from '@/utils/planGenerator';
 import { Card } from '@/components/ui/Card';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { a11y } from '@/utils/accessibility';
+import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/use-app-theme';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -18,6 +22,8 @@ export default function GeneratingPlans() {
     const router = useRouter();
     const { profile, updateProfile } = useUserProfileStore();
     const { addRoutine } = useSavedRoutinesStore();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
 
     useEffect(() => {
         if (profile) {
@@ -179,41 +185,41 @@ export default function GeneratingPlans() {
 
     return (
         <ScreenWrapper className="justify-center items-center px-6">
-            <Ionicons name="sparkles-outline" size={80} color="#3b82f6" />
+            <Ionicons name="sparkles-outline" size={80} color={colors.primary} />
 
-            <Text className="text-white text-3xl font-bold text-center mt-6">
+            <AccessibleText variant="h1" weight="bold" className="text-white text-center mt-6">
                 {t('onboarding.generating.title')}
-            </Text>
+            </AccessibleText>
 
-            <Text className="text-text-secondary text-center mt-3 mb-8">
+            <AccessibleText className="text-text-secondary text-center mt-3 mb-8">
                 {t('onboarding.generating.subtitle')}
-            </Text>
+            </AccessibleText>
 
-            <View className="w-full mb-6">
+            <View className="w-full mb-6" accessibilityRole="progressbar" accessibilityLabel={`Progreso de generación: ${progress}%`}>
                 <View className="h-2 bg-surface rounded-full overflow-hidden">
                     <View
                         className="h-full bg-primary rounded-full"
                         style={{ width: `${progress}%` }}
                     />
                 </View>
-                <Text className="text-primary text-sm text-center mt-2 font-bold">
+                <AccessibleText weight="bold" className="text-primary text-sm text-center mt-2">
                     {progress}%
-                </Text>
+                </AccessibleText>
             </View>
 
-            <ActivityIndicator size="large" color="#3b82f6" />
+            <ActivityIndicator size="large" color={colors.primary} />
 
-            <Text className="text-text-secondary text-center mt-4 font-medium">
+            <AccessibleText weight="medium" className="text-text-secondary text-center mt-4">
                 {status}
-            </Text>
+            </AccessibleText>
 
             <Card variant="glass" className="mt-8 w-full p-6">
-                <Text className="text-text-secondary text-center text-sm leading-relaxed">
+                <AccessibleText variant="caption" className="text-text-secondary text-center leading-relaxed">
                     {progress < 30 && t('onboarding.generating.tip1')}
                     {progress >= 30 && progress < 60 && t('onboarding.generating.tip2')}
                     {progress >= 60 && progress < 90 && t('onboarding.generating.tip3')}
                     {progress >= 90 && t('onboarding.generating.tip4')}
-                </Text>
+                </AccessibleText>
             </Card>
         </ScreenWrapper>
     );

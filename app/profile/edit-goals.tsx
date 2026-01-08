@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserProfileStore } from '@/store/userProfileStore';
+import { useUIStore } from '@/store/uiStore';
+import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
+import { AccessibleText } from '@/components/ui/AccessibleText';
+import { Card } from '@/components/ui/Card';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
+import { useTranslation } from 'react-i18next';
 
 export default function EditGoalsScreen() {
+    const { t } = useTranslation();
     const router = useRouter();
     const { profile, updateProfile } = useUserProfileStore();
+    const { showToast } = useUIStore();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
 
     const [calories, setCalories] = useState('');
     const [protein, setProtein] = useState('');
@@ -30,7 +40,7 @@ export default function EditGoalsScreen() {
         const fat = parseInt(fats);
 
         if (isNaN(cal) || isNaN(pro) || isNaN(car) || isNaN(fat)) {
-            Alert.alert('Error', 'Por favor ingresa números válidos');
+            showToast(t('profile.goals.invalidValues', 'Asegúrate de que todos los valores sean números válidos.'), 'warning');
             return;
         }
 
@@ -41,21 +51,20 @@ export default function EditGoalsScreen() {
             fatsGoal: fat
         });
 
+        showToast(t('profile.goals.updatedSuccess', 'Metas actualizadas correctamente.'), 'success');
         router.back();
     };
 
     const handleReset = () => {
         Alert.alert(
-            'Restablecer Calculados',
-            '¿Quieres volver a calcular tus metas basadas en tus datos físicos?',
+            t('profile.goals.resetTitle', 'Restablecer Calculados'),
+            t('profile.goals.resetMessage', '¿Quieres volver a calcular tus metas basadas en tus datos físicos?'),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Sí, recalcular',
+                    text: t('profile.goals.recalculate', 'Sí, recalcular'),
                     onPress: () => {
-                        // Logic to recalculate would go here, or we just navigate back to onboarding/setup
-                        // For now, let's just warn them this is manual override only
-                        Alert.alert('Info', 'Para recalcular automáticamente, por favor actualiza tu peso u objetivo en el perfil.');
+                        showToast(t('profile.goals.recalculateHint', 'Para recalcular automáticamente, actualiza tu peso en el perfil.'), 'info');
                     }
                 }
             ]
@@ -63,71 +72,75 @@ export default function EditGoalsScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
-            <View className="flex-row items-center justify-between p-4 border-b border-gray-800">
+        <ScreenWrapper safeArea={true}>
+            <View className="flex-row items-center justify-between p-4 border-b border-border/10">
                 <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="close" size={24} color="white" />
+                    <Ionicons name="close" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text className="text-white text-lg font-bold">Editar Metas</Text>
+                <AccessibleText weight="bold" className="text-text text-lg">{t('profile.goals.editTitle', 'Editar Metas')}</AccessibleText>
                 <TouchableOpacity onPress={handleSave}>
-                    <Text className="text-blue-500 font-bold">Guardar</Text>
+                    <AccessibleText weight="bold" className="text-primary">{t('common.save')}</AccessibleText>
                 </TouchableOpacity>
             </View>
 
             <ScrollView className="flex-1 p-4">
-                <View className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
-                    <Text className="text-gray-400 mb-4 text-sm">
-                        Ajusta manualmente tus objetivos diarios. Los cambios se reflejarán en el Dashboard.
-                    </Text>
+                <Card variant="glass" className="p-4 mb-4 border-border/10">
+                    <AccessibleText className="text-text-secondary mb-4 text-sm">
+                        {t('profile.goals.manualAdjustmentDesc', 'Ajusta manualmente tus objetivos diarios. Los cambios se reflejarán en el Dashboard.')}
+                    </AccessibleText>
 
                     <View className="mb-4">
-                        <Text className="text-white font-bold mb-2">Calorías (kcal)</Text>
+                        <AccessibleText weight="bold" className="text-text mb-2">{t('nutrition.calories')} (kcal)</AccessibleText>
                         <TextInput
-                            className="bg-gray-900 text-white p-4 rounded-xl border border-gray-700 font-bold text-lg"
+                            className="bg-surface-highlight/50 text-text p-4 rounded-xl border border-border/10 font-bold text-lg"
                             keyboardType="numeric"
                             value={calories}
                             onChangeText={setCalories}
+                            placeholderTextColor={colors.textMuted}
                         />
                     </View>
 
                     <View className="flex-row gap-4">
                         <View className="flex-1 mb-4">
-                            <Text className="text-white font-bold mb-2">Proteína (g)</Text>
+                            <AccessibleText weight="bold" className="text-text mb-2">{t('nutrition.protein')} (g)</AccessibleText>
                             <TextInput
-                                className="bg-gray-900 text-white p-4 rounded-xl border border-gray-700 font-bold"
+                                className="bg-surface-highlight/50 text-text p-4 rounded-xl border border-border/10 font-bold"
                                 keyboardType="numeric"
                                 value={protein}
                                 onChangeText={setProtein}
+                                placeholderTextColor={colors.textMuted}
                             />
                         </View>
                         <View className="flex-1 mb-4">
-                            <Text className="text-white font-bold mb-2">Carbos (g)</Text>
+                            <AccessibleText weight="bold" className="text-text mb-2">{t('nutrition.carbs')} (g)</AccessibleText>
                             <TextInput
-                                className="bg-gray-900 text-white p-4 rounded-xl border border-gray-700 font-bold"
+                                className="bg-surface-highlight/50 text-text p-4 rounded-xl border border-border/10 font-bold"
                                 keyboardType="numeric"
                                 value={carbs}
                                 onChangeText={setCarbs}
+                                placeholderTextColor={colors.textMuted}
                             />
                         </View>
                         <View className="flex-1 mb-4">
-                            <Text className="text-white font-bold mb-2">Grasas (g)</Text>
+                            <AccessibleText weight="bold" className="text-text mb-2">{t('nutrition.fats')} (g)</AccessibleText>
                             <TextInput
-                                className="bg-gray-900 text-white p-4 rounded-xl border border-gray-700 font-bold"
+                                className="bg-surface-highlight/50 text-text p-4 rounded-xl border border-border/10 font-bold"
                                 keyboardType="numeric"
                                 value={fats}
                                 onChangeText={setFats}
+                                placeholderTextColor={colors.textMuted}
                             />
                         </View>
                     </View>
-                </View>
+                </Card>
 
                 <TouchableOpacity
                     onPress={handleReset}
-                    className="p-4 rounded-xl border border-gray-700 items-center active:bg-gray-800"
+                    className="p-4 rounded-xl border border-border/10 items-center active:bg-surface-highlight/30"
                 >
-                    <Text className="text-gray-400">Restablecer a valores calculados</Text>
+                    <AccessibleText className="text-text-secondary">{t('profile.goals.resetToCalculated', 'Restablecer a valores calculados')}</AccessibleText>
                 </TouchableOpacity>
             </ScrollView>
-        </SafeAreaView>
+        </ScreenWrapper>
     );
 }

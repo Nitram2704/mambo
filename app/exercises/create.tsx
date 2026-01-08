@@ -5,30 +5,32 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRoutineStore } from '@/store/routineStore';
 import { useCustomExercisesStore } from '@/store/customExercisesStore';
-import { MuscleGroup } from '@/constants/exercises';
+import { useUIStore } from '@/store/uiStore';
+import { MuscleGroup, Exercise } from '@/constants/exercises';
 
-const MUSCLE_GROUPS: MuscleGroup[] = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
+const MUSCLE_GROUPS: MuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms' as any, 'abs' as any, 'cardio'];
 
 export default function CreateExerciseScreen() {
     const router = useRouter();
     const addExerciseToRoutine = useRoutineStore((state) => state.addExercise);
     const addCustomExercise = useCustomExercisesStore((state) => state.addCustomExercise);
+    const { showToast } = useUIStore();
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup>('Chest');
+    const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup>('chest');
 
     const handleSave = () => {
         if (!name.trim()) {
-            Alert.alert('Error', 'Por favor, ingresa el nombre del ejercicio');
+            showToast('El ejercicio necesita un nombre para poder guardarlo.', 'warning');
             return;
         }
 
-        const newExercise = {
+        const newExercise: Exercise = {
             id: 'custom-' + Date.now(),
             name: name.trim(),
             muscleGroup: selectedMuscle,
-            equipment: 'Custom',
+            equipment: 'other',
         };
 
         // 1. Persist custom exercise
@@ -36,6 +38,8 @@ export default function CreateExerciseScreen() {
 
         // 2. Add to current routine being created
         addExerciseToRoutine(newExercise);
+
+        showToast('¡Ejercicio creado y añadido!', 'success');
 
         // Use replace to go back to create routine screen
         router.replace('/routines/create');
@@ -97,7 +101,7 @@ export default function CreateExerciseScreen() {
                                     : 'bg-gray-800 border-gray-700'
                                     }`}>
                                 <Text
-                                    className={`text-base font-medium ${selectedMuscle === muscle ? 'text-white' : 'text-gray-400'
+                                    className={`text-base font-medium capitalize ${selectedMuscle === muscle ? 'text-white' : 'text-gray-400'
                                         }`}>
                                     {muscle}
                                 </Text>
