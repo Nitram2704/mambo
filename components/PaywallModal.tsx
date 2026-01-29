@@ -93,7 +93,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                                 colors={['#3b82f6', '#8b5cf6']}
                                 className="p-6 items-center"
                             >
-                                <View className="w-16 h-16 rounded-full bg-white/20 items-center justify-center mb-4">
+                                <View className="w-16 h-16 rounded-full bg-white/20 items-center justify-center mb-4 animate-pulse">
                                     <Ionicons name={getFeatureIcon()} size={32} color="#ffffff" />
                                 </View>
                                 <Text className="text-white text-2xl font-bold text-center mb-2">
@@ -116,7 +116,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                                 {/* Features List */}
                                 <View className="mb-6 space-y-3">
                                     {tierConfig.features.cvCredits !== 0 && (
-                                        <View className="flex-row items-center">
+                                        <View className="flex-row items-center animate-fade-in-left animate-delay-100">
                                             <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
                                             <Text className="ml-3" style={{ color: Colors[theme].textSecondary }}>
                                                 {tierConfig.features.cvCredits === -1 ? 'Videos ilimitados' : `${tierConfig.features.cvCredits} videos/mes`}
@@ -124,7 +124,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                                         </View>
                                     )}
                                     {tierConfig.features.chatLimit !== 0 && (
-                                        <View className="flex-row items-center">
+                                        <View className="flex-row items-center animate-fade-in-left animate-delay-200">
                                             <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
                                             <Text className="ml-3" style={{ color: Colors[theme].textSecondary }}>
                                                 {tierConfig.features.chatLimit === -1 ? 'Chat ilimitado' : `${tierConfig.features.chatLimit} mensajes/día`}
@@ -132,7 +132,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                                         </View>
                                     )}
                                     {tierConfig.features.agentActions && (
-                                        <View className="flex-row items-center">
+                                        <View className="flex-row items-center animate-fade-in-left animate-delay-300">
                                             <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
                                             <Text className="ml-3" style={{ color: Colors[theme].textSecondary }}>
                                                 Acciones del Asistente IA
@@ -140,7 +140,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                                         </View>
                                     )}
                                     {tierConfig.features.nutritionVision && (
-                                        <View className="flex-row items-center">
+                                        <View className="flex-row items-center animate-fade-in-left animate-delay-400">
                                             <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
                                             <Text className="ml-3" style={{ color: Colors[theme].textSecondary }}>
                                                 Análisis de Fotos de Comida
@@ -148,7 +148,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                                         </View>
                                     )}
                                     {tierConfig.features.ragMemory && (
-                                        <View className="flex-row items-center">
+                                        <View className="flex-row items-center animate-fade-in-left animate-delay-500">
                                             <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
                                             <Text className="ml-3" style={{ color: Colors[theme].textSecondary }}>
                                                 Memoria de Largo Plazo

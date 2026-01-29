@@ -31,8 +31,8 @@ export function WorkoutStreakBadge({ size = 'normal' }: { size?: 'small' | 'norm
     };
 
     return (
-        <View className={`flex-row items-center bg-orange-500/20 rounded-full ${container}`}>
-            <Text className="mr-1">🔥</Text>
+        <View className={`flex-row items-center bg-orange-500/20 rounded-full animate-fade-in ${container}`}>
+            <Text className="mr-1 animate-heartbeat">🔥</Text>
             <Text className={`text-orange-400 font-bold ${text}`}>
                 {streak.days} día{streak.days !== 1 ? 's' : ''}
             </Text>
@@ -54,12 +54,12 @@ export function WorkoutStreakCard() {
     const progress = getWeeklyProgress();
 
     return (
-        <View className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/30 rounded-2xl p-4">
+        <View className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/30 rounded-2xl p-4 animate-zoom-in">
             <View className="flex-row justify-between items-start">
                 <View>
-                    <Text className="text-gray-400 text-xs font-bold mb-1">RACHA DE ENTRENO</Text>
+                    <Text className="text-gray-400 text-xs font-bold mb-1 uppercase">Racha de Entreno</Text>
                     <View className="flex-row items-center">
-                        <Text className="text-3xl mr-2">🔥</Text>
+                        <Text className="text-3xl mr-2 animate-heartbeat">🔥</Text>
                         <View>
                             <Text className="text-white text-2xl font-bold">
                                 {streak.days} día{streak.days !== 1 ? 's' : ''}

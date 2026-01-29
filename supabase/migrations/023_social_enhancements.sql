@@ -41,26 +41,34 @@ ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE workout_feedback ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
+DROP POLICY IF EXISTS "Users can see likes on posts they can see" ON post_likes;
 CREATE POLICY "Users can see likes on posts they can see" ON post_likes
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can like posts" ON post_likes;
 CREATE POLICY "Users can like posts" ON post_likes
     FOR INSERT WITH CHECK (auth.uid() = profile_id);
 
+DROP POLICY IF EXISTS "Users can unlike their own likes" ON post_likes;
 CREATE POLICY "Users can unlike their own likes" ON post_likes
     FOR DELETE USING (auth.uid() = profile_id);
 
+DROP POLICY IF EXISTS "Users can see comments on posts they can see" ON post_comments;
 CREATE POLICY "Users can see comments on posts they can see" ON post_comments
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Users can comment on posts" ON post_comments;
 CREATE POLICY "Users can comment on posts" ON post_comments
     FOR INSERT WITH CHECK (auth.uid() = profile_id);
 
+DROP POLICY IF EXISTS "Users can delete their own comments" ON post_comments;
 CREATE POLICY "Users can delete their own comments" ON post_comments
     FOR DELETE USING (auth.uid() = profile_id);
 
+DROP POLICY IF EXISTS "Coaches and clients can see feedback" ON workout_feedback;
 CREATE POLICY "Coaches and clients can see feedback" ON workout_feedback
     FOR SELECT USING (auth.uid() = coach_id OR auth.uid() = client_id);
 
+DROP POLICY IF EXISTS "Coaches can give feedback" ON workout_feedback;
 CREATE POLICY "Coaches can give feedback" ON workout_feedback
     FOR INSERT WITH CHECK (auth.uid() = coach_id);

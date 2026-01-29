@@ -37,6 +37,18 @@ export interface Wager {
     created_at: string;
 }
 
+export interface PostComment {
+    id: string;
+    post_id: string;
+    profile_id: string;
+    content: string;
+    created_at: string;
+    profile?: {
+        name: string;
+        avatar_url?: string;
+    };
+}
+
 export interface SocialPost {
     id: string;
     profile_id: string;
@@ -47,11 +59,13 @@ export interface SocialPost {
     likes_count?: number;
     comments_count?: number;
     has_liked?: boolean;
+    workout_data?: any; // Added for workout stats
     created_at: string;
     profile?: {
         name: string;
         avatar_url?: string;
     };
+    comments?: PostComment[];
 }
 
 interface SocialState {
@@ -69,8 +83,13 @@ interface SocialState {
     createWager: (groupId: string, title: string, stake: string, endDate: Date, type: Wager['type'], goal: number) => Promise<void>;
     resolveWager: (wagerId: string, winnerId: string) => Promise<void>;
     fetchFeed: () => Promise<void>;
+    fetchPostDetails: (postId: string) => Promise<SocialPost | null>;
+    fetchComments: (postId: string) => Promise<PostComment[]>;
+    addComment: (postId: string, content: string) => Promise<void>;
+    fetchGroupPosts: (groupId: string) => Promise<SocialPost[]>;
+    fetchGroupMemberProgress: (groupId: string) => Promise<Record<string, number>>;
     postWorkoutProof: (workoutId: string, mediaUrl: string, caption: string) => Promise<void>;
-    createPost: (caption: string, mediaUrl?: string, isWorkoutProof?: boolean) => Promise<void>;
+    createPost: (caption: string, mediaUrl?: string, isWorkoutProof?: boolean, workoutData?: any) => Promise<void>;
     toggleLike: (postId: string) => Promise<void>;
     uploadMedia: (uri: string) => Promise<string | null>;
     searchUsers: (query: string) => Promise<any[]>;
@@ -243,6 +262,123 @@ export const useSocialStore = create<SocialState>()(
                 }
             },
 
+            fetchPostDetails: async (postId: string) => {
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    const { data, error } = await supabase
+                        .from('social_posts')
+                        .select('*, profiles!social_posts_profile_id_fkey(name, avatar_url), post_likes!post_likes_post_id_fkey(profile_id)')
+                        .eq('id', postId)
+                        .single();
+
+                    if (error) throw error;
+
+                    return {
+                        ...data,
+                        has_liked: data.post_likes?.some((like: any) => like.profile_id === user?.id),
+                        likes_count: data.likes_count || 0,
+                        comments_count: data.comments_count || 0,
+                        is_proof: data.is_proof || false
+                    } as SocialPost;
+                } catch (error) {
+                    console.error('Error fetching post details:', error);
+                    return null;
+                }
+            },
+
+            fetchComments: async (postId: string) => {
+                try {
+                    const { data, error } = await supabase
+                        .from('post_comments')
+                        .select('*, profiles(name, avatar_url)')
+                        .eq('post_id', postId)
+                        .order('created_at', { ascending: true });
+
+                    if (error) throw error;
+                    return data as PostComment[];
+                } catch (error) {
+                    console.error('Error fetching comments:', error);
+                    return [];
+                }
+            },
+
+            addComment: async (postId, content) => {
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+
+                    const { error } = await supabase
+                        .from('post_comments')
+                        .insert({ post_id: postId, profile_id: user.id, content });
+
+                    if (error) throw error;
+
+                    // Update feed to reflect new comment count
+                    set(state => ({
+                        feed: state.feed.map(p => p.id === postId ? { ...p, comments_count: (p.comments_count || 0) + 1 } : p)
+                    }));
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                }
+            },
+
+            fetchGroupPosts: async (groupId: string) => {
+                try {
+                    // Get all member IDs
+                    const { data: members } = await supabase
+                        .from('group_members')
+                        .select('profile_id')
+                        .eq('group_id', groupId);
+
+                    if (!members) return [];
+                    const memberIds = members.map(m => m.profile_id);
+
+                    const { data, error } = await supabase
+                        .from('social_posts')
+                        .select('*, profiles!social_posts_profile_id_fkey(name, avatar_url)')
+                        .in('profile_id', memberIds)
+                        .eq('is_proof', true)
+                        .order('created_at', { ascending: false })
+                        .limit(12);
+
+                    if (error) throw error;
+                    return data as SocialPost[];
+                } catch (error) {
+                    console.error('Error fetching group posts:', error);
+                    return [];
+                }
+            },
+
+            fetchGroupMemberProgress: async (groupId: string) => {
+                try {
+                    const { data: members } = await supabase
+                        .from('group_members')
+                        .select('profile_id')
+                        .eq('group_id', groupId);
+
+                    if (!members) return {};
+
+                    const progress: Record<string, number> = {};
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                    for (const member of members) {
+                        const { count } = await supabase
+                            .from('workouts')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('profile_id', member.profile_id)
+                            .gte('created_at', sevenDaysAgo.toISOString());
+
+                        progress[member.profile_id] = count || 0;
+                    }
+
+                    return progress;
+                } catch (error) {
+                    console.error('Error fetching group progress:', error);
+                    return {};
+                }
+            },
+
             postWorkoutProof: async (workoutId, mediaUrl, caption) => {
                 try {
                     const { data: { user } } = await supabase.auth.getUser();
@@ -259,7 +395,7 @@ export const useSocialStore = create<SocialState>()(
                 }
             },
 
-            createPost: async (caption, mediaUrl, isWorkoutProof = false) => {
+            createPost: async (caption, mediaUrl, isWorkoutProof = false, workoutData = null) => {
                 try {
                     const { data: { user } } = await supabase.auth.getUser();
                     if (!user) return;
@@ -270,7 +406,8 @@ export const useSocialStore = create<SocialState>()(
                             profile_id: user.id,
                             caption,
                             media_url: mediaUrl,
-                            is_proof: isWorkoutProof
+                            is_proof: isWorkoutProof,
+                            workout_data: workoutData
                         });
 
                     if (error) throw error;

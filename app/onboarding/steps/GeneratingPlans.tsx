@@ -185,7 +185,7 @@ export default function GeneratingPlans() {
 
     return (
         <ScreenWrapper className="justify-center items-center px-6">
-            <Ionicons name="sparkles-outline" size={80} color={colors.primary} />
+            <Ionicons name="sparkles-outline" size={80} color={colors.primary} className="animate-pulse" />
 
             <AccessibleText variant="h1" weight="bold" className="text-white text-center mt-6">
                 {t('onboarding.generating.title')}
@@ -209,7 +209,7 @@ export default function GeneratingPlans() {
 
             <ActivityIndicator size="large" color={colors.primary} />
 
-            <AccessibleText weight="medium" className="text-text-secondary text-center mt-4">
+            <AccessibleText key={status} weight="medium" className="text-text-secondary text-center mt-4 animate-fade-in">
                 {status}
             </AccessibleText>
 

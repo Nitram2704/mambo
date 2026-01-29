@@ -30,6 +30,7 @@ export default function ProfileScreen() {
     const router = useRouter();
     const { t, i18n } = useTranslation();
     const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const isDark = theme === 'dark';
 
     const { profile, updateProfile } = useUserProfileStore();
@@ -58,8 +59,8 @@ export default function ProfileScreen() {
 
                 <View className="flex-1 items-center justify-center p-8">
                     <Card className="items-center p-8 w-full">
-                        <View className="bg-primary/10 p-6 rounded-2xl mb-6">
-                            <Ionicons name="person" size={60} color={Colors[theme].primary} />
+                        <View className="bg-primary/20 p-6 rounded-2xl mb-6 shadow-glow">
+                            <Ionicons name="person" size={60} color={colors.primary} />
                         </View>
                         <AccessibleText variant="h2" weight="bold" className="text-text text-2xl font-black mb-2 text-center">{t('profile.noProfileTitle')}</AccessibleText>
                         <AccessibleText className="text-text-secondary text-center mb-8 leading-6">
@@ -82,7 +83,7 @@ export default function ProfileScreen() {
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 <View className="p-4">
                     {/* Header */}
-                    <View className="flex-row items-center justify-between mb-6 mt-2">
+                    <View className="flex-row items-center justify-between mb-6 mt-2 animate-roll-in">
                         <View>
                             <AccessibleText
                                 variant="h1"
@@ -98,44 +99,44 @@ export default function ProfileScreen() {
                         <View className="flex-row gap-3">
                             <TouchableOpacity
                                 onPress={() => router.push('/profile/settings')}
-                                className="p-2 rounded-2xl border"
-                                style={{ backgroundColor: Colors[theme].surfaceHighlight + '50', borderColor: Colors[theme].border + '10' }}
+                                className="p-2 rounded-2xl border bg-surface/50 border-white/10"
                                 accessibilityRole="button"
                                 accessibilityLabel={t('settings.title')}
                             >
-                                <Ionicons name="settings-outline" size={24} color={Colors[theme].text} />
+                                <Ionicons name="settings-outline" size={24} color={colors.text} />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={async () => {
                                     await updateProfile({ hasCompletedOnboarding: false });
                                     router.replace('/onboarding');
                                 }}
-                                className="p-2 rounded-2xl border"
-                                style={{ backgroundColor: Colors[theme].surfaceHighlight + '50', borderColor: Colors[theme].border + '10' }}
+                                className="p-2 rounded-2xl border bg-surface/50 border-white/10"
                                 accessibilityRole="button"
                                 accessibilityLabel={t('profile.regeneratePlan')}
                             >
-                                <Ionicons name="refresh-outline" size={24} color={Colors[theme].text} />
+                                <Ionicons name="refresh-outline" size={24} color={colors.text} />
                             </TouchableOpacity>
                         </View>
                     </View>
 
                     {/* Level Progress */}
-                    <LevelProgressBar
-                        level={levelData.level}
-                        title={levelData.title}
-                        progress={levelData.progress}
-                        currentXp={levelData.currentLevelXp}
-                        nextLevelXp={levelData.nextLevelXp}
-                    />
+                    <View className="animate-fade-in-up animate-delay-100">
+                        <LevelProgressBar
+                            level={levelData.level}
+                            title={levelData.title}
+                            progress={levelData.progress}
+                            currentXp={levelData.currentLevelXp}
+                            nextLevelXp={levelData.nextLevelXp}
+                        />
+                    </View>
 
                     {/* Consistency Calendar */}
-                    <View className="mb-6">
+                    <View className="mb-6 animate-fade-in-up animate-delay-200">
                         <ConsistencyCalendar />
                     </View>
 
                     {/* XP Progress Chart */}
-                    <View className="mb-6">
+                    <View className="mb-6 animate-fade-in-up animate-delay-300">
                         <XPProgressChart />
                     </View>
 
@@ -143,12 +144,12 @@ export default function ProfileScreen() {
                     <View className="flex-row gap-3 mb-6">
                         <TouchableOpacity
                             onPress={() => router.push('/profile/achievements')}
-                            className="flex-1"
+                            className="flex-1 animate-pop animate-delay-400"
                             activeOpacity={0.7}
                         >
-                            <Card className="items-center p-4 border-secondary/30">
+                            <Card variant="glass" className="items-center p-4 border-secondary/30">
                                 <View className="bg-secondary/20 p-3 rounded-2xl mb-3">
-                                    <Ionicons name="medal" size={28} color={Colors[theme].secondary} />
+                                    <Ionicons name="medal" size={28} color={colors.secondary} />
                                 </View>
                                 <AccessibleText weight="bold" className="text-text text-base font-black">{t('profile.achievements')}</AccessibleText>
                                 <AccessibleText weight="medium" className="text-text-secondary text-xs mt-1 font-medium">{t('profile.achievementsDesc')}</AccessibleText>
@@ -157,12 +158,12 @@ export default function ProfileScreen() {
 
                         <TouchableOpacity
                             onPress={() => router.push('/profile/body-scan')}
-                            className="flex-1"
+                            className="flex-1 animate-pop animate-delay-500"
                             activeOpacity={0.7}
                         >
-                            <Card className="items-center p-4 border-primary/30">
+                            <Card variant="glass" className="items-center p-4 border-primary/30">
                                 <View className="bg-primary/20 p-3 rounded-2xl mb-3">
-                                    <Ionicons name="scan" size={28} color={Colors[theme].primary} />
+                                    <Ionicons name="scan" size={28} color={colors.primary} />
                                 </View>
                                 <AccessibleText weight="bold" className="text-text text-base font-black">Body Scan</AccessibleText>
                                 <AccessibleText weight="medium" className="text-text-secondary text-xs mt-1 font-medium">Análisis con IA</AccessibleText>
@@ -172,23 +173,23 @@ export default function ProfileScreen() {
 
                     <TouchableOpacity
                         onPress={() => router.push('/profile/progress')}
-                        className="mb-6"
+                        className="mb-6 animate-fade-in-up animate-delay-600"
                         activeOpacity={0.7}
                     >
-                        <Card className="flex-row items-center p-4 border-warning/30">
+                        <Card variant="glass" className="flex-row items-center p-4 border-warning/30">
                             <View className="bg-warning/20 p-3 rounded-2xl mr-4">
-                                <Ionicons name="trending-up" size={28} color={Colors[theme].warning} />
+                                <Ionicons name="trending-up" size={28} color={colors.warning} />
                             </View>
                             <View className="flex-1">
                                 <AccessibleText weight="bold" className="text-text text-base font-black">{t('profile.progress')}</AccessibleText>
                                 <AccessibleText weight="medium" className="text-text-secondary text-xs mt-1 font-medium">{t('profile.progressDesc')}</AccessibleText>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color={Colors[theme].textMuted} />
+                            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
                         </Card>
                     </TouchableOpacity>
 
                     {/* Información Personal */}
-                    <Card className="mb-6">
+                    <Card variant="glass" className="mb-6 animate-fade-in-up animate-delay-700">
                         <AccessibleText
                             variant="h2"
                             weight="bold"
@@ -237,7 +238,7 @@ export default function ProfileScreen() {
                     </Card>
 
                     {/* Nutritional Goals */}
-                    <Card className="mb-6">
+                    <Card variant="glass" className="mb-6 animate-fade-in-up animate-delay-800">
                         <View className="flex-row justify-between items-center mb-5">
                             <AccessibleText
                                 variant="h2"
@@ -253,7 +254,7 @@ export default function ProfileScreen() {
                                 accessibilityRole="button"
                                 accessibilityLabel={t('profile.edit')}
                             >
-                                <AccessibleText weight="bold" className="font-bold text-sm" style={{ color: Colors[theme].primary }}>{t('profile.edit')}</AccessibleText>
+                                <AccessibleText weight="bold" className="font-bold text-sm" style={{ color: colors.primary }}>{t('profile.edit')}</AccessibleText>
                             </TouchableOpacity>
                         </View>
 
@@ -270,7 +271,7 @@ export default function ProfileScreen() {
                                 </View>
                                 <AccessibleText weight="bold" className="text-text font-bold text-lg">{profile.calorieGoal}</AccessibleText>
                             </View>
-                            <View className="w-[1px] h-8" style={{ backgroundColor: Colors[theme].border + '20' }} />
+                            <View className="w-[1px] h-8" style={{ backgroundColor: colors.border + '20' }} />
                             <View className="items-center flex-1" accessibilityLabel={`${t('profile.protein')}: ${profile.proteinGoal}g`}>
                                 <View className="flex-row items-center">
                                     <AccessibleText weight="bold" className="text-text-secondary text-[10px] font-black uppercase tracking-widest mb-1">{t('profile.protein')}</AccessibleText>
@@ -283,7 +284,7 @@ export default function ProfileScreen() {
                                 </View>
                                 <AccessibleText weight="bold" className="text-text font-bold text-lg">{profile.proteinGoal}g</AccessibleText>
                             </View>
-                            <View className="w-[1px] h-8" style={{ backgroundColor: Colors[theme].border + '20' }} />
+                            <View className="w-[1px] h-8" style={{ backgroundColor: colors.border + '20' }} />
                             <View className="items-center flex-1" accessibilityLabel={`${t('profile.carbs')}: ${profile.carbsGoal}g`}>
                                 <View className="flex-row items-center">
                                     <AccessibleText weight="bold" className="text-text-secondary text-[10px] font-black uppercase tracking-widest mb-1">{t('profile.carbs')}</AccessibleText>
@@ -296,7 +297,7 @@ export default function ProfileScreen() {
                                 </View>
                                 <AccessibleText weight="bold" className="text-text font-bold text-lg">{profile.carbsGoal}g</AccessibleText>
                             </View>
-                            <View className="w-[1px] h-8" style={{ backgroundColor: Colors[theme].border + '20' }} />
+                            <View className="w-[1px] h-8" style={{ backgroundColor: colors.border + '20' }} />
                             <View className="items-center flex-1" accessibilityLabel={`${t('profile.fats')}: ${profile.fatsGoal}g`}>
                                 <View className="flex-row items-center">
                                     <AccessibleText weight="bold" className="text-text-secondary text-[10px] font-black uppercase tracking-widest mb-1">{t('profile.fats')}</AccessibleText>
@@ -311,9 +312,9 @@ export default function ProfileScreen() {
                             </View>
                         </View>
 
-                        <View className="flex-row justify-between py-2 border-t pt-3" style={{ borderColor: Colors[theme].border + '10' }}>
-                            <AccessibleText className="text-xs" style={{ color: Colors[theme].textMuted }}>BMR: {Math.round(profile.bmr)}</AccessibleText>
-                            <AccessibleText className="text-xs" style={{ color: Colors[theme].textMuted }}>TDEE: {Math.round(profile.tdee)}</AccessibleText>
+                        <View className="flex-row justify-between py-2 border-t pt-3" style={{ borderColor: colors.border + '10' }}>
+                            <AccessibleText className="text-xs" style={{ color: colors.textMuted }}>BMR: {Math.round(profile.bmr)}</AccessibleText>
+                            <AccessibleText className="text-xs" style={{ color: colors.textMuted }}>TDEE: {Math.round(profile.tdee)}</AccessibleText>
                         </View>
                     </Card>
 

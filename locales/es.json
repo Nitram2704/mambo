@@ -15,7 +15,8 @@
         "generatePlan": "Generar Mi Plan",
         "today": "Hoy",
         "tip": "Consejo",
-        "ok": "Aceptar"
+        "ok": "Aceptar",
+        "new": "NUEVO"
     },
     "auth": {
         "login": "Iniciar Sesión",
@@ -153,6 +154,18 @@
     },
     "sleep": {
         "title": "Sueño",
+        "smartAlarm": {
+            "title": "Smart Alarm",
+            "yourAlarms": "Tus Alarmas",
+            "noAlarms": "No tienes alarmas configuradas.\nPresiona + para añadir una.",
+            "defaultLabel": "Alarma",
+            "recommendations": "Ciclos de Sueño (Si te duermes ahora)",
+            "disclaimer": "* Basado en ciclos de 90 minutos y 14 min para conciliar el sueño.",
+            "howItWorks": "¿Cómo funciona?",
+            "howItWorksDesc": "La Smart Alarm utiliza el análisis de ciclos de sueño para despertarte en tu fase de sueño más ligero, reduciendo la inercia del sueño y haciéndote sentir más energético.",
+            "smartWake": "Smart Wake",
+            "sunriseEffect": "Amanecer Activo"
+        },
         "logSleep": "Registrar Sueño",
         "cancel": "Cancelar",
         "save": "Guardar",
@@ -207,6 +220,16 @@
             "targetBedtime": "Hora de Dormir Objetivo",
             "targetWakeTime": "Hora de Despertar Objetivo",
             "tipDesc": "Dormir lo suficiente es crucial para la recuperación muscular y el rendimiento mental."
+        },
+        "sync": {
+            "title": "Sincronización de Salud",
+            "notSynced": "No sincronizado",
+            "syncNow": "Sincronizar Ahora",
+            "lastSync": "Última sincronización: {{time}}",
+            "success": "Sincronización Exitosa",
+            "successDesc": "Se han importado {{count}} registros de sueño.",
+            "permissionDenied": "Permiso denegado para acceder a datos de salud.",
+            "error": "Error al sincronizar datos de salud."
         }
     },
     "tabs": {
@@ -638,10 +661,23 @@
         }
     },
     "reports": {
+        "analysis": "ANÁLISIS",
+        "title": "Reportes",
+        "thisWeek": "Esta Semana",
+        "volume": "Volumen",
+        "workouts": "Entrenamientos",
+        "streak": "Racha",
+        "weeklyReport": "Reporte Semanal",
+        "weeklyReportDesc": "Análisis detallado de tus últimos 7 días",
+        "monthlyReport": "Reporte Mensual",
+        "monthlyReportDesc": "Resumen de tu progreso este mes",
+        "advancedAnalytics": "Analytics Avanzados",
+        "advancedAnalyticsDesc": "Predicciones de IA y equilibrio muscular",
+        "fullHistory": "Historial Completo",
+        "fullHistoryDesc": "Todos tus entrenamientos y comidas",
         "weeklyTitle": "Reporte Semanal",
         "monthlyTitle": "Reporte Mensual",
         "caloriesPerDay": "Calorías/Día",
-        "workouts": "Entrenamientos",
         "calorieTrend": "Tendencia de Calorías",
         "macroDistribution": "Distribución de Macros",
         "dailyAverage": "Promedio Diario",
@@ -658,7 +694,13 @@
         "monthlyAchievements": "Logros del Mes",
         "workoutsCompleted": "entrenamientos completados",
         "activeNutritionTracking": "Seguimiento de nutrición activo",
-        "startTracking": "¡Comienza a registrar para ver tus logros!"
+        "startTracking": "¡Comienza a registrar para ver tus logros!",
+        "muscleVolumeTitle": "Volumen por Músculo (30 días)",
+        "noMuscleData": "No hay datos suficientes en los últimos 30 días",
+        "volumeNote": "* Volumen total en miles de kg (toneladas)",
+        "oneRMTitle": "Progreso 1RM Estimado",
+        "noOneRMData": "No hay suficientes datos para {{exercise}}",
+        "others": "Otros"
     },
     "history": {
         "title": "Historial",

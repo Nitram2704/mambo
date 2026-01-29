@@ -62,7 +62,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
                 },
                 style
             ]}
-            className={className}
+            className={`animate-fade-in ${className}`}
         >
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
             {header ? header : headerTitle && (
@@ -86,14 +86,16 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
                 {scrollable ? (
                     <ScrollView
                         className="flex-1"
-                        contentContainerClassName={contentContainerClassName}
+                        contentContainerClassName={`flex-grow ${contentContainerClassName}`}
                         showsVerticalScrollIndicator={false}
                         keyboardShouldPersistTaps="handled"
                     >
-                        {children}
+                        <View className="w-full max-w-4xl mx-auto self-center flex-1">
+                            {children}
+                        </View>
                     </ScrollView>
                 ) : (
-                    <View className={`flex-1 ${contentContainerClassName}`}>
+                    <View className={`flex-1 ${contentContainerClassName} w-full max-w-4xl mx-auto self-center`}>
                         {children}
                     </View>
                 )}

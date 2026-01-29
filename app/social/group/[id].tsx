@@ -20,7 +20,7 @@ export default function GroupDetails() {
     const { t } = useTranslation();
     const { theme } = useAppTheme();
 
-    const { activeGroup, members, wagers, fetchGroupDetails, searchUsers, inviteMember, createWager, loading } = useSocialStore();
+    const { activeGroup, members, wagers, fetchGroupDetails, searchUsers, inviteMember, createWager, fetchGroupPosts, fetchGroupMemberProgress, resolveWager, loading } = useSocialStore();
 
     const [showInviteModal, setShowInviteModal] = React.useState(false);
     const [showWagerModal, setShowWagerModal] = React.useState(false);
@@ -28,6 +28,8 @@ export default function GroupDetails() {
     const [searchResults, setSearchResults] = React.useState<any[]>([]);
     const [isSearching, setIsSearching] = React.useState(false);
     const [isInviting, setIsInviting] = React.useState<string | null>(null);
+    const [groupPosts, setGroupPosts] = React.useState<any[]>([]);
+    const [memberProgress, setMemberProgress] = React.useState<Record<string, number>>({});
 
     // Wager form state
     const [wagerTitle, setWagerTitle] = React.useState('');
@@ -38,8 +40,21 @@ export default function GroupDetails() {
     const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 
     useEffect(() => {
-        if (id) fetchGroupDetails(id);
+        if (id) {
+            fetchGroupDetails(id);
+            loadGroupData();
+        }
     }, [id]);
+
+    const loadGroupData = async () => {
+        if (!id) return;
+        const [posts, progress] = await Promise.all([
+            fetchGroupPosts(id),
+            fetchGroupMemberProgress(id)
+        ]);
+        setGroupPosts(posts);
+        setMemberProgress(progress);
+    };
 
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
@@ -121,7 +136,6 @@ export default function GroupDetails() {
         );
     }
 
-    const activeWager = wagers.find(w => w.status === 'active');
 
     return (
         <ScreenWrapper safeArea={true}>
@@ -166,73 +180,111 @@ export default function GroupDetails() {
                         </TouchableOpacity>
                     </View>
                     <Card variant="glass" className="mb-6 p-4">
-                        {members.map((member, index) => (
-                            <View key={member.profile_id} className="mb-4 last:mb-0">
-                                <View className="flex-row justify-between items-center mb-2">
-                                    <View className="flex-row items-center">
-                                        <View className="w-8 h-8 rounded-full bg-primary/20 items-center justify-center mr-2">
-                                            <AccessibleText weight="bold" className="text-primary text-xs">
-                                                {member.profile?.name?.charAt(0) || 'U'}
-                                            </AccessibleText>
+                        {members.map((member, index) => {
+                            const progress = memberProgress[member.profile_id] || 0;
+                            const goal = 5; // Default goal
+                            const percentage = Math.min((progress / goal) * 100, 100);
+
+                            return (
+                                <View key={member.profile_id} className="mb-4 last:mb-0">
+                                    <View className="flex-row justify-between items-center mb-2">
+                                        <View className="flex-row items-center">
+                                            <View className="w-8 h-8 rounded-full bg-primary/20 items-center justify-center mr-2">
+                                                {member.profile?.avatar_url ? (
+                                                    <Image source={{ uri: member.profile.avatar_url }} className="w-full h-full rounded-full" />
+                                                ) : (
+                                                    <AccessibleText weight="bold" className="text-primary text-xs">
+                                                        {member.profile?.name?.charAt(0) || 'U'}
+                                                    </AccessibleText>
+                                                )}
+                                            </View>
+                                            <AccessibleText weight="medium" className="text-text">{member.profile?.name}</AccessibleText>
                                         </View>
-                                        <AccessibleText weight="medium" className="text-text">{member.profile?.name}</AccessibleText>
+                                        <AccessibleText weight="bold" className="text-primary">{progress}/{goal}</AccessibleText>
                                     </View>
-                                    <AccessibleText weight="bold" className="text-primary">3/5</AccessibleText>
+                                    <View className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                        <LinearGradient
+                                            colors={[Colors[theme].primary, Colors[theme].secondary]}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 0 }}
+                                            style={{ width: `${percentage}%`, height: '100%', borderRadius: 4 }}
+                                        />
+                                    </View>
                                 </View>
-                                <View className="h-2 bg-white/5 rounded-full overflow-hidden">
-                                    <LinearGradient
-                                        colors={[Colors[theme].primary, Colors[theme].secondary]}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 1, y: 0 }}
-                                        style={{ width: '60%', height: '100%', borderRadius: 4 }}
-                                    />
-                                </View>
-                            </View>
-                        ))}
+                            );
+                        })}
                     </Card>
 
                     {/* Wager Section */}
-                    <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest mb-4">
-                        {t('social.wagers.title')}
-                    </AccessibleText>
-                    {activeWager ? (
-                        <Card variant="glass" className="mb-6 p-0 overflow-hidden">
-                            <LinearGradient
-                                colors={[Colors[theme].warning + '20', Colors[theme].warning + '10']}
-                                className="p-4"
-                            >
-                                <View className="flex-row items-center justify-between mb-2">
-                                    <View className="flex-row items-center">
-                                        <Ionicons name="trophy" size={20} color={Colors[theme].warning} className="mr-2" />
-                                        <AccessibleText weight="bold" className="text-warning">{activeWager.title}</AccessibleText>
-                                    </View>
-                                    {activeGroup.created_by === useUserProfileStore.getState().profile?.id && (
-                                        <TouchableOpacity
-                                            onPress={() => handleResolveWager(activeWager.id, members[0].profile_id)}
-                                            className="bg-warning/20 px-2 py-1 rounded-lg"
-                                        >
-                                            <AccessibleText weight="bold" className="text-warning text-[10px]">RESOLVER</AccessibleText>
-                                        </TouchableOpacity>
-                                    )}
-                                </View>
-                                <AccessibleText className="text-text mb-3">{activeWager.stake}</AccessibleText>
-                                <View className="flex-row justify-between items-center">
-                                    <AccessibleText className="text-text-secondary text-xs">
-                                        Finaliza: {new Date(activeWager.end_date).toLocaleDateString()}
-                                    </AccessibleText>
-                                    <View className="bg-warning/20 px-3 py-1 rounded-full">
-                                        <AccessibleText weight="bold" className="text-warning text-xs">ACTIVA</AccessibleText>
-                                    </View>
-                                </View>
-                            </LinearGradient>
+                    <View className="flex-row justify-between items-center mb-4">
+                        <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest">
+                            {t('social.wagers.title')}
+                        </AccessibleText>
+                        <TouchableOpacity
+                            onPress={() => setShowWagerModal(true)}
+                            className="bg-primary/10 px-3 py-1 rounded-full"
+                        >
+                            <AccessibleText weight="bold" className="text-primary text-xs">+ {t('common.add')}</AccessibleText>
+                        </TouchableOpacity>
+                    </View>
+
+                    {wagers.length === 0 ? (
+                        <Card variant="glass" className="mb-6 p-6 items-center border-dashed border-white/10">
+                            <Ionicons name="trophy-outline" size={32} color={Colors[theme].textMuted} className="mb-2" />
+                            <AccessibleText className="text-text-secondary text-center text-xs">No hay retos activos.</AccessibleText>
                         </Card>
                     ) : (
-                        <TouchableOpacity onPress={() => setShowWagerModal(true)}>
-                            <Card variant="glass" className="mb-6 items-center py-6 border-dashed border-white/10">
-                                <Ionicons name="add-circle-outline" size={32} color={Colors[theme].textMuted} className="mb-2" />
-                                <AccessibleText className="text-text-secondary">{t('social.wagers.create')}</AccessibleText>
+                        wagers.map((wager) => (
+                            <Card key={wager.id} variant="glass" className="mb-4 p-4">
+                                <View className="flex-row justify-between items-start mb-2">
+                                    <View className="flex-1">
+                                        <View className="flex-row items-center">
+                                            <Ionicons name="trophy" size={16} color={wager.status === 'active' ? Colors[theme].warning : Colors[theme].textMuted} className="mr-2" />
+                                            <AccessibleText weight="bold" className="text-text text-base">{wager.title}</AccessibleText>
+                                        </View>
+                                        <AccessibleText className="text-text-secondary text-xs mt-1">{wager.stake}</AccessibleText>
+                                    </View>
+                                    <View className={`px-2 py-1 rounded-full ${wager.status === 'active' ? 'bg-green-500/20' : 'bg-blue-500/20'}`}>
+                                        <AccessibleText weight="bold" className={`text-[10px] ${wager.status === 'active' ? 'text-green-500' : 'text-blue-500'}`}>
+                                            {wager.status === 'active' ? 'ACTIVO' : 'COMPLETADO'}
+                                        </AccessibleText>
+                                    </View>
+                                </View>
+
+                                {wager.status === 'active' && (
+                                    <View className="mt-3 pt-3 border-t border-white/5">
+                                        <AccessibleText weight="bold" className="text-text-secondary text-[10px] mb-2 uppercase tracking-tighter">RESOLVER (SELECCIONAR GANADOR):</AccessibleText>
+                                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                            <View className="flex-row gap-2">
+                                                {members.map((member) => (
+                                                    <TouchableOpacity
+                                                        key={member.profile_id}
+                                                        onPress={() => handleResolveWager(wager.id, member.profile_id)}
+                                                        className="bg-white/5 px-3 py-1.5 rounded-lg flex-row items-center"
+                                                    >
+                                                        <View className="w-5 h-5 rounded-full bg-primary/20 items-center justify-center mr-2">
+                                                            <AccessibleText weight="bold" className="text-primary text-[8px]">
+                                                                {member.profile?.name?.charAt(0)}
+                                                            </AccessibleText>
+                                                        </View>
+                                                        <AccessibleText className="text-text text-[10px]">{member.profile?.name}</AccessibleText>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        </ScrollView>
+                                    </View>
+                                )}
+
+                                {wager.status === 'completed' && wager.winner_id && (
+                                    <View className="mt-2 flex-row items-center bg-yellow-500/10 p-2 rounded-lg">
+                                        <Ionicons name="ribbon" size={16} color="#fbbf24" className="mr-2" />
+                                        <AccessibleText className="text-yellow-500 text-xs font-bold">
+                                            Ganador: {members.find(m => m.profile_id === wager.winner_id)?.profile?.name || 'Usuario'}
+                                        </AccessibleText>
+                                    </View>
+                                )}
                             </Card>
-                        </TouchableOpacity>
+                        ))
                     )}
 
                     {/* Proof Gallery */}
@@ -240,23 +292,31 @@ export default function GroupDetails() {
                         GALERÍA DE PRUEBAS
                     </AccessibleText>
                     <View className="flex-row flex-wrap gap-2 pb-10">
-                        {[1, 2, 3, 4].map((i) => (
-                            <View key={i} style={{ width: (width - 48 - 16) / 3 }} className="aspect-square bg-white/5 rounded-xl overflow-hidden">
-                                <Image
-                                    source={{ uri: `https://picsum.photos/200/200?random=${i}` }}
-                                    className="w-full h-full"
-                                />
-                                <View className="absolute bottom-1 right-1 bg-black/50 px-1 rounded">
-                                    <AccessibleText className="text-white text-[8px]">hace 2h</AccessibleText>
-                                </View>
+                        {groupPosts.length === 0 ? (
+                            <View className="w-full py-10 items-center">
+                                <Ionicons name="images-outline" size={32} color={Colors[theme].textMuted} className="mb-2" />
+                                <AccessibleText className="text-text-secondary text-xs">No hay pruebas compartidas aún</AccessibleText>
                             </View>
-                        ))}
-                        <TouchableOpacity
-                            style={{ width: (width - 48 - 16) / 3 }}
-                            className="aspect-square bg-white/5 rounded-xl items-center justify-center border-dashed border-white/10 border"
-                        >
-                            <Ionicons name="camera-outline" size={24} color={Colors[theme].textMuted} />
-                        </TouchableOpacity>
+                        ) : (
+                            groupPosts.map((post) => (
+                                <TouchableOpacity
+                                    key={post.id}
+                                    onPress={() => router.push({ pathname: '/social/post/[id]' as any, params: { id: post.id } })}
+                                    style={{ width: (width - 48 - 16) / 3 }}
+                                    className="aspect-square bg-white/5 rounded-xl overflow-hidden"
+                                >
+                                    <Image
+                                        source={{ uri: post.media_url }}
+                                        className="w-full h-full"
+                                    />
+                                    <View className="absolute bottom-1 right-1 bg-black/50 px-1 rounded">
+                                        <AccessibleText className="text-white text-[8px]">
+                                            {new Date(post.created_at).toLocaleDateString()}
+                                        </AccessibleText>
+                                    </View>
+                                </TouchableOpacity>
+                            ))
+                        )}
                     </View>
                 </ScrollView>
 

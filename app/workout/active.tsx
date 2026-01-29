@@ -24,6 +24,18 @@ import { PlateCalculator } from '@/components/PlateCalculator';
 import SetRow from '@/components/SetRow';
 import { WhyTooltip } from '@/components/WhyTooltip';
 import * as ImagePicker from 'expo-image-picker';
+import { CameraView } from 'expo-camera';
+import { Video, ResizeMode } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import { FormFeedbackCard } from '@/components/workout/FormFeedbackCard';
+import { analyzeExerciseForm, FormCheckResult } from '@/utils/formCheckService';
+import { useFormCheckStore } from '@/store/formCheckStore';
+import { CameraOverlay } from '@/components/workout/CameraOverlay';
+import { PremiumLoading } from '@/components/workout/PremiumLoading';
+import { readFileAsBase64 } from '@/utils/fileSystem';
+import { generateWorkoutPost } from '@/utils/social/postGenerator';
+import { useSocialStore } from '@/store/socialStore';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ActiveWorkoutScreen() {
     const router = useRouter();
@@ -40,6 +52,15 @@ export default function ActiveWorkoutScreen() {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [techniqueFeedback, setTechniqueFeedback] = useState<string | null>(null);
     const [elapsedTime, setElapsedTime] = useState(0);
+    const [showFormCheckModal, setShowFormCheckModal] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordedVideoUri, setRecordedVideoUri] = useState<string | null>(null);
+    const [formCheckResult, setFormCheckResult] = useState<FormCheckResult | null>(null);
+    const [cameraRef, setCameraRef] = useState<any>(null);
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [sharePostContent, setSharePostContent] = useState('');
+    const [completedWorkoutData, setCompletedWorkoutData] = useState<any>(null);
+    const { createPost } = useSocialStore();
 
     const {
         exercises,
@@ -181,12 +202,37 @@ export default function ActiveWorkoutScreen() {
                 lastWorkout: completedWorkout
             });
 
-            router.replace({
-                pathname: '/workout/summary',
-                params: { workoutId: completedWorkout.id }
-            });
+            // Prepare Social Post
+            const postData = generateWorkoutPost(completedWorkout);
+            setSharePostContent(postData.content);
+            setCompletedWorkoutData(completedWorkout);
+            setShowShareModal(true);
         } else {
             router.back();
+        }
+    };
+
+    const confirmShare = async () => {
+        if (completedWorkoutData) {
+            // Generate workout data object for the post
+            const workoutData = generateWorkoutPost(completedWorkoutData).workout_data;
+
+            await createPost(sharePostContent, undefined, true, workoutData);
+            setShowShareModal(false);
+            router.replace({
+                pathname: '/workout/summary',
+                params: { workoutId: completedWorkoutData.id }
+            });
+        }
+    };
+
+    const skipShare = () => {
+        setShowShareModal(false);
+        if (completedWorkoutData) {
+            router.replace({
+                pathname: '/workout/summary',
+                params: { workoutId: completedWorkoutData.id }
+            });
         }
     };
 
@@ -240,9 +286,9 @@ export default function ActiveWorkoutScreen() {
                 </TouchableOpacity>
 
                 <View className="flex-1 items-center">
-                    <View className="flex-row items-center bg-surface-highlight/50 px-3 py-1.5 rounded-full border border-border/10">
-                        <Icon name="time-outline" size={14} variant="primary" />
-                        <AccessibleText className="text-text font-mono font-black ml-1.5 text-sm">
+                    <View className="flex-row items-center bg-surface/50 px-4 py-2 rounded-full border border-primary/20 shadow-glow animate-pulse">
+                        <Icon name="time-outline" size={16} variant="primary" />
+                        <AccessibleText weight="black" className="text-primary ml-2 text-base font-mono tracking-widest">
                             {formatElapsedTime(elapsedTime)}
                         </AccessibleText>
                     </View>
@@ -269,8 +315,9 @@ export default function ActiveWorkoutScreen() {
                         onPress={handleFinish}
                         accessibilityRole="button"
                         accessibilityLabel="Finalizar entrenamiento"
+                        className="bg-primary/20 px-3 py-1.5 rounded-xl border border-primary/30"
                     >
-                        <AccessibleText className="text-primary font-black">Finalizar</AccessibleText>
+                        <AccessibleText weight="black" className="text-primary text-xs uppercase tracking-widest">Finalizar</AccessibleText>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -541,8 +588,8 @@ export default function ActiveWorkoutScreen() {
 
                         <View className="flex-row items-center mb-1 pr-8">
                             <AccessibleText
-                                weight="bold"
-                                className="text-text text-2xl font-black flex-1"
+                                weight="black"
+                                className="text-text text-3xl tracking-tight flex-1"
                                 numberOfLines={1}
                                 adjustsFontSizeToFit
                             >
@@ -559,7 +606,7 @@ export default function ActiveWorkoutScreen() {
                                 scientific="Estudios muestran que el rango 8-12 reps maximiza la activación de fibras de tipo II, responsables del crecimiento muscular (Schoenfeld et al., 2017)."
                             />
                         </View>
-                        <AccessibleText className="text-text-secondary text-sm font-medium">
+                        <AccessibleText weight="medium" className="text-text-secondary text-sm">
                             {currentExercise.sets.length} series planeadas
                         </AccessibleText>
 
@@ -594,14 +641,11 @@ export default function ActiveWorkoutScreen() {
                             </TouchableOpacity>
                             {(subscription?.tier_id === 'PRO' || subscription?.tier_id === 'ELITE') && (
                                 <TouchableOpacity
-                                    onPress={() => router.push({
-                                        pathname: '/workout/form-check',
-                                        params: { exerciseIndex: currentExerciseIndex, setId: currentExercise.sets.find(s => !s.completed)?.id }
-                                    })}
-                                    className="flex-1 bg-secondary/20 py-2.5 px-1 rounded-xl items-center justify-center border border-secondary/30"
+                                    onPress={() => setShowFormCheckModal(true)}
+                                    className="flex-1 bg-secondary/20 py-3 px-1 rounded-xl items-center justify-center border border-secondary/30 shadow-glow"
                                 >
                                     <Icon name="camera" size={16} variant="secondary" />
-                                    <AccessibleText weight="bold" className="text-secondary text-[10px] uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Record Set</AccessibleText>
+                                    <AccessibleText weight="bold" className="text-secondary text-[10px] uppercase tracking-widest mt-1" numberOfLines={1} adjustsFontSizeToFit>Form Check</AccessibleText>
                                 </TouchableOpacity>
                             )}
                             {/* Superset Button */}
@@ -858,6 +902,290 @@ export default function ActiveWorkoutScreen() {
             </ScrollView>
 
             <RestTimer />
+
+            {/* Form Check Modal */}
+            <Modal
+                visible={showFormCheckModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => {
+                    setShowFormCheckModal(false);
+                    setRecordedVideoUri(null);
+                    setFormCheckResult(null);
+                    setIsRecording(false);
+                }}
+            >
+                <View className="flex-1 bg-black">
+                    {!recordedVideoUri && !formCheckResult && (
+                        <View className="flex-1">
+                            <CameraView
+                                ref={(ref: any) => setCameraRef(ref)}
+                                style={{ flex: 1 }}
+                                facing="back"
+                            />
+                            <CameraOverlay exerciseName={currentExercise.exerciseName} />
+
+                            {/* Camera Controls */}
+                            <View className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80">
+                                <View className="items-center mb-4">
+                                    <AccessibleText weight="bold" className="text-white text-lg mb-2">
+                                        {currentExercise.exerciseName}
+                                    </AccessibleText>
+                                    <AccessibleText className="text-white/70 text-sm text-center">
+                                        {isRecording ? 'Grabando... Realiza tu serie' : 'Presiona para grabar tu serie'}
+                                    </AccessibleText>
+                                </View>
+
+                                <View className="flex-row items-center justify-center gap-4">
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setShowFormCheckModal(false);
+                                            setRecordedVideoUri(null);
+                                            setFormCheckResult(null);
+                                        }}
+                                        className="w-16 h-16 rounded-full bg-white/20 items-center justify-center"
+                                    >
+                                        <Icon name="close" size={28} color="white" />
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={async () => {
+                                            if (isRecording && cameraRef) {
+                                                setIsRecording(false);
+                                                cameraRef.stopRecording();
+                                            } else if (cameraRef) {
+                                                setIsRecording(true);
+                                                const video = await cameraRef.recordAsync({
+                                                    maxDuration: 30,
+                                                    quality: '720p'
+                                                });
+                                                setRecordedVideoUri(video.uri);
+                                                setIsRecording(false);
+                                            }
+                                        }}
+                                        className={`w-20 h-20 rounded-full items-center justify-center ${isRecording ? 'bg-red-500' : 'bg-secondary'
+                                            }`}
+                                    >
+                                        {isRecording ? (
+                                            <View className="w-8 h-8 bg-white rounded-sm" />
+                                        ) : (
+                                            <View className="w-16 h-16 rounded-full border-4 border-white" />
+                                        )}
+                                    </TouchableOpacity>
+
+                                    <View className="w-16 h-16" />
+                                </View>
+                            </View>
+                        </View>
+                    )}
+
+                    {recordedVideoUri && !formCheckResult && (
+                        <View className="flex-1 bg-black">
+                            <Video
+                                source={{ uri: recordedVideoUri }}
+                                style={{ flex: 1 }}
+                                useNativeControls
+                                resizeMode={ResizeMode.CONTAIN}
+                                isLooping
+                                shouldPlay
+                            />
+
+                            <View className="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/80">
+                                <View className="flex-row items-center justify-between">
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setRecordedVideoUri(null);
+                                        }}
+                                        className="w-10 h-10 rounded-full bg-white/20 items-center justify-center"
+                                    >
+                                        <Icon name="arrow-back" size={24} color="white" />
+                                    </TouchableOpacity>
+
+                                    <AccessibleText weight="bold" className="text-white text-lg">
+                                        Vista Previa
+                                    </AccessibleText>
+
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setShowFormCheckModal(false);
+                                            setRecordedVideoUri(null);
+                                        }}
+                                        className="w-10 h-10 rounded-full bg-white/20 items-center justify-center"
+                                    >
+                                        <Icon name="close" size={24} color="white" />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80">
+                                {isAnalyzing ? (
+                                    <PremiumLoading />
+                                ) : (
+                                    <View className="flex-row gap-3">
+                                        <TouchableOpacity
+                                            onPress={() => setRecordedVideoUri(null)}
+                                            className="flex-1 bg-white/20 py-4 rounded-2xl items-center"
+                                        >
+                                            <AccessibleText weight="bold" className="text-white">
+                                                Grabar de Nuevo
+                                            </AccessibleText>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            onPress={async () => {
+                                                setIsAnalyzing(true);
+                                                try {
+                                                    const publicUrl = await useFormCheckStore.getState().uploadVideo(recordedVideoUri);
+
+                                                    const base64 = await readFileAsBase64(recordedVideoUri);
+
+                                                    const result = await analyzeExerciseForm(base64, currentExercise.exerciseName);
+
+                                                    // Guardar resultado
+                                                    await useFormCheckStore.getState().saveFormCheck({
+                                                        exercise_name: currentExercise.exerciseName,
+                                                        video_url: publicUrl,
+                                                        result
+                                                    });
+
+                                                    // Verificar logros de IA
+                                                    const formChecks = useFormCheckStore.getState().formChecks;
+                                                    useAchievementsStore.getState().checkAchievements({
+                                                        formCheckCount: formChecks.length,
+                                                        formCheckScore: result.score
+                                                    });
+
+                                                    setFormCheckResult(result);
+                                                } catch (error) {
+                                                    console.error('Error analyzing form:', error);
+                                                    Alert.alert('Error', 'No se pudo analizar el video. Intenta de nuevo.');
+                                                    setRecordedVideoUri(null);
+                                                } finally {
+                                                    setIsAnalyzing(false);
+                                                }
+                                            }}
+                                            className="flex-1 bg-secondary py-4 rounded-2xl items-center"
+                                        >
+                                            <AccessibleText weight="bold" className="text-white">
+                                                Analizar Técnica
+                                            </AccessibleText>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    )}
+
+                    {formCheckResult && (
+                        <ScrollView className="flex-1 bg-surface" showsVerticalScrollIndicator={false}>
+                            <View className="p-6">
+                                <View className="flex-row items-center justify-between mb-6">
+                                    <View>
+                                        <AccessibleText weight="bold" className="text-text text-2xl">
+                                            Análisis Completo
+                                        </AccessibleText>
+                                        <AccessibleText className="text-text-secondary">
+                                            {currentExercise.exerciseName}
+                                        </AccessibleText>
+                                    </View>
+
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setShowFormCheckModal(false);
+                                            setRecordedVideoUri(null);
+                                            setFormCheckResult(null);
+                                        }}
+                                        className="w-10 h-10 rounded-full bg-surface-highlight items-center justify-center"
+                                    >
+                                        <Icon name="close" size={24} color={Colors[theme].text} />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <FormFeedbackCard result={formCheckResult} />
+
+                                <View className="mt-6 gap-3">
+                                    <Button
+                                        onPress={() => {
+                                            setShowFormCheckModal(false);
+                                            setRecordedVideoUri(null);
+                                            setFormCheckResult(null);
+                                        }}
+                                        variant="primary"
+                                        label="Continuar Entrenamiento"
+                                    />
+
+                                    <Button
+                                        onPress={() => {
+                                            setFormCheckResult(null);
+                                            setRecordedVideoUri(null);
+                                        }}
+                                        variant="secondary"
+                                        label="Grabar Otro Video"
+                                    />
+                                </View>
+                            </View>
+                        </ScrollView>
+                    )}
+                </View>
+            </Modal>
+            {/* Share to Feed Modal */}
+            <Modal
+                visible={showShareModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={skipShare}
+            >
+                <View className="flex-1 justify-end bg-black/80">
+                    <View className="bg-surface rounded-t-[32px] p-6 border-t border-white/10">
+                        <View className="items-center mb-6">
+                            <View className="w-16 h-16 bg-primary/20 rounded-full items-center justify-center mb-4 animate-bounce">
+                                <Icon name="flame" size={32} variant="primary" />
+                            </View>
+                            <AccessibleText variant="h2" weight="black" className="text-white text-center uppercase tracking-tight">
+                                ¡Entrenamiento Completado!
+                            </AccessibleText>
+                            <AccessibleText className="text-text-secondary text-center mt-2">
+                                Comparte tu victoria con la comunidad Mambo.
+                            </AccessibleText>
+                        </View>
+
+                        <View className="bg-surface-highlight/30 p-4 rounded-2xl border border-white/5 mb-6">
+                            <TextInput
+                                value={sharePostContent}
+                                onChangeText={setSharePostContent}
+                                multiline
+                                className="text-white text-base min-h-[80px]"
+                                placeholder="Escribe algo..."
+                                placeholderTextColor="#64748b"
+                            />
+                        </View>
+
+                        <View className="gap-3">
+                            <TouchableOpacity onPress={confirmShare}>
+                                <LinearGradient
+                                    colors={Colors.gradients.primary}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    className="py-4 rounded-2xl items-center shadow-lg shadow-primary/20"
+                                >
+                                    <AccessibleText weight="black" className="text-black text-lg uppercase tracking-wider">
+                                        Compartir en Feed
+                                    </AccessibleText>
+                                </LinearGradient>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={skipShare}
+                                className="py-4 rounded-2xl items-center bg-surface-highlight/50"
+                            >
+                                <AccessibleText weight="bold" className="text-text-secondary uppercase tracking-wider">
+                                    No, gracias
+                                </AccessibleText>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </ScreenWrapper>
     );
 }

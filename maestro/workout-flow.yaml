@@ -1,0 +1,14 @@
+appId: com.mambo.fitness
+---
+- launchApp
+- tapOn: "Entrenar"
+- assertVisible: "Mis Rutinas"
+- tapOn: "Rutina de Prueba"
+- tapOn: "Empezar Entrenamiento"
+- assertVisible: "Serie 1"
+- tapOn: "Form Check"
+- assertVisible: "Grabar"
+- tapOn: "Cerrar"
+- tapOn: "Finalizar"
+- assertVisible: "¡Entrenamiento Completado!"
+- tapOn: "Cerrar"

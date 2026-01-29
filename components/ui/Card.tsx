@@ -31,7 +31,7 @@ export const Card: React.FC<CardProps> = ({
 
     if (variant === 'glass') {
         const glassColors = theme === 'dark'
-            ? ['rgba(30, 41, 59, 0.7)', 'rgba(15, 23, 42, 0.7)'] as const
+            ? Colors.gradients.glass
             : ['rgba(255, 255, 255, 0.8)', 'rgba(241, 245, 249, 0.8)'] as const;
 
         const borderColor = theme === 'dark' ? 'border-white/10' : 'border-slate-200';

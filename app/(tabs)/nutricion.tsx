@@ -473,7 +473,7 @@ export default function NutricionScreen() {
                 {/* Header */}
                 <View className="p-4">
                     {/* Date Navigation */}
-                    <Card variant="glass" className="mb-6 border-primary/30">
+                    <Card variant="glass" className="mb-6 border-primary/30 animate-fade-in-down">
                         <View className="flex-row items-center justify-between">
                             <TouchableOpacity
                                 onPress={goToPreviousDay}
@@ -499,18 +499,20 @@ export default function NutricionScreen() {
                         </View>
                     </Card>
 
-                    <View className="mb-6">
-                        <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest">
+                    <View className="mb-6 animate-fade-in-down animate-delay-100">
+                        <AccessibleText weight="bold" className="text-primary text-xs uppercase tracking-widest mb-1">
                             {isToday ? t('nutrition.today') : formatDateDisplay(selectedDate).split(' de ')[0]}
                         </AccessibleText>
-                        <AccessibleText weight="bold" className="text-text text-4xl mt-1">{t('nutrition.title')}</AccessibleText>
-                        <TouchableOpacity onPress={() => fetchWeeklyPlan()} className="absolute right-0 top-2 p-2">
-                            <Ionicons name="refresh" size={20} color={colors.primary} />
-                        </TouchableOpacity>
+                        <View className="flex-row justify-between items-center">
+                            <AccessibleText weight="black" className="text-text text-4xl tracking-tight">{t('nutrition.title')}</AccessibleText>
+                            <TouchableOpacity onPress={() => fetchWeeklyPlan()} className="bg-surface/50 p-2 rounded-xl border border-border/50">
+                                <Ionicons name="refresh" size={20} color={colors.primary} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     {/* Calories Summary Card */}
-                    <Card variant="glass" className="mb-6 border-warning/30">
+                    <Card variant="glass" className="mb-6 border-warning/30 animate-fade-in-up animate-delay-200">
                         <View className="flex-row justify-between items-start mb-4">
                             <View>
                                 <View className="flex-row items-center mb-1">
@@ -541,19 +543,20 @@ export default function NutricionScreen() {
                         </View>
 
                         {/* Progress Bar */}
-                        <View className="h-4 bg-surface-highlight/50 rounded-full overflow-hidden mb-3 border border-border/5">
+                        <View className="h-4 bg-surface-highlight/30 rounded-full overflow-hidden mb-3 border border-white/5">
                             <LinearGradient
-                                colors={Colors.gradients.orange}
+                                colors={Colors.gradients.primary}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
                                 style={{ width: `${percentageComplete}%`, height: '100%' }}
+                                className="shadow-glow"
                             />
                         </View>
 
                         {/* Macros Grid */}
                         <View className="flex-row gap-2 mt-2">
                             {/* Protein */}
-                            <Card variant="outline" className="flex-1 p-3 border-primary/20">
+                            <Card variant="outline" className="flex-1 p-3 border-primary/20 bg-primary/5">
                                 <View className="flex-row items-center mb-1">
                                     <AccessibleText weight="bold" className="text-primary text-[10px] uppercase tracking-widest">{t('nutrition.protein')}</AccessibleText>
                                     <WhyTooltip
@@ -567,7 +570,7 @@ export default function NutricionScreen() {
                                         scientific="La ingesta adecuada de proteína es crucial para mantener el balance de nitrógeno positivo necesario para la hipertrofia (Morton et al., 2018)."
                                     />
                                 </View>
-                                <AccessibleText weight="bold" className="text-text text-lg">
+                                <AccessibleText weight="black" className="text-text text-lg">
                                     {Math.round(proteinConsumed)}g
                                 </AccessibleText>
                                 <View className="h-1 bg-surface-highlight rounded-full mt-2 overflow-hidden">
@@ -609,34 +612,35 @@ export default function NutricionScreen() {
                     </Card>
 
                     {/* Meal Sections */}
-                    {mealTypes.map((mealType) => (
-                        <MealSection
-                            key={mealType.id}
-                            mealType={mealType.id as MealType}
-                            label={mealType.label}
-                            icon={mealType.icon}
-                            color={mealType.color}
-                            meals={getMealsByType(mealType.id as MealType)}
-                            plannedMeals={getPlannedMealsByType(mealType.id as MealType)}
-                            selectedDate={selectedDate}
-                            canPaste={clipboard?.mealType === mealType.id}
-                            canPasteSingleMeal={!!singleMealClipboard}
-                            onAddFood={() => handleAddFood(mealType.id as MealType)}
-                            onDeleteMeal={handleDeleteMeal}
-                            onLogPlannedMeal={handleLogPlannedMeal}
-                            onCopy={() => handleCopyMeal(mealType.id as MealType)}
-                            onPaste={handlePasteMeal}
-                            onCopySingleMeal={handleCopySingleMeal}
-                            onPasteSingleMeal={() => handlePasteSingleMeal(mealType.id as MealType)}
-                            t={t}
-                        />
+                    {mealTypes.map((mealType, index) => (
+                        <View key={mealType.id} className={`animate-fade-in-left animate-delay-${300 + (index * 100)}`}>
+                            <MealSection
+                                mealType={mealType.id as MealType}
+                                label={mealType.label}
+                                icon={mealType.icon}
+                                color={mealType.color}
+                                meals={getMealsByType(mealType.id as MealType)}
+                                plannedMeals={getPlannedMealsByType(mealType.id as MealType)}
+                                selectedDate={selectedDate}
+                                canPaste={clipboard?.mealType === mealType.id}
+                                canPasteSingleMeal={!!singleMealClipboard}
+                                onAddFood={() => handleAddFood(mealType.id as MealType)}
+                                onDeleteMeal={handleDeleteMeal}
+                                onLogPlannedMeal={handleLogPlannedMeal}
+                                onCopy={() => handleCopyMeal(mealType.id as MealType)}
+                                onPaste={handlePasteMeal}
+                                onCopySingleMeal={handleCopySingleMeal}
+                                onPasteSingleMeal={() => handlePasteSingleMeal(mealType.id as MealType)}
+                                t={t}
+                            />
+                        </View>
                     ))}
 
                     {/* Quick Access Buttons */}
                     <View className="mt-2 mb-32 flex-row gap-3">
                         <TouchableOpacity
                             onPress={() => router.push('/nutrition/food-database')}
-                            className="flex-1"
+                            className="flex-1 animate-pop animate-delay-800"
                         >
                             <Card variant="glass" className="border-primary/30 items-center">
                                 <Ionicons name="search" size={24} color={colors.primary} />
@@ -648,7 +652,7 @@ export default function NutricionScreen() {
 
                         <TouchableOpacity
                             onPress={() => router.push('/nutrition/shopping-list')}
-                            className="flex-1"
+                            className="flex-1 animate-pop animate-delay-900"
                         >
                             <Card variant="glass" className="border-secondary/30 items-center">
                                 <Ionicons name="cart" size={24} color={colors.secondary} />
@@ -660,7 +664,7 @@ export default function NutricionScreen() {
 
                         <TouchableOpacity
                             onPress={() => router.push('/nutrition/recipes')}
-                            className="flex-1"
+                            className="flex-1 animate-pop animate-delay-1000"
                         >
                             <Card variant="glass" className="border-warning/30 items-center">
                                 <Ionicons name="restaurant" size={24} color={colors.warning} />

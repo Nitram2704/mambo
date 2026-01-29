@@ -22,8 +22,8 @@ export function EmptyState({ icon = 'document-text-outline', title, description,
     };
 
     return (
-        <View className={`items-center justify-center p-8 ${className}`}>
-            <View className="w-16 h-16 rounded-full bg-surface-highlight items-center justify-center mb-4">
+        <View className="items-center justify-center p-8 ${className}">
+            <View className="w-16 h-16 rounded-full bg-surface-highlight items-center justify-center mb-4 animate-bounce">
                 <Ionicons name={icon} size={32} color={Colors[theme].textMuted} />
             </View>
             <AccessibleText variant="h3" weight="bold" className="text-center mb-2">

@@ -3,6 +3,8 @@ import { View, TextInput, TouchableOpacity, TextInputProps } from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
 import { AccessibleText } from '../ui/AccessibleText';
+import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/use-app-theme';
 
 interface AuthInputProps extends TextInputProps {
     icon: keyof typeof Ionicons.glyphMap;
@@ -23,12 +25,14 @@ export function AuthInput({
 }: AuthInputProps) {
     const [isFocused, setIsFocused] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
 
     const animatedBorderStyle = useAnimatedStyle(() => {
         const borderColor = interpolateColor(
             isFocused ? 1 : 0,
             [0, 1],
-            [error ? '#ef4444' : '#374151', error ? '#ef4444' : '#60a5fa']
+            [error ? colors.error : colors.border, error ? colors.error : colors.primary]
         );
 
         return {
@@ -40,16 +44,16 @@ export function AuthInput({
         <View className="mb-4">
             <Animated.View
                 style={animatedBorderStyle}
-                className="flex-row items-center bg-gray-800 rounded-xl px-4 h-14 border-2"
+                className="flex-row items-center bg-surface/50 backdrop-blur-sm rounded-2xl px-4 h-14 border"
             >
                 <Ionicons
                     name={icon}
                     size={20}
-                    color={isFocused ? '#60a5fa' : '#6B7280'}
+                    color={isFocused ? colors.primary : colors.textMuted}
                 />
                 <TextInput
-                    className="flex-1 text-white text-base ml-3"
-                    placeholderTextColor="#9CA3AF"
+                    className="flex-1 text-text text-base ml-3 font-medium"
+                    placeholderTextColor={colors.textMuted}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     onChangeText={onChangeText}
@@ -66,15 +70,15 @@ export function AuthInput({
                         <Ionicons
                             name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                             size={20}
-                            color="#9CA3AF"
+                            color={colors.textMuted}
                         />
                     </TouchableOpacity>
                 )}
             </Animated.View>
             {error && (
                 <View className="flex-row items-center mt-1 px-1">
-                    <Ionicons name="alert-circle" size={14} color="#ef4444" />
-                    <AccessibleText className="text-red-500 text-xs ml-1">{error}</AccessibleText>
+                    <Ionicons name="alert-circle" size={14} color={colors.error} />
+                    <AccessibleText className="text-error text-xs ml-1 font-medium">{error}</AccessibleText>
                 </View>
             )}
         </View>

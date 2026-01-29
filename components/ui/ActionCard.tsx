@@ -155,7 +155,7 @@ export function ActionCard({ type, args, status, result }: ActionCardProps) {
     };
 
     return (
-        <Animated.View entering={ZoomIn.delay(100).springify()} className="my-2 rounded-2xl overflow-hidden border border-white/10">
+        <Animated.View entering={ZoomIn.delay(100).springify()} className="my-2 rounded-2xl overflow-hidden border border-white/10 animate-shake animate-delay-100">
             <LinearGradient
                 colors={getGradientColors()}
                 className="p-4"

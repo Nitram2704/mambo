@@ -4,11 +4,13 @@ import { BarChart } from 'react-native-chart-kit';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
+import { useTranslation } from 'react-i18next';
 import { AccessibleText } from '@/components/ui/AccessibleText';
 
 export const MuscleVolumeChart = () => {
     const { workouts } = useWorkoutHistoryStore();
     const { theme } = useAppTheme();
+    const { t } = useTranslation();
     const colors = Colors[theme];
 
     const chartData = useMemo(() => {
@@ -29,7 +31,7 @@ export const MuscleVolumeChart = () => {
                     }, 0);
 
                     // Add to muscle group
-                    const muscle = exercise.muscleGroup || 'Otros';
+                    const muscle = exercise.muscleGroup || t('reports.others');
                     volumeByMuscle[muscle] = (volumeByMuscle[muscle] || 0) + volume;
                 });
             }
@@ -51,14 +53,14 @@ export const MuscleVolumeChart = () => {
     if (chartData.labels.length === 0) {
         return (
             <View className="bg-surface p-4 rounded-xl items-center justify-center h-64 border border-border/10">
-                <AccessibleText className="text-text-muted">No hay datos suficientes en los últimos 30 días</AccessibleText>
+                <AccessibleText className="text-text-muted">{t('reports.noMuscleData')}</AccessibleText>
             </View>
         );
     }
 
     return (
         <View className="bg-surface p-4 rounded-xl mb-4 border border-border/10">
-            <AccessibleText weight="bold" className="text-text text-lg mb-4">Volumen por Músculo (30 días)</AccessibleText>
+            <AccessibleText weight="bold" className="text-text text-lg mb-4">{t('reports.muscleVolumeTitle')}</AccessibleText>
             <BarChart
                 data={chartData}
                 width={Dimensions.get('window').width - 64}
@@ -83,7 +85,7 @@ export const MuscleVolumeChart = () => {
                 }}
                 showValuesOnTopOfBars
             />
-            <AccessibleText className="text-text-muted text-[10px] text-center mt-2">* Volumen total en miles de kg (toneladas)</AccessibleText>
+            <AccessibleText className="text-text-muted text-[10px] text-center mt-2">{t('reports.volumeNote')}</AccessibleText>
         </View>
     );
 };

@@ -211,7 +211,7 @@ export default function WeeklyCheckinModal({ visible, onClose, isDeloadWeek = fa
                             <View className="mb-8">
                                 <View className="flex-row justify-between items-center mb-3">
                                     <Text className="font-bold text-lg" style={{ color: Colors[theme].text }}>🧠 Nivel de Estrés</Text>
-                                    <Text className="text-4xl">{getEmojiForLevel(stressLevel, 'stress')}</Text>
+                                    <Text className="text-4xl animate-jelly">{getEmojiForLevel(stressLevel, 'stress')}</Text>
                                 </View>
                                 <Slider
                                     minimumValue={1}
@@ -233,7 +233,7 @@ export default function WeeklyCheckinModal({ visible, onClose, isDeloadWeek = fa
                             <View className="mb-8">
                                 <View className="flex-row justify-between items-center mb-3">
                                     <Text className="font-bold text-lg" style={{ color: Colors[theme].text }}>⚡ Nivel de Energía</Text>
-                                    <Text className="text-4xl">{getEmojiForLevel(energyLevel, 'energy')}</Text>
+                                    <Text className="text-4xl animate-jelly">{getEmojiForLevel(energyLevel, 'energy')}</Text>
                                 </View>
                                 <Slider
                                     minimumValue={1}
@@ -255,7 +255,7 @@ export default function WeeklyCheckinModal({ visible, onClose, isDeloadWeek = fa
                             <View className="mb-8">
                                 <View className="flex-row justify-between items-center mb-3">
                                     <Text className="font-bold text-lg" style={{ color: Colors[theme].text }}>😌 Estado de Ánimo</Text>
-                                    <Text className="text-4xl">{getEmojiForLevel(mood, 'mood')}</Text>
+                                    <Text className="text-4xl animate-jelly">{getEmojiForLevel(mood, 'mood')}</Text>
                                 </View>
                                 <Slider
                                     minimumValue={1}
@@ -277,7 +277,7 @@ export default function WeeklyCheckinModal({ visible, onClose, isDeloadWeek = fa
                             <View className="mb-8">
                                 <View className="flex-row justify-between items-center mb-3">
                                     <Text className="font-bold text-lg" style={{ color: Colors[theme].text }}>💪 Dolor Muscular (DOMS)</Text>
-                                    <Text className="text-4xl">{getEmojiForLevel(domsLevel, 'doms')}</Text>
+                                    <Text className="text-4xl animate-jelly">{getEmojiForLevel(domsLevel, 'doms')}</Text>
                                 </View>
                                 <Slider
                                     minimumValue={1}
@@ -317,14 +317,14 @@ export default function WeeklyCheckinModal({ visible, onClose, isDeloadWeek = fa
                             {analysisResult && (
                                 <>
                                     {/* Message */}
-                                    <View className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4 mb-6">
+                                    <View className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4 mb-6 animate-fade-in-up">
                                         <Text className="text-blue-400 text-base leading-6">
                                             {analysisResult.message}
                                         </Text>
                                     </View>
 
                                     {/* Stats */}
-                                    <View className="flex-row gap-3 mb-6">
+                                    <View className="flex-row gap-3 mb-6 animate-fade-in-up animate-delay-100">
                                         <View
                                             className="flex-1 rounded-xl p-4 items-center"
                                             style={{ backgroundColor: isDark ? 'rgba(31, 41, 55, 0.5)' : '#f3f4f6' }}
@@ -347,7 +347,7 @@ export default function WeeklyCheckinModal({ visible, onClose, isDeloadWeek = fa
 
                                     {/* Wellness Summary */}
                                     <View
-                                        className="rounded-2xl p-4 mb-6"
+                                        className="rounded-2xl p-4 mb-6 animate-fade-in-up animate-delay-200"
                                         style={{ backgroundColor: isDark ? 'rgba(31, 41, 55, 0.5)' : '#f3f4f6' }}
                                     >
                                         <Text className="font-bold mb-3" style={{ color: Colors[theme].text }}>Estado General</Text>

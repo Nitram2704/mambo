@@ -58,24 +58,29 @@ ALTER TABLE wagers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE social_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE coach_clients ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies (Simplified for now, can be refined)
+-- RLS Policies
+DROP POLICY IF EXISTS "Users can see groups they are members of" ON social_groups;
 CREATE POLICY "Users can see groups they are members of" ON social_groups
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM group_members WHERE group_id = social_groups.id AND profile_id = auth.uid())
     );
 
+DROP POLICY IF EXISTS "Members can see other members in their groups" ON group_members;
 CREATE POLICY "Members can see other members in their groups" ON group_members
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM group_members gm WHERE gm.group_id = group_members.group_id AND gm.profile_id = auth.uid())
     );
 
+DROP POLICY IF EXISTS "Members can see wagers in their groups" ON wagers;
 CREATE POLICY "Members can see wagers in their groups" ON wagers
     FOR SELECT USING (
         EXISTS (SELECT 1 FROM group_members WHERE group_id = wagers.group_id AND profile_id = auth.uid())
     );
 
+DROP POLICY IF EXISTS "Users can see posts from their group members" ON social_posts;
 CREATE POLICY "Users can see posts from their group members" ON social_posts
     FOR SELECT USING (true); -- Public for now, can be restricted to friends/groups later
 
+DROP POLICY IF EXISTS "Coaches can see their clients" ON coach_clients;
 CREATE POLICY "Coaches can see their clients" ON coach_clients
     FOR SELECT USING (coach_id = auth.uid() OR client_id = auth.uid());

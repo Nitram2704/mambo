@@ -43,14 +43,14 @@ export const LevelProgressBar: React.FC<LevelProgressBarProps> = ({
             colors={theme === 'dark'
                 ? ['rgba(30, 41, 59, 0.7)', 'rgba(15, 23, 42, 0.8)']
                 : [Colors[theme].surfaceHighlight + '20', Colors[theme].surfaceHighlight + '40']}
-            className="rounded-2xl p-5 border border-border/10 mb-6"
+            className="rounded-2xl p-5 border border-border/10 mb-6 animate-fade-in"
             accessibilityLabel={`Nivel ${level}, ${title}, ${Math.round(progress * 100)}% de progreso hacia el siguiente nivel`}
         >
             <View className="flex-row justify-between items-end mb-3">
                 <View>
                     <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase mb-1 tracking-wider">Nivel Actual</AccessibleText>
                     <View className="flex-row items-baseline">
-                        <AccessibleText weight="bold" className="text-text text-4xl mr-2">{level}</AccessibleText>
+                        <AccessibleText weight="bold" className="text-text text-4xl mr-2 animate-zoom-in">{level}</AccessibleText>
                         <LinearGradient
                             colors={['#60a5fa', '#a78bfa']}
                             start={{ x: 0, y: 0 }}

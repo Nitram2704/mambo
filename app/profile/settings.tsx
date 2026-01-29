@@ -16,6 +16,7 @@ export default function SettingsScreen() {
     const router = useRouter();
     const { t, i18n } = useTranslation();
     const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const { profile, updateProfile, clearProfile } = useUserProfileStore();
     const [showTermsModal, setShowTermsModal] = React.useState(false);
     const [modalTitle, setModalTitle] = React.useState('');
@@ -61,7 +62,7 @@ export default function SettingsScreen() {
         value,
         onPress,
         type = 'navigation',
-        iconColor = Colors[theme].primary
+        iconColor = colors.primary
     }: {
         icon: keyof typeof Ionicons.glyphMap,
         label: string,
@@ -79,13 +80,13 @@ export default function SettingsScreen() {
                 <View className="w-10 h-10 rounded-xl items-center justify-center mr-4" style={{ backgroundColor: iconColor + '15' }}>
                     <Ionicons name={icon} size={22} color={iconColor} />
                 </View>
-                <AccessibleText weight="medium" className="text-text text-base flex-1">{label}</AccessibleText>
+                <AccessibleText weight="bold" className="text-text text-base flex-1">{label}</AccessibleText>
             </View>
 
             {type === 'navigation' && (
                 <View className="flex-row items-center">
                     {value && <AccessibleText className="text-text-secondary mr-2 text-sm">{value}</AccessibleText>}
-                    <Ionicons name="chevron-forward" size={20} color={Colors[theme].textMuted} />
+                    <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
                 </View>
             )}
 
@@ -93,13 +94,13 @@ export default function SettingsScreen() {
                 <Switch
                     value={value as boolean}
                     onValueChange={onPress}
-                    trackColor={{ false: Colors[theme].border, true: Colors[theme].primary }}
+                    trackColor={{ false: colors.border, true: colors.primary }}
                     thumbColor="#ffffff"
                 />
             )}
 
             {type === 'action' && (
-                <Ionicons name="chevron-forward" size={20} color={Colors[theme].textMuted} />
+                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             )}
         </TouchableOpacity>
     );
@@ -117,11 +118,11 @@ export default function SettingsScreen() {
                 <View className="px-6 py-4 flex-row items-center">
                     <TouchableOpacity
                         onPress={() => router.back()}
-                        className="w-10 h-10 bg-white/5 rounded-full items-center justify-center mr-4"
+                        className="w-10 h-10 bg-surface/50 rounded-full items-center justify-center mr-4 border border-white/10"
                     >
-                        <Ionicons name="arrow-back" size={24} color={Colors[theme].text} />
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
                     </TouchableOpacity>
-                    <AccessibleText variant="h1" weight="bold" className="text-text text-2xl">
+                    <AccessibleText variant="h1" weight="black" className="text-text text-2xl uppercase tracking-tight">
                         {t('settings.title')}
                     </AccessibleText>
                 </View>
@@ -275,7 +276,7 @@ export default function SettingsScreen() {
                         <SettingItem
                             icon="trash-outline"
                             label={t('settings.account.deleteAccount')}
-                            iconColor={Colors[theme].error}
+                            iconColor={colors.error}
                             onPress={() => {
                                 Alert.alert(
                                     t('settings.delete_account.title'),
@@ -354,10 +355,10 @@ export default function SettingsScreen() {
                         className="mt-8 mb-12"
                     >
                         <LinearGradient
-                            colors={[Colors[theme].error + '20', Colors[theme].error + '10']}
+                            colors={[colors.error + '20', colors.error + '10']}
                             className="rounded-2xl py-4 items-center border border-red-500/20"
                         >
-                            <AccessibleText weight="bold" className="text-red-500 text-lg">
+                            <AccessibleText weight="black" className="text-red-500 text-lg uppercase tracking-widest">
                                 {t('settings.account.logout')}
                             </AccessibleText>
                         </LinearGradient>

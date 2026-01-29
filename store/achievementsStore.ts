@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/lib/supabase';
 import { ACHIEVEMENTS, Achievement } from '@/constants/achievements';
 import { CompletedWorkout, WorkoutSet, ExerciseSession, UserProfile } from '@/types/schema';
 import { DailyNutrition } from './nutritionStore';
@@ -43,6 +44,11 @@ interface AchievementsState {
     cleanEatingStreak: number;
     lessonsCompleted: number;
 
+    // UI Queue
+    achievementQueue: Achievement[];
+    addToQueue: (achievement: Achievement) => void;
+    removeFromQueue: () => void;
+
     // Acciones para ganar XP
     addXp: (amount: number, source: string) => void;
     checkNutritionStreaks: (dailyNutrition: DailyNutrition, yesterdayNutrition: DailyNutrition | undefined, goals: UserProfile) => void;
@@ -56,12 +62,15 @@ interface AchievementsState {
             nutritionStreak?: number;
             cleanEatingStreak?: number;
             lessonsCompleted?: number;
+            formCheckCount?: number;
+            formCheckScore?: number;
         }
     ) => UnlockedAchievement[];
 
     getUnlockedCount: () => number;
     getTotalXp: () => number;
     getCurrentLevel: () => { level: number; title: string; progress: number; currentLevelXp: number; nextLevelXp: number; totalXp: number };
+    syncWithSupabase: () => Promise<void>;
     reset: () => void;
 }
 
@@ -74,6 +83,11 @@ export const useAchievementsStore = create<AchievementsState>()(
             cleanEatingStreak: 0,
             lessonsCompleted: 0,
 
+            achievementQueue: [],
+
+            addToQueue: (achievement) => set((state) => ({ achievementQueue: [...state.achievementQueue, achievement] })),
+            removeFromQueue: () => set((state) => ({ achievementQueue: state.achievementQueue.slice(1) })),
+
             addXp: (amount, source) => {
                 set((state) => ({
                     accumulatedXp: state.accumulatedXp + amount
@@ -85,7 +99,7 @@ export const useAchievementsStore = create<AchievementsState>()(
                 const state = get();
                 const newUnlocks: UnlockedAchievement[] = [];
                 const now = new Date();
-                const { lastWorkout, history, userWeight, nutritionStreak, cleanEatingStreak, lessonsCompleted } = context;
+                const { lastWorkout, history, userWeight, nutritionStreak, cleanEatingStreak, lessonsCompleted, formCheckCount, formCheckScore } = context;
 
                 ACHIEVEMENTS.forEach((achievement) => {
                     // Skip if already unlocked
@@ -225,6 +239,18 @@ export const useAchievementsStore = create<AchievementsState>()(
                                 isUnlocked = true;
                             }
                             break;
+
+                        case 'AI_FORM_CHECK':
+                            if (formCheckCount !== undefined && formCheckCount >= achievement.targetValue) {
+                                isUnlocked = true;
+                            }
+                            break;
+
+                        case 'AI_PERFECT_SCORE':
+                            if (formCheckScore !== undefined && formCheckScore >= achievement.targetValue) {
+                                isUnlocked = true;
+                            }
+                            break;
                     }
 
                     if (isUnlocked) {
@@ -237,9 +263,20 @@ export const useAchievementsStore = create<AchievementsState>()(
                 });
 
                 if (newUnlocks.length > 0) {
+                    // Add to queue for UI
+                    newUnlocks.forEach(ua => {
+                        const achievement = ACHIEVEMENTS.find(a => a.id === ua.id);
+                        if (achievement) {
+                            get().addToQueue(achievement);
+                        }
+                    });
+
                     set((state) => ({
                         unlockedAchievements: [...state.unlockedAchievements, ...newUnlocks],
                     }));
+
+                    // Sync new unlocks to Supabase
+                    get().syncWithSupabase();
                 }
 
                 return newUnlocks;
@@ -289,6 +326,49 @@ export const useAchievementsStore = create<AchievementsState>()(
             incrementLessonsCompleted: () => {
                 set((state) => ({ lessonsCompleted: state.lessonsCompleted + 1 }));
                 get().addXp(15, 'Completed lesson');
+            },
+
+            syncWithSupabase: async () => {
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+
+                    const state = get();
+
+                    // 1. Push local unlocks to Supabase
+                    if (state.unlockedAchievements.length > 0) {
+                        const { error: pushError } = await supabase
+                            .from('user_achievements')
+                            .upsert(
+                                state.unlockedAchievements.map(ua => ({
+                                    user_id: user.id,
+                                    achievement_id: ua.id,
+                                    unlocked_at: ua.unlockedAt.toISOString()
+                                })),
+                                { onConflict: 'user_id,achievement_id' }
+                            );
+                        if (pushError) console.error('Error pushing achievements:', pushError);
+                    }
+
+                    // 2. Pull from Supabase to ensure sync
+                    const { data, error: pullError } = await supabase
+                        .from('user_achievements')
+                        .select('achievement_id, unlocked_at')
+                        .eq('user_id', user.id);
+
+                    if (pullError) throw pullError;
+
+                    if (data) {
+                        const syncedUnlocks = data.map((item: any) => ({
+                            id: item.achievement_id,
+                            unlockedAt: new Date(item.unlocked_at)
+                        }));
+
+                        set({ unlockedAchievements: syncedUnlocks });
+                    }
+                } catch (error) {
+                    console.error('Error syncing achievements with Supabase:', error);
+                }
             },
 
             reset: () =>

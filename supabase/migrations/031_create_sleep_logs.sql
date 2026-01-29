@@ -19,15 +19,19 @@ CREATE TABLE IF NOT EXISTS sleep_logs (
 ALTER TABLE sleep_logs ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
+DROP POLICY IF EXISTS "Users can view their own sleep logs" ON sleep_logs;
 CREATE POLICY "Users can view their own sleep logs" ON sleep_logs
     FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own sleep logs" ON sleep_logs;
 CREATE POLICY "Users can insert their own sleep logs" ON sleep_logs
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own sleep logs" ON sleep_logs;
 CREATE POLICY "Users can update their own sleep logs" ON sleep_logs
     FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own sleep logs" ON sleep_logs;
 CREATE POLICY "Users can delete their own sleep logs" ON sleep_logs
     FOR DELETE USING (auth.uid() = user_id);
 

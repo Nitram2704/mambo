@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { triggerHaptic as hapticImpact, triggerNotification, triggerSelection } from '@/utils/haptics';
 import { useColorScheme as useSystemColorScheme } from 'react-native';
 import { useUserProfileStore } from '@/store/userProfileStore';
 
@@ -12,13 +13,13 @@ export function useAppTheme() {
 
     const triggerHaptic = (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'selection' = 'medium') => {
         switch (type) {
-            case 'light': Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); break;
-            case 'medium': Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); break;
-            case 'heavy': Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); break;
-            case 'success': Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); break;
-            case 'warning': Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); break;
-            case 'error': Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); break;
-            case 'selection': Haptics.selectionAsync(); break;
+            case 'light': hapticImpact(Haptics.ImpactFeedbackStyle.Light); break;
+            case 'medium': hapticImpact(Haptics.ImpactFeedbackStyle.Medium); break;
+            case 'heavy': hapticImpact(Haptics.ImpactFeedbackStyle.Heavy); break;
+            case 'success': triggerNotification(Haptics.NotificationFeedbackType.Success); break;
+            case 'warning': triggerNotification(Haptics.NotificationFeedbackType.Warning); break;
+            case 'error': triggerNotification(Haptics.NotificationFeedbackType.Error); break;
+            case 'selection': triggerSelection(); break;
         }
     };
 

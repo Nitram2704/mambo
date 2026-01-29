@@ -12,6 +12,7 @@ import SleepLogModal from '@/components/SleepLogModal';
 import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { AccessibleText } from '@/components/ui/AccessibleText';
+import { PremiumButton } from '@/components/ui/PremiumButton';
 
 const { width } = Dimensions.get('window');
 
@@ -29,7 +30,7 @@ export default function SleepScreen() {
 
     const lastNightSleep = useMemo(() => getLastNightSleep(), [sleepLogs, getLastNightSleep]);
 
-    const weeklyStats = useMemo(() => getWeeklyStats(), [getWeeklyStats]);
+    const weeklyStats = useMemo(() => getWeeklyStats(), [getWeeklyStats, sleepLogs]);
 
     const weekDays = useMemo(() => {
         const days = [];
@@ -51,12 +52,12 @@ export default function SleepScreen() {
         <ScreenWrapper safeArea={true}>
             <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
                 {/* Header */}
-                <View className="mb-8 mt-2">
+                <View className="mb-8 mt-2 animate-fade-in-down">
                     <AccessibleText variant="h1" weight="bold" className="text-text text-4xl font-black">{t('sleep.title')}</AccessibleText>
                 </View>
 
                 {/* Last Night Summary */}
-                <Card variant="glass" className="p-6 mb-6 overflow-hidden">
+                <Card variant="glass" className="p-6 mb-6 overflow-hidden animate-fade-in-up animate-delay-100">
                     <View className="flex-row justify-between items-start mb-6">
                         <View>
                             <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest mb-1">
@@ -81,7 +82,7 @@ export default function SleepScreen() {
                         <View className="flex-row gap-4">
                             <View className="flex-1 bg-primary/5 p-3 rounded-xl border border-primary/20">
                                 <AccessibleText weight="bold" className="text-text-muted text-[10px] uppercase mb-1">{t('sleep.quality')}</AccessibleText>
-                                <AccessibleText weight="bold" className="text-text font-bold">{lastNightSleep.quality}/10</AccessibleText>
+                                <AccessibleText weight="bold" className="text-text font-bold">{lastNightSleep.quality}/5</AccessibleText>
                             </View>
                             <View className="flex-1 bg-primary/5 p-3 rounded-xl border border-primary/20">
                                 <AccessibleText weight="bold" className="text-text-muted text-[10px] uppercase mb-1">{t('sleep.lastSession')}</AccessibleText>
@@ -91,18 +92,15 @@ export default function SleepScreen() {
                     )}
 
                     {!lastNightSleep && (
-                        <TouchableOpacity
+                        <PremiumButton
+                            label={t('sleep.register')}
                             onPress={() => setIsModalVisible(true)}
-                            className="bg-blue-600 py-4 rounded-2xl items-center"
-                            style={{ backgroundColor: Colors[theme].primary }}
-                        >
-                            <AccessibleText weight="bold" className="text-white font-bold">{t('sleep.register')}</AccessibleText>
-                        </TouchableOpacity>
+                        />
                     )}
                 </Card>
 
                 {/* Weekly Activity */}
-                <View className="mb-8">
+                <View className="mb-8 animate-fade-in-up animate-delay-200">
                     <View className="flex-row justify-between items-end mb-4">
                         <AccessibleText weight="bold" className="text-text text-xl font-bold">{t('sleep.thisWeek')}</AccessibleText>
                         <AccessibleText weight="bold" className="text-text-secondary text-xs font-bold">
@@ -137,12 +135,12 @@ export default function SleepScreen() {
                 </View>
 
                 {/* Quick Actions */}
-                <View className="flex-row gap-4 mb-8">
+                <View className="flex-row flex-wrap gap-4 mb-8">
                     <TouchableOpacity
                         onPress={() => setIsModalVisible(true)}
-                        className="flex-1"
+                        className="w-[47%] animate-pop animate-delay-300"
                     >
-                        <Card variant="glass" className="p-5 items-center">
+                        <Card variant="glass" className="p-5 items-center h-32 justify-center">
                             <View className="bg-primary/10 p-3 rounded-full mb-3">
                                 <Ionicons name="add" size={24} color={Colors[theme].primary} />
                             </View>
@@ -151,10 +149,22 @@ export default function SleepScreen() {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        onPress={() => router.push('/sleep/sleep-report')}
-                        className="flex-1"
+                        onPress={() => router.push('/sleep/smart-alarm' as any)}
+                        className="w-[47%] animate-pop animate-delay-400"
                     >
-                        <Card variant="glass" className="p-5 items-center">
+                        <Card variant="glass" className="p-5 items-center h-32 justify-center border-primary/30 bg-primary/5">
+                            <View className="bg-primary/20 p-3 rounded-full mb-3">
+                                <Ionicons name="alarm" size={24} color={Colors[theme].primary} />
+                            </View>
+                            <AccessibleText weight="bold" className="text-text font-bold text-sm">{t('sleep.smartAlarm.title')}</AccessibleText>
+                        </Card>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress={() => router.push('/sleep/sleep-report')}
+                        className="w-[47%] animate-pop animate-delay-500"
+                    >
+                        <Card variant="glass" className="p-5 items-center h-32 justify-center">
                             <View className="bg-secondary/10 p-3 rounded-full mb-3">
                                 <Ionicons name="stats-chart" size={24} color={Colors[theme].secondary} />
                             </View>
@@ -164,9 +174,9 @@ export default function SleepScreen() {
 
                     <TouchableOpacity
                         onPress={() => router.push('/sleep/sleep-goals')}
-                        className="flex-1"
+                        className="w-[47%] animate-pop animate-delay-600"
                     >
-                        <Card variant="glass" className="p-5 items-center">
+                        <Card variant="glass" className="p-5 items-center h-32 justify-center">
                             <View className="bg-warning/10 p-3 rounded-full mb-3">
                                 <Ionicons name="trophy" size={24} color={Colors[theme].warning} />
                             </View>

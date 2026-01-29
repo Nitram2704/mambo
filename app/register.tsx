@@ -13,10 +13,14 @@ import { performSocialLogin } from '@/utils/authUtils';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { AccessibleText } from '@/components/ui/AccessibleText';
+import { Colors } from '@/constants/Colors';
+import { useAppTheme } from '@/hooks/use-app-theme';
 
 export default function RegisterScreen() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const [loading, setLoading] = useState(false);
 
     // Form state
@@ -150,7 +154,7 @@ export default function RegisterScreen() {
             <Stack.Screen options={{ headerShown: false }} />
 
             <LinearGradient
-                colors={['#1a1a2e', '#16213e', '#0f3460']}
+                colors={theme === 'dark' ? ['#09090b', '#18181b'] : ['#ffffff', '#f4f4f5']}
                 className="flex-1"
             >
                 <SafeAreaView className="flex-1">
@@ -167,8 +171,8 @@ export default function RegisterScreen() {
                                 <Ionicons name="arrow-back" size={24} color="white" />
                             </TouchableOpacity>
                             <View>
-                                <AccessibleText className="text-white text-2xl font-bold">{t('auth.registerTitle')}</AccessibleText>
-                                <AccessibleText className="text-gray-400 text-sm">{t('auth.registerSubtitle')}</AccessibleText>
+                                <AccessibleText weight="black" className="text-text text-2xl tracking-tight">{t('auth.registerTitle')}</AccessibleText>
+                                <AccessibleText className="text-text-secondary text-sm font-medium">{t('auth.registerSubtitle')}</AccessibleText>
                             </View>
                         </View>
 
@@ -239,11 +243,12 @@ export default function RegisterScreen() {
                                         />
                                     </TouchableOpacity>
                                     <View className="ml-3 flex-1">
-                                        <AccessibleText className="text-gray-400 text-sm">
+                                        <AccessibleText className="text-text-secondary text-sm font-medium">
                                             {t('auth.accept')}
                                             <AccessibleText
                                                 onPress={() => setShowTermsModal(true)}
-                                                className="text-blue-500 font-semibold"
+                                                weight="bold"
+                                                className="text-primary"
                                             >
                                                 {t('auth.termsAndConditions')}
                                             </AccessibleText>
@@ -258,42 +263,42 @@ export default function RegisterScreen() {
                                     className="mt-8 mb-4"
                                 >
                                     <LinearGradient
-                                        colors={loading ? ['#6B7280', '#4B5563'] : ['#3b82f6', '#60a5fa']}
+                                        colors={loading ? [colors.surfaceHighlight, colors.surfaceHighlight] : Colors.gradients.primary}
                                         start={{ x: 0, y: 0 }}
                                         end={{ x: 1, y: 0 }}
                                         className="rounded-2xl py-4 items-center"
                                     >
                                         {loading ? (
-                                            <ActivityIndicator color="white" />
+                                            <ActivityIndicator color={colors.text} />
                                         ) : (
-                                            <AccessibleText className="text-white text-lg font-bold">{t('auth.signUp')}</AccessibleText>
+                                            <AccessibleText weight="black" className="text-black text-lg uppercase tracking-wider">{t('auth.signUp')}</AccessibleText>
                                         )}
                                     </LinearGradient>
                                 </TouchableOpacity>
 
                                 {/* Divider */}
                                 <View className="flex-row items-center mb-6">
-                                    <View className="flex-1 h-px bg-gray-700" />
-                                    <AccessibleText className="text-gray-500 text-sm mx-4">{t('auth.social.or')}</AccessibleText>
-                                    <View className="flex-1 h-px bg-gray-700" />
+                                    <View className="flex-1 h-px bg-border" />
+                                    <AccessibleText className="text-text-muted text-sm mx-4 font-medium">{t('auth.social.or')}</AccessibleText>
+                                    <View className="flex-1 h-px bg-border" />
                                 </View>
 
                                 {/* Social Login */}
                                 <View className="flex-row justify-between gap-4 mb-6">
                                     <TouchableOpacity
                                         onPress={() => performSocialLogin('google')}
-                                        className="flex-1 flex-row items-center justify-center bg-white/5 border border-white/10 rounded-2xl py-4"
+                                        className="flex-1 flex-row items-center justify-center bg-surface/50 border border-border rounded-2xl py-4"
                                     >
-                                        <Ionicons name="logo-google" size={20} color="white" />
-                                        <AccessibleText className="text-white font-semibold ml-2">{t('auth.continueWithGoogle')}</AccessibleText>
+                                        <Ionicons name="logo-google" size={20} color={colors.text} />
+                                        <AccessibleText weight="bold" className="text-text ml-2">{t('auth.continueWithGoogle')}</AccessibleText>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
                                         onPress={() => performSocialLogin('apple')}
-                                        className="flex-1 flex-row items-center justify-center bg-white/5 border border-white/10 rounded-2xl py-4"
+                                        className="flex-1 flex-row items-center justify-center bg-surface/50 border border-border rounded-2xl py-4"
                                     >
-                                        <Ionicons name="logo-apple" size={20} color="white" />
-                                        <AccessibleText className="text-white font-semibold ml-2">{t('auth.continueWithApple')}</AccessibleText>
+                                        <Ionicons name="logo-apple" size={20} color={colors.text} />
+                                        <AccessibleText weight="bold" className="text-text ml-2">{t('auth.continueWithApple')}</AccessibleText>
                                     </TouchableOpacity>
                                 </View>
 
@@ -302,9 +307,9 @@ export default function RegisterScreen() {
                                     onPress={() => router.push('/auth')}
                                     className="items-center py-4 mb-8"
                                 >
-                                    <AccessibleText className="text-gray-400">
+                                    <AccessibleText className="text-text-secondary font-medium">
                                         {t('auth.hasAccount')}{' '}
-                                        <AccessibleText className="text-blue-500 font-semibold">{t('auth.signIn')}</AccessibleText>
+                                        <AccessibleText weight="bold" className="text-primary">{t('auth.signIn')}</AccessibleText>
                                     </AccessibleText>
                                 </TouchableOpacity>
                             </Animated.View>
@@ -346,15 +351,15 @@ export default function RegisterScreen() {
 
                         <TouchableOpacity
                             onPress={() => setShowTermsModal(false)}
-                            className="mt-8"
+                            className="mt-8 shadow-glow"
                         >
                             <LinearGradient
-                                colors={['#3b82f6', '#60a5fa']}
+                                colors={Colors.gradients.primary}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
-                                className="rounded-2xl py-4 items-center shadow-lg shadow-blue-500/30"
+                                className="rounded-2xl py-4 items-center"
                             >
-                                <AccessibleText className="text-white text-lg font-bold">
+                                <AccessibleText weight="black" className="text-black text-lg uppercase tracking-wider">
                                     {t('common.ok')}
                                 </AccessibleText>
                             </LinearGradient>

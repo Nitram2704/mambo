@@ -107,16 +107,16 @@ export default function DashboardScreen() {
     <ScreenWrapper safeArea={true}>
       <ScrollView className="flex-1 px-6 py-4" showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View className="mb-5 mt-3 flex-row justify-between items-center">
+        <View className="mb-5 mt-3 flex-row justify-between items-center animate-fade-in-down">
           <View>
-            <AccessibleText className="text-text-secondary text-xs font-bold uppercase tracking-widest">
+            <AccessibleText className="text-primary text-xs font-black uppercase tracking-widest mb-1">
               {new Date().toLocaleDateString(i18n.language === 'es' ? 'es-ES' : 'en-US', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
               })}
             </AccessibleText>
-            <AccessibleText variant="h1" weight="bold" className="text-text text-4xl font-black mt-1">{t('dashboard.title')}</AccessibleText>
+            <AccessibleText variant="h1" weight="black" className="text-text text-4xl tracking-tighter">{t('dashboard.title')}</AccessibleText>
           </View>
           <TouchableOpacity
             onPress={handleLogoutPress}
@@ -129,42 +129,42 @@ export default function DashboardScreen() {
         {/* Main Stats Cards */}
         <View className="flex-row gap-3 mb-4">
           {/* Calories Card */}
-          <Card variant="glass" className="flex-1 p-4">
+          <Card variant="glass" className="flex-1 p-5 shadow-glow-sm animate-fade-in-up animate-delay-100 border-primary/20">
             <View className="flex-row items-center mb-3">
-              <View className="w-8 h-8 rounded-full items-center justify-center mr-2 bg-error/10">
-                <Ionicons name="flame" size={18} color={Colors[theme].error} />
+              <View className="w-8 h-8 rounded-full items-center justify-center mr-2 bg-primary/10">
+                <Ionicons name="flame" size={18} color={Colors[theme].primary} />
               </View>
-              <AccessibleText className="text-text-secondary text-xs font-medium">{t('dashboard.calories')}</AccessibleText>
+              <AccessibleText className="text-text-secondary text-xs font-bold uppercase tracking-wider">{t('dashboard.calories')}</AccessibleText>
             </View>
-            <AccessibleText weight="bold" className="text-text text-3xl font-bold tracking-tight">{todayData.caloriesConsumed}</AccessibleText>
+            <AccessibleText weight="black" className="text-text text-3xl tracking-tighter">{todayData.caloriesConsumed}</AccessibleText>
             <AccessibleText className="text-text-muted text-xs font-medium mt-1">/ {calorieGoal} kcal</AccessibleText>
           </Card>
 
           {/* Workouts Card */}
-          <Card variant="glass" className="flex-1 p-4">
+          <Card variant="glass" className="flex-1 p-5 shadow-glow-sm animate-fade-in-up animate-delay-200 border-secondary/20">
             <View className="flex-row items-center mb-3">
-              <View className="w-8 h-8 rounded-full items-center justify-center mr-2 bg-success/10">
-                <Ionicons name="barbell" size={18} color={Colors[theme].success} />
+              <View className="w-8 h-8 rounded-full items-center justify-center mr-2 bg-secondary/10">
+                <Ionicons name="barbell" size={18} color={Colors[theme].secondary} />
               </View>
-              <AccessibleText className="text-text-secondary text-xs font-medium">{t('dashboard.workouts')}</AccessibleText>
+              <AccessibleText className="text-text-secondary text-xs font-bold uppercase tracking-wider">{t('dashboard.workouts')}</AccessibleText>
             </View>
-            <AccessibleText weight="bold" className="text-text text-3xl font-bold tracking-tight">{todayData.workouts.length}</AccessibleText>
+            <AccessibleText weight="black" className="text-text text-3xl tracking-tighter">{todayData.workouts.length}</AccessibleText>
             <AccessibleText className="text-text-muted text-xs font-medium mt-1">{t('dashboard.activeMinutes', { count: workoutMinutes })}</AccessibleText>
           </Card>
         </View>
 
         {/* Calorie Goal Progress */}
-        <Card variant="glass" className="p-4 mb-4">
+        <Card variant="glass" className="p-4 mb-4 animate-fade-in-up animate-delay-300">
           <View className="flex-row justify-between items-center mb-3">
             <AccessibleText weight="bold" className="text-text text-lg">{t('dashboard.dailyGoal')}</AccessibleText>
-            <View className="px-3 py-1 rounded-full bg-orange-500/10">
-              <AccessibleText weight="bold" className="text-orange-500 text-xs">{percentageComplete}%</AccessibleText>
+            <View className="px-3 py-1 rounded-full bg-primary/10">
+              <AccessibleText weight="bold" className="text-primary text-xs">{percentageComplete}%</AccessibleText>
             </View>
           </View>
 
           <View className="h-4 rounded-full overflow-hidden mb-3 border border-border bg-surface-highlight/50">
             <LinearGradient
-              colors={Colors.gradients.orange}
+              colors={Colors.gradients.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ width: `${Math.min(parseFloat(percentageComplete), 100)}%`, height: '100%' }}
@@ -178,35 +178,35 @@ export default function DashboardScreen() {
         {/* Macros Grid */}
         <View className="flex-row gap-2.5 mb-4">
           {/* Protein */}
-          <Card variant="glass" className="flex-1 p-2.5 items-center border-blue-500/30">
+          <Card variant="glass" className="flex-1 p-2.5 items-center border-blue-500/30 animate-fade-in-up animate-delay-400">
             <AccessibleText weight="bold" className="text-blue-500 text-[10px] uppercase mb-1">{t('dashboard.protein')}</AccessibleText>
             <AccessibleText weight="bold" className="text-text text-lg">{Math.round(proteinConsumed)}g</AccessibleText>
-            <View className="w-full h-1.5 rounded-full mt-2 overflow-hidden bg-surface-highlight/50">
+            <View className="w-full h-1.5 rounded-full mt-2 overflow-hidden bg-surface-highlight/50 animate-jiggle">
               <View className="h-full bg-blue-500" style={{ width: `${Math.min((proteinConsumed / proteinGoal) * 100, 100)}%` }} />
             </View>
           </Card>
 
           {/* Carbs */}
-          <Card variant="glass" className="flex-1 p-2.5 items-center border-green-500/30">
+          <Card variant="glass" className="flex-1 p-2.5 items-center border-green-500/30 animate-fade-in-up animate-delay-500">
             <AccessibleText weight="bold" className="text-green-500 text-[10px] uppercase mb-1">{t('dashboard.carbs')}</AccessibleText>
             <AccessibleText weight="bold" className="text-text text-lg">{Math.round(carbsConsumed)}g</AccessibleText>
-            <View className="w-full h-1.5 rounded-full mt-2 overflow-hidden bg-surface-highlight/50">
+            <View className="w-full h-1.5 rounded-full mt-2 overflow-hidden bg-surface-highlight/50 animate-jiggle">
               <View className="h-full bg-green-500" style={{ width: `${Math.min((carbsConsumed / carbsGoal) * 100, 100)}%` }} />
             </View>
           </Card>
 
           {/* Fats */}
-          <Card variant="glass" className="flex-1 p-2.5 items-center border-yellow-500/30">
+          <Card variant="glass" className="flex-1 p-2.5 items-center border-yellow-500/30 animate-fade-in-up animate-delay-600">
             <AccessibleText weight="bold" className="text-yellow-500 text-[10px] uppercase mb-1">{t('dashboard.fats')}</AccessibleText>
             <AccessibleText weight="bold" className="text-text text-lg">{Math.round(fatsConsumed)}g</AccessibleText>
-            <View className="w-full h-1.5 rounded-full mt-2 overflow-hidden bg-surface-highlight/50">
+            <View className="w-full h-1.5 rounded-full mt-2 overflow-hidden bg-surface-highlight/50 animate-jiggle">
               <View className="h-full bg-yellow-500" style={{ width: `${Math.min((fatsConsumed / fatsGoal) * 100, 100)}%` }} />
             </View>
           </Card>
         </View>
 
         {/* Water Tracker */}
-        <Card variant="glass" className="p-4 mb-4 border-blue-500/30">
+        <Card variant="glass" className="p-4 mb-4 border-blue-500/30 animate-fade-in-up animate-delay-700">
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center">
               <View className="bg-blue-500/10 p-2 rounded-full mr-3">
@@ -266,7 +266,7 @@ export default function DashboardScreen() {
         {isMonday && (
           <TouchableOpacity
             onPress={() => setCheckinModalVisible(true)}
-            className="mb-4"
+            className="mb-4 animate-pop animate-delay-800"
           >
             <Card variant="glass" className="p-4 border-secondary/30">
               <View className="flex-row items-center justify-between">
@@ -288,27 +288,35 @@ export default function DashboardScreen() {
         )}
 
         {/* Quick Actions Section */}
-        <View className="mb-8 pb-4">
+        <View className="mb-8 pb-4 animate-fade-in-up animate-delay-900">
           <AccessibleText weight="bold" className="text-text text-xl mb-4">{t('dashboard.quickActions')}</AccessibleText>
 
           {/* Main Action: Workout */}
           <TouchableOpacity
             onPress={() => router.push('/workout/start')}
-            className="mb-4"
+            className="mb-4 animate-pulse overflow-hidden rounded-2xl"
           >
             <LinearGradient
-              colors={Colors.gradients.orange}
+              colors={Colors.gradients.primary}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              className="rounded-2xl p-5 flex-row items-center justify-between"
+              className="p-6 flex-row items-center justify-between shadow-glow"
             >
+              {/* Shine Effect */}
+              <View className="absolute inset-0 overflow-hidden pointer-events-none">
+                <View
+                  className="absolute top-0 bottom-0 w-1/2 bg-white/20 -skew-x-12 animate-shine"
+                  style={{ left: '-100%' }}
+                />
+              </View>
+
               <View className="flex-row items-center">
                 <View className="bg-white/20 p-2 rounded-full mr-3">
                   <Ionicons name="barbell" size={24} color="white" />
                 </View>
                 <View>
-                  <AccessibleText weight="bold" className="text-white text-lg">{t('dashboard.train')}</AccessibleText>
-                  <AccessibleText className="text-orange-100 text-xs">{t('dashboard.startRoutine')}</AccessibleText>
+                  <AccessibleText weight="black" className="text-black text-xl italic">{t('dashboard.train').toUpperCase()}</AccessibleText>
+                  <AccessibleText className="text-black/70 text-xs font-bold uppercase tracking-widest">{t('dashboard.startRoutine')}</AccessibleText>
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.5)" />
@@ -337,8 +345,8 @@ export default function DashboardScreen() {
               </Card>
             </TouchableOpacity>
 
-            {/* Learn */}
-            <Link href="/learn" asChild className="flex-1">
+            {/* Academy */}
+            <Link href={"/academy" as any} asChild className="flex-1">
               <TouchableOpacity>
                 <Card variant="glass" className="p-4 items-center h-28 justify-center">
                   <View className="bg-indigo-500/10 p-2.5 rounded-full mb-2">
@@ -350,7 +358,7 @@ export default function DashboardScreen() {
                     numberOfLines={1}
                     adjustsFontSizeToFit
                   >
-                    {t('dashboard.learn')}
+                    Academy
                   </AccessibleText>
                 </Card>
               </TouchableOpacity>

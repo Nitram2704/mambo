@@ -4,34 +4,62 @@
 
 @layer base {
   :root {
-    --color-primary: #3b82f6;
-    --color-secondary: #8b5cf6;
-    --color-accent: #f43f5e;
-    --color-background: #f8fafc;
-    --color-surface: #ffffff;
-    --color-surface-highlight: #f1f5f9;
-    --color-text: #0f172a;
-    --color-text-secondary: #475569;
-    --color-text-muted: #64748b;
-    --color-success: #22c55e;
-    --color-warning: #eab308;
-    --color-error: #ef4444;
-    --color-border: #e2e8f0;
+    /* Light Mode (Secondary) */
+    --color-primary: #65a30d;
+    /* Lime 600 */
+    --color-secondary: #4f46e5;
+    /* Indigo 600 */
+    --color-accent: #e11d48;
+    /* Rose 600 */
+    --color-background: #ffffff;
+    /* White */
+    --color-surface: #f4f4f5;
+    /* Zinc 100 */
+    --color-surface-highlight: #e4e4e7;
+    /* Zinc 200 */
+    --color-text: #18181b;
+    /* Zinc 900 */
+    --color-text-secondary: #52525b;
+    /* Zinc 600 */
+    --color-text-muted: #a1a1aa;
+    /* Zinc 400 */
+    --color-success: #16a34a;
+    /* Green 600 */
+    --color-warning: #ca8a04;
+    /* Yellow 600 */
+    --color-error: #dc2626;
+    /* Red 600 */
+    --color-border: #e4e4e7;
+    /* Zinc 200 */
   }
 
   .dark:root {
-    --color-primary: #60a5fa;
-    --color-secondary: #a78bfa;
-    --color-accent: #f43f5e;
-    --color-background: #0f172a;
-    --color-surface: #1e293b;
-    --color-surface-highlight: #334155;
-    --color-text: #f8fafc;
-    --color-text-secondary: #cbd5e1;
-    --color-text-muted: #94a3b8;
+    /* Dark Mode (Primary - Cyber Athletic) */
+    --color-primary: #d4ff00;
+    /* Electric Lime */
+    --color-secondary: #6366f1;
+    /* Indigo 500 */
+    --color-accent: #ff0055;
+    /* Rose 500 */
+    --color-background: #09090b;
+    /* Zinc 950 */
+    --color-surface: #18181b;
+    /* Zinc 900 */
+    --color-surface-highlight: #27272a;
+    /* Zinc 800 */
+    --color-text: #fafafa;
+    /* Zinc 50 */
+    --color-text-secondary: #a1a1aa;
+    /* Zinc 400 */
+    --color-text-muted: #52525b;
+    /* Zinc 600 */
     --color-success: #22c55e;
+    /* Green 500 */
     --color-warning: #eab308;
+    /* Yellow 500 */
     --color-error: #ef4444;
-    --color-border: #334155;
+    /* Red 500 */
+    --color-border: #3f3f46;
+    /* Zinc 700 */
   }
 }

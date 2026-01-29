@@ -7,6 +7,7 @@ import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
 import { HealthSyncService } from '@/utils/healthSyncService';
 import { useTranslation } from 'react-i18next';
+import { PremiumButton } from '@/components/ui/PremiumButton';
 
 export function HealthSyncCard() {
     const { theme } = useAppTheme();
@@ -56,20 +57,13 @@ export function HealthSyncCard() {
                         </AccessibleText>
                     </View>
                 </View>
-                <TouchableOpacity
+                <PremiumButton
+                    label={t('sleep.sync.syncNow')}
                     onPress={handleSync}
-                    disabled={syncing}
-                    className="px-4 py-2 rounded-lg"
-                    style={{ backgroundColor: colors.primary }}
-                >
-                    {syncing ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                        <AccessibleText weight="bold" className="text-white text-sm">
-                            {t('sleep.sync.syncNow')}
-                        </AccessibleText>
-                    )}
-                </TouchableOpacity>
+                    loading={syncing}
+                    size="sm"
+                    className="w-32"
+                />
             </View>
         </Card>
     );

@@ -105,52 +105,55 @@ export default function BodyScanScreen() {
 
     return (
         <ScreenWrapper>
-            <View className="flex-row items-center p-4">
-                <TouchableOpacity onPress={() => router.back()} className="mr-4">
+            <View className="flex-row items-center p-4 border-b border-white/5 bg-background">
+                <TouchableOpacity onPress={() => router.back()} className="mr-4 bg-surface/50 p-2 rounded-full border border-white/10">
                     <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <AccessibleText variant="h2" weight="bold" className="text-text">
-                    Body Scan AI
-                </AccessibleText>
+                <View>
+                    <AccessibleText variant="caption" weight="black" className="text-primary uppercase tracking-widest mb-1">
+                        AI Analysis
+                    </AccessibleText>
+                    <AccessibleText variant="h2" weight="black" className="text-text text-3xl tracking-tight">
+                        Body Scan
+                    </AccessibleText>
+                </View>
             </View>
 
             <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
                 {!result ? (
                     <View className="items-center py-6">
-                        <Card variant="glass" className="w-full aspect-[3/4] items-center justify-center overflow-hidden border-dashed border-2 border-border/30">
+                        <Card variant="glass" className="w-full aspect-[3/4] items-center justify-center overflow-hidden border-dashed border-2 border-primary/30 bg-surface/30">
                             {image ? (
                                 <Image source={{ uri: image }} className="w-full h-full" resizeMode="cover" />
                             ) : (
                                 <View className="items-center p-8">
-                                    <View className="w-20 h-20 rounded-full bg-primary/10 items-center justify-center mb-4">
-                                        <Ionicons name="camera-outline" size={40} color={colors.primary} />
+                                    <View className="w-24 h-24 rounded-full bg-primary/10 items-center justify-center mb-6 shadow-glow">
+                                        <Ionicons name="scan-outline" size={48} color={colors.primary} />
                                     </View>
-                                    <AccessibleText weight="bold" className="text-center mb-2">
-                                        Sube una foto de tu físico
+                                    <AccessibleText weight="black" className="text-center mb-2 text-xl uppercase tracking-tight text-white">
+                                        Sube una foto
                                     </AccessibleText>
-                                    <AccessibleText variant="caption" className="text-center text-text-secondary">
-                                        Para mejores resultados, usa buena iluminación y posa de frente.
+                                    <AccessibleText variant="caption" className="text-center text-text-secondary leading-6">
+                                        Nuestra IA analizará tu composición corporal. Para mejores resultados, usa buena iluminación.
                                     </AccessibleText>
                                 </View>
                             )}
                         </Card>
 
-                        <View className="flex-row w-full mt-6 space-x-4">
+                        <View className="flex-row w-full mt-6 gap-4">
                             <TouchableOpacity
                                 onPress={takePhoto}
-                                className="flex-1 bg-surface-highlight p-4 rounded-2xl items-center flex-row justify-center"
-                                style={{ backgroundColor: colors.surfaceHighlight }}
+                                className="flex-1 bg-surface/50 p-4 rounded-2xl items-center flex-row justify-center border border-white/10"
                             >
                                 <Ionicons name="camera" size={20} color={colors.primary} className="mr-2" />
-                                <AccessibleText weight="bold">Cámara</AccessibleText>
+                                <AccessibleText weight="bold" className="text-white">Cámara</AccessibleText>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={pickImage}
-                                className="flex-1 bg-surface-highlight p-4 rounded-2xl items-center flex-row justify-center"
-                                style={{ backgroundColor: colors.surfaceHighlight }}
+                                className="flex-1 bg-surface/50 p-4 rounded-2xl items-center flex-row justify-center border border-white/10"
                             >
                                 <Ionicons name="images" size={20} color={colors.primary} className="mr-2" />
-                                <AccessibleText weight="bold">Galería</AccessibleText>
+                                <AccessibleText weight="bold" className="text-white">Galería</AccessibleText>
                             </TouchableOpacity>
                         </View>
 

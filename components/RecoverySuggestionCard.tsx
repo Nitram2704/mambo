@@ -98,7 +98,7 @@ export function RecoverySuggestionCard() {
 
     return (
         <View
-            className="rounded-2xl p-4 mb-4 border"
+            className="rounded-2xl p-4 mb-4 border animate-fade-in-up"
             style={{
                 backgroundColor: suggestion.color + '15',
                 borderColor: suggestion.color + '40'

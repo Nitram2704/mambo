@@ -3,10 +3,10 @@ export interface Achievement {
     title: string;
     description: string;
     icon: string; // Ionicons name
-    conditionType: 'COUNT_WORKOUTS' | 'TOTAL_VOLUME' | 'STREAK' | 'SPECIFIC_EXERCISE' | 'EARLY_BIRD' | 'NIGHT_OWL' | 'SESSION_VOLUME' | 'PERFECT_WEEK' | 'MACROS_STREAK' | 'NO_EXCESS_STREAK' | 'LESSONS_COMPLETED' | 'TOTAL_SETS' | 'STRENGTH_RELATIVE';
+    conditionType: 'COUNT_WORKOUTS' | 'TOTAL_VOLUME' | 'STREAK' | 'SPECIFIC_EXERCISE' | 'EARLY_BIRD' | 'NIGHT_OWL' | 'SESSION_VOLUME' | 'PERFECT_WEEK' | 'MACROS_STREAK' | 'NO_EXCESS_STREAK' | 'LESSONS_COMPLETED' | 'TOTAL_SETS' | 'STRENGTH_RELATIVE' | 'AI_FORM_CHECK' | 'AI_PERFECT_SCORE';
     targetValue: number;
     xpReward: number;
-    category: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'SPECIAL' | 'NUTRITION' | 'LEARNING' | 'STRENGTH';
+    category: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'SPECIAL' | 'NUTRITION' | 'LEARNING' | 'STRENGTH' | 'AI';
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
@@ -286,5 +286,27 @@ export const ACHIEVEMENTS: Achievement[] = [
         targetValue: 10,
         xpReward: 500,
         category: 'LEARNING'
+    },
+
+    // AI
+    {
+        id: 'form_check_1',
+        title: 'profile.achievementsList.form_check_1.title',
+        description: 'profile.achievementsList.form_check_1.description',
+        icon: 'scan',
+        conditionType: 'AI_FORM_CHECK',
+        targetValue: 1,
+        xpReward: 150,
+        category: 'AI'
+    },
+    {
+        id: 'form_check_perfect',
+        title: 'profile.achievementsList.form_check_perfect.title',
+        description: 'profile.achievementsList.form_check_perfect.description',
+        icon: 'star',
+        conditionType: 'AI_PERFECT_SCORE',
+        targetValue: 100,
+        xpReward: 500,
+        category: 'AI'
     }
 ];

@@ -4,6 +4,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
+import { useTranslation } from 'react-i18next';
 import { AccessibleText } from '@/components/ui/AccessibleText';
 
 const TRACKED_EXERCISES = ['Squat', 'Bench Press', 'Deadlift', 'Overhead Press'];
@@ -12,6 +13,7 @@ export const OneRMChart = () => {
     const { workouts } = useWorkoutHistoryStore();
     const [selectedExercise, setSelectedExercise] = useState('Bench Press');
     const { theme } = useAppTheme();
+    const { t } = useTranslation();
     const colors = Colors[theme];
 
     const chartData = useMemo(() => {
@@ -55,7 +57,7 @@ export const OneRMChart = () => {
     return (
         <View className="bg-surface p-4 rounded-xl mb-4 border border-border/10">
             <View className="flex-row justify-between items-center mb-4">
-                <AccessibleText weight="bold" className="text-text text-lg">Progreso 1RM Estimado</AccessibleText>
+                <AccessibleText weight="bold" className="text-text text-lg">{t('reports.oneRMTitle')}</AccessibleText>
             </View>
 
             {/* Exercise Selector */}
@@ -77,7 +79,7 @@ export const OneRMChart = () => {
             {chartData.length < 2 ? (
                 <View className="h-48 items-center justify-center">
                     <AccessibleText className="text-text-muted text-center">
-                        No hay suficientes datos para {selectedExercise}
+                        {t('reports.noOneRMData', { exercise: selectedExercise })}
                     </AccessibleText>
                 </View>
             ) : (

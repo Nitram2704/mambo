@@ -10,6 +10,7 @@ import { Colors } from '@/constants/Colors';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 import { Card } from '@/components/ui/Card';
 import { HealthSyncCard } from '@/components/sleep/HealthSyncCard';
+import { PremiumButton } from '@/components/ui/PremiumButton';
 
 export default function SleepGoalsScreen() {
     const { t, i18n } = useTranslation();
@@ -159,13 +160,11 @@ export default function SleepGoalsScreen() {
                     </Text>
                 </Card>
 
-                <TouchableOpacity
+                <PremiumButton
+                    label={t('common.save')}
                     onPress={handleSave}
-                    className="mt-8 p-4 rounded-xl items-center"
-                    style={{ backgroundColor: colors.primary }}
-                >
-                    <Text className="text-white text-lg font-bold">{t('common.save')}</Text>
-                </TouchableOpacity>
+                    className="mt-8"
+                />
             </View>
         </ScreenWrapper>
     );

@@ -56,20 +56,6 @@ export const useRevenueCat = () => {
         const activeEntitlements = info.entitlements.active;
         let newTier: SubscriptionTier = 'STARTER';
 
-        // Check for highest tier first
-        if (activeEntitlements[ENTITLEMENT_TO_TIER['elite_features']]) { // This might be wrong if keys are entitlement IDs
-            // Wait, ENTITLEMENT_TO_TIER maps entitlement_id -> Tier Name
-            // activeEntitlements keys are entitlement IDs.
-        }
-
-        // Correct logic:
-        // Iterate through active entitlements and find the corresponding tier.
-        // Since we have a hierarchy, we should check for ELITE, then PRO.
-
-        // Actually, let's look at config/revenueCatConfig.ts again.
-        // export const ENTITLEMENTS = { PRO_FEATURES: 'pro_features', ELITE_FEATURES: 'elite_features' }
-        // export const ENTITLEMENT_TO_TIER = { [ENTITLEMENTS.PRO_FEATURES]: 'PRO', [ENTITLEMENTS.ELITE_FEATURES]: 'ELITE' }
-
         if (activeEntitlements[ENTITLEMENTS.ELITE_FEATURES]) {
             newTier = 'ELITE';
         } else if (activeEntitlements[ENTITLEMENTS.PRO_FEATURES]) {

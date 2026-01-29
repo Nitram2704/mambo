@@ -49,7 +49,7 @@ export function RoutineCard({ title, duration, difficulty, exercises, onStart, o
 
     return (
         <TouchableOpacity onPress={handlePress} activeOpacity={0.9}>
-            <Card variant="glass" className="p-0 overflow-hidden mb-4 border-white/10">
+            <Card variant="glass" className="p-0 overflow-hidden mb-4 border-white/10 animate-pop">
                 {/* Header Section */}
                 <View className="p-4 pb-2">
                     <View className="flex-row justify-between items-start mb-2">

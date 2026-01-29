@@ -254,11 +254,35 @@ export const useSleepStore = create<SleepState>()(
                     return sum + Math.max(0, 100 - (diff / (targetHours * 60)) * 100);
                 }, 0) / logs.length;
 
+                // Calculate streak
+                let streak = 0;
+                const allLogs = Object.values(get().sleepLogs).sort((a, b) =>
+                    new Date(b.date).getTime() - new Date(a.date).getTime()
+                );
+
+                const today = getLocalDateString();
+                let checkDate = new Date();
+
+                // If no log for today, check from yesterday
+                if (!get().sleepLogs[today]) {
+                    checkDate.setDate(checkDate.getDate() - 1);
+                }
+
+                for (let i = 0; i < 30; i++) { // Check up to 30 days
+                    const dateStr = getLocalDateString(checkDate);
+                    if (get().sleepLogs[dateStr]) {
+                        streak++;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+
                 return {
                     avgDuration: Math.round(avgDuration),
                     avgQuality: Math.round(avgQuality * 10) / 10,
                     consistency: Math.round(consistency),
-                    streak: 0, // TODO: Implement streak calculation
+                    streak,
                     sleepDebt: Math.round(sleepDebt),
                 };
             },
@@ -329,10 +353,10 @@ export const useSleepStore = create<SleepState>()(
                     return;
                 }
 
-                if (data) {
-                    const logs: Record<string, SleepLog> = {};
+                if (data && data.length > 0) {
+                    const remoteLogs: Record<string, SleepLog> = {};
                     data.forEach((item) => {
-                        logs[item.date] = {
+                        remoteLogs[item.date] = {
                             id: item.id,
                             date: item.date,
                             bedTime: new Date(item.bed_time),
@@ -346,7 +370,14 @@ export const useSleepStore = create<SleepState>()(
                             createdAt: new Date(item.created_at),
                         };
                     });
-                    set({ sleepLogs: logs });
+
+                    // Merge remote logs with local logs, remote takes precedence
+                    set((state) => ({
+                        sleepLogs: {
+                            ...state.sleepLogs,
+                            ...remoteLogs
+                        }
+                    }));
                 }
             },
 

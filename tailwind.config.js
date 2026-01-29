@@ -40,7 +40,30 @@ module.exports = {
                 '2xl': '16px',
                 '3xl': '24px',
             },
+            keyframes: {
+                shine: {
+                    '0%': { transform: 'translateX(-100%)' },
+                    '100%': { transform: 'translateX(100%)' },
+                },
+                pulse: {
+                    '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                    '50%': { opacity: 0.8, transform: 'scale(1.05)' },
+                },
+                tilt: {
+                    '0%, 100%': { transform: 'rotate(-3deg)' },
+                    '50%': { transform: 'rotate(3deg)' },
+                },
+            },
+            animation: {
+                shine: 'shine 2s infinite',
+                pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                tilt: 'tilt 2s ease-in-out infinite',
+            },
+            boxShadow: {
+                'glow': '0 0 20px rgba(212, 255, 0, 0.3)',
+                'glow-sm': '0 0 10px rgba(212, 255, 0, 0.2)',
+            },
         },
     },
-    plugins: [],
+    plugins: [require("@midudev/tailwind-animations")],
 }

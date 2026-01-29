@@ -18,12 +18,14 @@ import { useUserProfileStore } from '@/store/userProfileStore';
 import { useSavedRoutinesStore } from '@/store/savedRoutinesStore';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
 import { useActiveWorkoutStore } from '@/store/activeWorkoutStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
 
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { RestTimerProvider } from '@/context/RestTimerContext';
 import { FloatingTimer } from '@/components/FloatingTimer';
 import { AssistantButton } from '@/components/AssistantButton';
 import { Toast } from '@/components/ui/Toast';
+import { AchievementUnlock } from '@/components/achievements/AchievementUnlock';
 import { PostHogProvider } from 'posthog-react-native';
 import { posthog } from '@/lib/posthog';
 import { initSentry } from '@/lib/sentry';
@@ -74,7 +76,6 @@ export default function RootLayout() {
   const { fetchRoutines } = useSavedRoutinesStore();
   const { fetchWorkouts } = useWorkoutHistoryStore();
   const isZenMode = useActiveWorkoutStore((state) => state.isZenMode);
-  console.log('RootLayout: isZenMode', isZenMode);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -87,6 +88,7 @@ export default function RootLayout() {
         fetchProfile();
         fetchRoutines(); // Kept this as it was not explicitly removed by the instruction
         fetchWorkouts(); // Kept this as it was not explicitly removed by the instruction
+        useSubscriptionStore.getState().fetchSubscription();
       }
     });
 
@@ -99,6 +101,7 @@ export default function RootLayout() {
         fetchProfile();
         fetchRoutines(); // Kept this as it was not explicitly removed by the instruction
         fetchWorkouts(); // Kept this as it was not explicitly removed by the instruction
+        useSubscriptionStore.getState().fetchSubscription();
       }
     });
 
@@ -204,6 +207,7 @@ export default function RootLayout() {
                 {!isZenMode && <FloatingTimer />}
                 {!isZenMode && <AssistantButton />}
                 <Toast />
+                <AchievementUnlock />
                 <StatusBar style="auto" />
               </RestTimerProvider>
             </ThemeProvider>

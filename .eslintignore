@@ -1,0 +1,6 @@
+scripts/
+node_modules/
+.expo/
+.next/
+dist/
+build/

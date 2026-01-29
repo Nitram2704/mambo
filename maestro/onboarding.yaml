@@ -1,0 +1,19 @@
+appId: com.mambo.fitness
+---
+- launchApp
+- tapOn: "Empezar"
+- assertVisible: "Crear Cuenta"
+- inputText: "Nombre"
+- tapOn: "Nombre"
+- inputText: "Test User"
+- tapOn: "Email"
+- inputText: "test@example.com"
+- tapOn: "Contraseña"
+- inputText: "password123"
+- tapOn: "Crear Cuenta"
+- assertVisible: "Bienvenido"
+- tapOn: "Siguiente"
+- assertVisible: "¿Cuál es tu objetivo?"
+- tapOn: "Perder Peso"
+- tapOn: "Siguiente"
+- assertVisible: "Dashboard"

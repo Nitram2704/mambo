@@ -26,6 +26,7 @@ interface FormCheckState {
         thumbnail_url?: string;
         result: FormCheckResult;
     }) => Promise<void>;
+    uploadVideo: (uri: string) => Promise<string>;
     deleteFormCheck: (id: string) => Promise<void>;
 }
 
@@ -72,6 +73,38 @@ export const useFormCheckStore = create<FormCheckState>((set, get) => ({
             await get().fetchFormChecks();
         } catch (error) {
             console.error('Error saving form check:', error);
+            throw error;
+        }
+    },
+
+    uploadVideo: async (uri: string) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const fileName = `${user.id}/${Date.now()}.mp4`;
+
+            // In React Native/Expo, we use FormData for file uploads to Supabase
+            const formData = new FormData();
+            formData.append('file', {
+                uri,
+                name: fileName,
+                type: 'video/mp4',
+            } as any);
+
+            const { data, error } = await supabase.storage
+                .from('workout-videos')
+                .upload(fileName, formData);
+
+            if (error) throw error;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('workout-videos')
+                .getPublicUrl(data.path);
+
+            return publicUrl;
+        } catch (error) {
+            console.error('Error uploading video:', error);
             throw error;
         }
     },

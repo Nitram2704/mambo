@@ -202,16 +202,16 @@ export default function WorkoutPlansScreen() {
                 <View className="flex-row items-center p-4 border-b border-white/5 bg-background">
                     <TouchableOpacity
                         onPress={() => router.back()}
-                        className="bg-surface-highlight/50 p-2 rounded-full mr-4"
+                        className="bg-surface/50 p-2 rounded-full mr-4 border border-white/10"
                         {...a11y.button('Volver', 'Regresa a la pantalla anterior')}
                     >
                         <Ionicons name="arrow-back" size={24} color="white" />
                     </TouchableOpacity>
                     <View>
-                        <AccessibleText variant="caption" weight="bold" className="text-text-secondary uppercase tracking-widest">
+                        <AccessibleText variant="caption" weight="black" className="text-primary uppercase tracking-widest mb-1">
                             {t('workoutPlans.title')}
                         </AccessibleText>
-                        <AccessibleText variant="h2" weight="bold" className="text-white">Mambo Plans</AccessibleText>
+                        <AccessibleText variant="h2" weight="black" className="text-white text-3xl tracking-tight">Mambo Plans</AccessibleText>
                     </View>
                 </View>
             }
@@ -227,17 +227,17 @@ export default function WorkoutPlansScreen() {
                                     key={option.key}
                                     onPress={() => setGoalFilter(option.key)}
                                     className={`px-4 py-2 rounded-full flex-row items-center ${goalFilter === option.key
-                                        ? 'bg-primary'
-                                        : 'bg-surface-highlight/50 border border-white/5'
+                                        ? 'bg-primary shadow-glow'
+                                        : 'bg-surface/50 border border-white/10'
                                         }`}
                                     {...a11y.button(`Filtrar por ${option.label}`, `Muestra solo planes de ${option.label}`)}
                                 >
                                     <Ionicons
                                         name={option.icon as any}
                                         size={16}
-                                        color={goalFilter === option.key ? 'white' : option.color}
+                                        color={goalFilter === option.key ? 'black' : option.color}
                                     />
-                                    <AccessibleText weight="medium" className={`ml-2 ${goalFilter === option.key ? 'text-white' : 'text-text-muted'}`}>
+                                    <AccessibleText weight="bold" className={`ml-2 ${goalFilter === option.key ? 'text-black' : 'text-text-muted'}`}>
                                         {option.label}
                                     </AccessibleText>
                                 </TouchableOpacity>
@@ -255,12 +255,12 @@ export default function WorkoutPlansScreen() {
                                 key={option.key}
                                 onPress={() => setLevelFilter(option.key)}
                                 className={`px-4 py-2 rounded-full ${levelFilter === option.key
-                                    ? 'bg-primary'
-                                    : 'bg-surface-highlight/50 border border-white/5'
+                                    ? 'bg-white shadow-lg'
+                                    : 'bg-surface/50 border border-white/10'
                                     }`}
                                 {...a11y.button(`Filtrar por nivel ${option.label}`, `Muestra solo planes para nivel ${option.label}`)}
                             >
-                                <AccessibleText weight="medium" className={`${levelFilter === option.key ? 'text-white' : 'text-text-muted'}`}>
+                                <AccessibleText weight="bold" className={`${levelFilter === option.key ? 'text-black' : 'text-text-muted'}`}>
                                     {option.label}
                                 </AccessibleText>
                             </TouchableOpacity>
@@ -291,24 +291,25 @@ export default function WorkoutPlansScreen() {
                                         'Toca para ver detalles de este plan'
                                     )}
                                 >
-                                    <Card variant="glass" className="p-5 border-white/5">
+                                    <Card variant="glass" className="p-5 border-white/10">
                                         <View className="flex-row justify-between items-start mb-3">
                                             <View className="flex-1 mr-3">
-                                                <AccessibleText variant="h3" weight="bold" className="text-white mb-1">
+                                                <AccessibleText variant="h3" weight="black" className="text-white mb-1 text-xl tracking-tight">
                                                     {template.name}
                                                 </AccessibleText>
-                                                <AccessibleText variant="caption" className="text-text-secondary mb-2" numberOfLines={2}>
+                                                <AccessibleText variant="caption" className="text-text-secondary mb-2 leading-5" numberOfLines={2}>
                                                     {template.description}
                                                 </AccessibleText>
                                             </View>
                                             <View
                                                 className="px-3 py-1 rounded-full"
-                                                style={{ backgroundColor: getLevelColor(template.level) + '30' }}
+                                                style={{ backgroundColor: getLevelColor(template.level) + '20' }}
                                             >
                                                 <AccessibleText
-                                                    weight="bold"
+                                                    weight="black"
                                                     variant="caption"
                                                     style={{ color: getLevelColor(template.level) }}
+                                                    className="uppercase tracking-widest text-[10px]"
                                                 >
                                                     {getLevelLabel(template.level)}
                                                 </AccessibleText>
@@ -318,13 +319,13 @@ export default function WorkoutPlansScreen() {
                                         <View className="flex-row items-center gap-4">
                                             <View className="flex-row items-center">
                                                 <Ionicons name="calendar" size={14} color={colors.primary} />
-                                                <AccessibleText variant="caption" className="text-primary ml-1">
+                                                <AccessibleText variant="caption" weight="bold" className="text-primary ml-1 uppercase tracking-wider text-[10px]">
                                                     {t('workoutPlans.daysPerWeek', { count: template.daysPerWeek })}
                                                 </AccessibleText>
                                             </View>
                                             <View className="flex-row items-center">
                                                 <Ionicons name="trending-up" size={14} color="#f97316" />
-                                                <AccessibleText variant="caption" className="text-orange-400 ml-1">
+                                                <AccessibleText variant="caption" weight="bold" className="text-orange-400 ml-1 uppercase tracking-wider text-[10px]">
                                                     {getGoalLabel(template.goal)}
                                                 </AccessibleText>
                                             </View>
@@ -404,13 +405,13 @@ export default function WorkoutPlansScreen() {
                                     <TouchableOpacity
                                         onPress={() => handleAdoptClick(selectedTemplate.id)}
                                         disabled={adoptingId !== null}
-                                        className={`p-4 rounded-2xl items-center ${adoptingId ? 'bg-surface-highlight/50' : 'bg-primary'}`}
+                                        className={`p-4 rounded-2xl items-center ${adoptingId ? 'bg-surface/50' : 'bg-primary shadow-glow'}`}
                                         {...a11y.button(
                                             adoptingId ? t('workoutPlans.adopting') : t('workoutPlans.adopt'),
                                             'Toca para adoptar este plan de entrenamiento'
                                         )}
                                     >
-                                        <AccessibleText weight="bold" className="text-white uppercase tracking-widest">
+                                        <AccessibleText weight="black" className={`${adoptingId ? 'text-text-muted' : 'text-black'} uppercase tracking-widest text-lg`}>
                                             {adoptingId ? t('workoutPlans.adopting') : t('workoutPlans.adopt')}
                                         </AccessibleText>
                                     </TouchableOpacity>

@@ -7,11 +7,15 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useUserProfileStore } from '@/store/userProfileStore';
 import { useSavedRoutinesStore } from '@/store/savedRoutinesStore';
 import { useWorkoutHistoryStore } from '@/store/workoutHistoryStore';
+import { useAppTheme } from '@/hooks/use-app-theme';
+import { Colors } from '@/constants/Colors';
 
 export default function TabLayout() {
   const { fetchProfile } = useUserProfileStore();
   const { fetchRoutines } = useSavedRoutinesStore();
   const { fetchWorkouts } = useWorkoutHistoryStore();
+  const { theme } = useAppTheme();
+  const colors = Colors[theme];
 
   React.useEffect(() => {
     fetchProfile();
@@ -23,13 +27,13 @@ export default function TabLayout() {
     <Tabs
       initialRouteName="index"
       screenOptions={{
-        tabBarActiveTintColor: '#3b82f6', // blue-500
-        tabBarInactiveTintColor: '#9ca3af', // gray-400
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: '#111827', // gray-900
-          borderTopColor: '#1f2937', // gray-800
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
         },
       }}>
       <Tabs.Screen

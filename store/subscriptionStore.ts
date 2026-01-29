@@ -50,9 +50,9 @@ export const useSubscriptionStore = create<SubscriptionState>()(
                     let currentTier: SubscriptionTier = 'STARTER';
 
                     // Map RevenueCat entitlements to our tiers
-                    if (customerInfo.entitlements.active['elite']) {
+                    if (customerInfo.entitlements.active['elite_features']) {
                         currentTier = 'ELITE';
-                    } else if (customerInfo.entitlements.active['pro']) {
+                    } else if (customerInfo.entitlements.active['pro_features']) {
                         currentTier = 'PRO';
                     }
 

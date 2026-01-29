@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, ActivityIndicator, TouchableOpacityProps, View, Platform } from 'react-native';
+import { triggerHaptic } from '@/utils/haptics';
 import * as Haptics from 'expo-haptics';
 import { cssInterop } from 'react-native-css-interop';
 import { a11y } from '@/utils/accessibility';
@@ -17,6 +18,8 @@ interface ButtonProps extends TouchableOpacityProps {
     className?: string;
     textClassName?: string;
     accessibilityHint?: string;
+    pulse?: boolean;
+    shine?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -31,15 +34,15 @@ export const Button: React.FC<ButtonProps> = ({
     onPress,
     disabled,
     accessibilityHint,
+    pulse = false,
+    shine = false,
     ...props
 }) => {
     const { theme } = useAppTheme();
     const colors = Colors[theme];
 
     const handlePress = (e: any) => {
-        if (Platform.OS !== 'web') {
-            Haptics.selectionAsync();
-        }
+        triggerHaptic(Haptics.ImpactFeedbackStyle.Light);
         onPress?.(e);
     };
 
@@ -101,15 +104,25 @@ export const Button: React.FC<ButtonProps> = ({
             activeOpacity={0.7}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             className={`
-                flex-row items-center justify-center rounded-xl
+                flex-row items-center justify-center rounded-xl overflow-hidden
                 ${getVariantStyles()}
                 ${getSizeStyles()}
                 ${disabled ? 'opacity-50' : ''}
+                active:scale-95
+                ${pulse ? 'animate-pulse' : ''}
                 ${className || ''}
             `}
             {...a11y.button(label, accessibilityHint, { disabled: disabled || loading, busy: loading })}
             {...props}
         >
+            {shine && !disabled && !loading && (
+                <View className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <View
+                        className="absolute top-0 bottom-0 w-1/2 bg-white/20 -skew-x-12 animate-shine"
+                        style={{ left: '-100%' }}
+                    />
+                </View>
+            )}
             {loading ? (
                 <ActivityIndicator
                     color={variant === 'outline' || variant === 'ghost' ? colors.primary : '#ffffff'}

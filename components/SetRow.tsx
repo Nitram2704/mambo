@@ -7,6 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { calculateOneRM } from '@/utils/workoutMath';
 import { AccessibleText } from './ui/AccessibleText';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface SetRowProps {
     set: WorkoutSet;
@@ -90,7 +91,7 @@ export default function SetRow({ set, index, onUpdate, onToggle, onTypeChange, o
     const currentType = SET_TYPES.find(t => t.key === set.type) || SET_TYPES[1];
 
     return (
-        <View className="mb-1.5">
+        <Animated.View entering={FadeInDown.delay(index * 100).springify()} className="mb-1.5">
             <Card
                 variant={set.completed ? 'solid' : 'glass'}
                 className={`p-3 border ${set.completed ? 'bg-success/20 border-success/30' : 'border-white/5'}`}
@@ -224,7 +225,7 @@ export default function SetRow({ set, index, onUpdate, onToggle, onTypeChange, o
                         disabled={!isReady && !set.completed}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                         className={`w-10 h-10 rounded-xl items-center justify-center ml-2 shadow-sm ${set.completed
-                            ? 'bg-success shadow-success/20'
+                            ? 'bg-success shadow-success/20 animate-tada'
                             : isReady
                                 ? 'bg-primary shadow-primary/20 active:bg-primary/80'
                                 : 'bg-surface-highlight/50 border border-white/5'
@@ -268,7 +269,7 @@ export default function SetRow({ set, index, onUpdate, onToggle, onTypeChange, o
                     </Card>
                 )
             }
-        </View >
+        </Animated.View >
     );
 }
 

@@ -7,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 
 interface AccessibleTextProps extends TextProps {
     variant?: 'h1' | 'h2' | 'h3' | 'body' | 'caption' | 'label';
-    weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+    weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'black';
     color?: string;
 }
 
@@ -50,6 +50,7 @@ export const AccessibleText: React.FC<AccessibleTextProps> = ({
         medium: '500',
         semibold: '600',
         bold: '700',
+        black: '900',
     };
 
     const dynamicStyles = {

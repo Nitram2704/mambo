@@ -1,20 +1,20 @@
 export const Colors = {
     light: {
-        primary: '#2563eb', // Blue 600 - Stronger contrast
-        secondary: '#7c3aed', // Violet 600
-        accent: '#f43f5e', // Rose 500
-        background: '#f8fafc', // Slate 50
-        surface: '#ffffff', // White
-        surfaceHighlight: '#f1f5f9', // Slate 100
-        text: '#0f172a', // Slate 900
-        textSecondary: '#475569', // Slate 600
-        textMuted: '#94a3b8', // Slate 400
+        primary: '#65a30d', // Lime 600
+        secondary: '#4f46e5', // Indigo 600
+        accent: '#e11d48', // Rose 600
+        background: '#ffffff', // White
+        surface: '#f4f4f5', // Zinc 100
+        surfaceHighlight: '#e4e4e7', // Zinc 200
+        text: '#18181b', // Zinc 900
+        textSecondary: '#52525b', // Zinc 600
+        textMuted: '#a1a1aa', // Zinc 400
         success: '#16a34a', // Green 600
         warning: '#ca8a04', // Yellow 600
         error: '#dc2626', // Red 600
         info: '#0ea5e9', // Sky 500
-        border: '#e2e8f0', // Slate 200
-        tabIconSelected: '#2563eb',
+        border: '#e4e4e7', // Zinc 200
+        tabIconSelected: '#65a30d',
         orange: {
             400: '#fb923c',
             500: '#f97316',
@@ -43,21 +43,21 @@ export const Colors = {
         },
     },
     dark: {
-        primary: '#60a5fa', // Lighter blue for better contrast on dark bg
-        secondary: '#a78bfa', // Lighter purple
-        accent: '#f43f5e',
-        background: '#0f172a',
-        surface: '#1e293b',
-        surfaceHighlight: '#334155',
-        text: '#f8fafc',
-        textSecondary: '#cbd5e1', // Improved contrast (was #94a3b8)
-        textMuted: '#94a3b8', // Improved contrast (was #64748b)
-        success: '#22c55e',
-        warning: '#eab308',
-        error: '#ef4444',
-        info: '#38bdf8', // Sky 400 (lighter for dark mode)
-        border: '#334155',
-        tabIconSelected: '#60a5fa',
+        primary: '#d4ff00', // Electric Lime
+        secondary: '#6366f1', // Indigo 500
+        accent: '#ff0055', // Rose 500
+        background: '#09090b', // Zinc 950
+        surface: '#18181b', // Zinc 900
+        surfaceHighlight: '#27272a', // Zinc 800
+        text: '#fafafa', // Zinc 50
+        textSecondary: '#a1a1aa', // Zinc 400
+        textMuted: '#52525b', // Zinc 600
+        success: '#22c55e', // Green 500
+        warning: '#eab308', // Yellow 500
+        error: '#ef4444', // Red 500
+        info: '#38bdf8', // Sky 400
+        border: '#3f3f46', // Zinc 700
+        tabIconSelected: '#d4ff00',
         orange: {
             400: '#fb923c',
             500: '#f97316',
@@ -87,16 +87,16 @@ export const Colors = {
     },
     // Common/Shared
     gradients: {
-        primary: ['#3b82f6', '#8b5cf6'] as const,
+        primary: ['#d4ff00', '#a3e635'] as const, // Lime to Lime-400
         success: ['#22c55e', '#10b981'] as const,
         fire: ['#f59e0b', '#ef4444'] as const,
-        dark: ['#1e293b', '#0f172a'] as const,
-        glass: ['rgba(30, 41, 59, 0.7)', 'rgba(15, 23, 42, 0.7)'] as const,
+        dark: ['#18181b', '#09090b'] as const, // Zinc 900 to Zinc 950
+        glass: ['rgba(24, 24, 27, 0.8)', 'rgba(9, 9, 11, 0.8)'] as const,
         orange: ['#f97316', '#ea580c'] as const,
         blue: ['#3b82f6', '#60a5fa'] as const,
     },
     glass: {
-        background: 'rgba(30, 41, 59, 0.6)',
+        background: 'rgba(24, 24, 27, 0.6)',
         border: 'rgba(255, 255, 255, 0.1)',
     },
 };

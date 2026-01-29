@@ -1,0 +1,11 @@
+appId: com.mambo.fitness
+---
+- launchApp
+- tapOn: "Perfil"
+- tapOn: "Mejorar Plan"
+- assertVisible: "Mambo Pro"
+- tapOn: "Mambo Elite"
+- tapOn: "Suscribirse"
+- assertVisible: "¡Ya eres Elite!"
+- tapOn: "Cerrar"
+- assertVisible: "Elite"

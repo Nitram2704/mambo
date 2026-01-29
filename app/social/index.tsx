@@ -11,43 +11,34 @@ import { AccessibleText } from '@/components/ui/AccessibleText';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
 import { useSocialStore } from '@/store/socialStore';
-import { useCoachStore } from '@/store/coachStore';
 import { useUserProfileStore } from '@/store/userProfileStore';
+import { PostCard } from '@/components/social/PostCard';
+import { Post } from '@/types/social';
 
-type SocialTab = 'feed' | 'groups' | 'coaching';
+type SocialTab = 'feed' | 'squads' | 'arena';
 
 export default function SocialHub() {
     const router = useRouter();
     const { t } = useTranslation();
     const { theme } = useAppTheme();
+    const colors = Colors[theme];
     const [activeTab, setActiveTab] = useState<SocialTab>('feed');
 
     const { profile } = useUserProfileStore();
-    const { feed, fetchFeed, groups, fetchGroups, createPost, uploadMedia, toggleLike, loading: socialLoading } = useSocialStore();
-    const { clients, fetchClients, myCoach, fetchMyCoach, loading: coachLoading } = useCoachStore();
+    // TODO: Update store to match new types
+    const { feed, fetchFeed, createPost, uploadMedia, toggleLike, loading: socialLoading } = useSocialStore();
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [caption, setCaption] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isPosting, setIsPosting] = useState(false);
-    const [isWorkoutProof, setIsWorkoutProof] = useState(false);
 
     useEffect(() => {
         if (activeTab === 'feed') fetchFeed();
-        if (activeTab === 'groups') fetchGroups();
-        if (activeTab === 'coaching') {
-            if (profile?.role === 'coach') fetchClients();
-            else fetchMyCoach();
-        }
     }, [activeTab]);
 
     const onRefresh = () => {
         if (activeTab === 'feed') fetchFeed();
-        if (activeTab === 'groups') fetchGroups();
-        if (activeTab === 'coaching') {
-            if (profile?.role === 'coach') fetchClients();
-            else fetchMyCoach();
-        }
     };
 
     const pickImage = async () => {
@@ -78,11 +69,10 @@ export default function SocialHub() {
                 }
             }
 
-            await createPost(caption, mediaUrl, isWorkoutProof);
+            await createPost(caption, mediaUrl, false);
             setShowCreateModal(false);
             setCaption('');
             setSelectedImage(null);
-            setIsWorkoutProof(false);
         } catch (error) {
             console.error('Error creating post:', error);
             Alert.alert(t('common.error'), 'Error al crear la publicación');
@@ -99,7 +89,7 @@ export default function SocialHub() {
             <Ionicons
                 name={icon}
                 size={20}
-                color={activeTab === id ? Colors[theme].primary : Colors[theme].textMuted}
+                color={activeTab === id ? colors.primary : colors.textMuted}
                 className="mr-2"
             />
             <AccessibleText
@@ -115,196 +105,93 @@ export default function SocialHub() {
         <ScreenWrapper safeArea={true}>
             <View className="flex-1">
                 {/* Header */}
-                <View className="px-6 py-4">
-                    <AccessibleText variant="h1" weight="bold" className="text-text text-3xl">
-                        {t('social.title')}
-                    </AccessibleText>
+                <View className="px-6 py-4 flex-row justify-between items-center bg-background border-b border-white/5">
+                    <View>
+                        <AccessibleText variant="caption" weight="black" className="text-primary uppercase tracking-widest mb-1">
+                            Mambo Social
+                        </AccessibleText>
+                        <AccessibleText variant="h1" weight="black" className="text-text text-3xl tracking-tight">
+                            The Pulse
+                        </AccessibleText>
+                    </View>
+                    <TouchableOpacity className="w-10 h-10 rounded-full bg-surface-highlight items-center justify-center border border-white/10">
+                        <Ionicons name="notifications-outline" size={20} color={colors.text} />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Tabs */}
-                <View className="px-6 mb-4">
-                    <View className="flex-row bg-white/5 p-1 rounded-2xl">
-                        <TabButton id="feed" label={t('social.tabs.feed')} icon="list" />
-                        <TabButton id="groups" label={t('social.tabs.groups')} icon="people" />
-                        <TabButton id="coaching" label={t('social.tabs.coaching')} icon="fitness" />
+                <View className="px-6 py-4">
+                    <View className="flex-row bg-surface/50 p-1 rounded-2xl border border-white/5">
+                        <TabButton id="feed" label="Feed" icon="list" />
+                        <TabButton id="squads" label="Squads" icon="people" />
+                        <TabButton id="arena" label="Arena" icon="trophy" />
                     </View>
                 </View>
 
                 <ScrollView
-                    className="flex-1 px-6"
+                    className="flex-1 px-4"
                     showsVerticalScrollIndicator={false}
                     refreshControl={
-                        <RefreshControl refreshing={socialLoading || coachLoading} onRefresh={onRefresh} tintColor={Colors[theme].primary} />
+                        <RefreshControl refreshing={socialLoading} onRefresh={onRefresh} tintColor={colors.primary} />
                     }
                 >
                     {activeTab === 'feed' && (
-                        <View className="pb-10">
-                            {feed.map((post) => (
-                                <Card key={post.id} variant="glass" className="mb-4 p-4">
-                                    <View className="flex-row items-center mb-3">
-                                        <View className="w-10 h-10 rounded-full bg-primary/20 items-center justify-center mr-3">
-                                            <Ionicons name="person" size={20} color={Colors[theme].primary} />
-                                        </View>
-                                        <View>
-                                            <View className="flex-row items-center">
-                                                <AccessibleText weight="bold" className="text-text">{post.profile?.name || 'Usuario'}</AccessibleText>
-                                                {post.is_proof && (
-                                                    <View className="ml-2 bg-green-500/20 px-2 py-0.5 rounded-full flex-row items-center">
-                                                        <Ionicons name="checkmark-circle" size={12} color="#22c55e" />
-                                                        <AccessibleText weight="bold" className="text-green-500 text-[10px] ml-1">PROOVED</AccessibleText>
-                                                    </View>
-                                                )}
-                                            </View>
-                                            <AccessibleText className="text-text-secondary text-xs">
-                                                {new Date(post.created_at).toLocaleDateString()}
-                                            </AccessibleText>
-                                        </View>
+                        <View className="pb-24">
+                            {/* Stories / Highlights Placeholder */}
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6 -mx-4 px-4">
+                                <TouchableOpacity className="mr-4 items-center">
+                                    <View className="w-16 h-16 rounded-full bg-surface-highlight border-2 border-dashed border-primary items-center justify-center mb-1">
+                                        <Ionicons name="add" size={24} color={colors.primary} />
                                     </View>
-
-                                    {post.media_url && (
-                                        <View className="w-full aspect-square rounded-2xl overflow-hidden mb-3 bg-white/5">
-                                            <Image source={{ uri: post.media_url }} className="w-full h-full" resizeMode="cover" />
-                                        </View>
-                                    )}
-
-                                    <AccessibleText className="text-text mb-2">{post.caption}</AccessibleText>
-
-                                    <View className="flex-row items-center mt-2 pt-3 border-t border-white/5">
-                                        <TouchableOpacity
-                                            onPress={() => toggleLike(post.id)}
-                                            className="flex-row items-center mr-6"
-                                        >
-                                            <Ionicons name={post.has_liked ? "heart" : "heart-outline"} size={22} color={post.has_liked ? "#ef4444" : Colors[theme].textMuted} />
-                                            <AccessibleText className={`ml-1 ${post.has_liked ? 'text-red-500' : 'text-text-secondary'}`}>
-                                                {post.likes_count || 0}
-                                            </AccessibleText>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity className="flex-row items-center">
-                                            <Ionicons name="chatbubble-outline" size={20} color={Colors[theme].textMuted} />
-                                            <AccessibleText className="text-text-secondary ml-1">
-                                                {post.comments_count || 0}
-                                            </AccessibleText>
-                                        </TouchableOpacity>
-                                    </View>
-                                </Card>
-                            ))}
-                        </View>
-                    )}
-
-                    {activeTab === 'groups' && (
-                        <View className="pb-10">
-                            <View className="flex-row justify-between items-center mb-4">
-                                <AccessibleText weight="bold" className="text-text text-xl">
-                                    {t('social.groups.title')}
-                                </AccessibleText>
-                                <TouchableOpacity
-                                    onPress={() => router.push('/social/group/create')}
-                                    className="bg-primary px-4 py-2 rounded-xl"
-                                >
-                                    <AccessibleText weight="bold" className="text-white text-sm">
-                                        {t('social.groups.create')}
-                                    </AccessibleText>
+                                    <AccessibleText className="text-text-secondary text-xs">Tu Historia</AccessibleText>
                                 </TouchableOpacity>
-                            </View>
+                                {[1, 2, 3].map((i) => (
+                                    <View key={i} className="mr-4 items-center opacity-50">
+                                        <View className="w-16 h-16 rounded-full bg-surface-highlight border border-white/10 mb-1" />
+                                        <View className="w-12 h-2 bg-surface-highlight rounded-full" />
+                                    </View>
+                                ))}
+                            </ScrollView>
 
-                            {groups.length === 0 ? (
-                                <Card variant="glass" className="items-center py-10">
-                                    <Ionicons name="people-outline" size={48} color={Colors[theme].textMuted} className="mb-4" />
-                                    <AccessibleText className="text-text-secondary text-center">
-                                        {t('social.groups.empty')}
+                            {feed.length === 0 && !socialLoading ? (
+                                <View className="items-center py-12">
+                                    <View className="w-20 h-20 bg-surface-highlight rounded-full items-center justify-center mb-4">
+                                        <Ionicons name="newspaper-outline" size={32} color={colors.textMuted} />
+                                    </View>
+                                    <AccessibleText weight="bold" className="text-text-secondary text-center">
+                                        No hay publicaciones aún
                                     </AccessibleText>
-                                </Card>
+                                    <AccessibleText className="text-text-muted text-center mt-2 px-10">
+                                        Sé el primero en compartir tu entrenamiento o únete a un Squad.
+                                    </AccessibleText>
+                                </View>
                             ) : (
-                                groups.map((group) => (
-                                    <TouchableOpacity
-                                        key={group.id}
-                                        onPress={() => router.push({ pathname: '/social/group/[id]', params: { id: group.id } })}
-                                    >
-                                        <Card variant="glass" className="mb-4 flex-row items-center p-4">
-                                            <View className="w-12 h-12 rounded-2xl bg-secondary/20 items-center justify-center mr-4">
-                                                <Ionicons
-                                                    name={group.type === 'couple' ? 'heart' : 'people'}
-                                                    size={24}
-                                                    color={Colors[theme].secondary}
-                                                />
-                                            </View>
-                                            <View className="flex-1">
-                                                <AccessibleText weight="bold" className="text-text text-lg">{group.name}</AccessibleText>
-                                                <AccessibleText className="text-text-secondary text-sm">
-                                                    {t(`social.groups.types.${group.type}`)}
-                                                </AccessibleText>
-                                            </View>
-                                            <Ionicons name="chevron-forward" size={20} color={Colors[theme].textMuted} />
-                                        </Card>
-                                    </TouchableOpacity>
+                                feed.map((post) => (
+                                    <PostCard
+                                        key={post.id}
+                                        post={post as unknown as Post} // Temporary cast until store is updated
+                                        onLike={() => toggleLike(post.id)}
+                                        onComment={() => { }}
+                                        onUserPress={() => { }}
+                                    />
                                 ))
                             )}
                         </View>
                     )}
 
-                    {activeTab === 'coaching' && (
-                        <View className="pb-10">
-                            {profile?.role === 'coach' ? (
-                                <>
-                                    <AccessibleText weight="bold" className="text-text text-xl mb-4">
-                                        {t('social.coaching.clients')}
-                                    </AccessibleText>
-                                    {clients.map((client) => (
-                                        <TouchableOpacity
-                                            key={client.client_id}
-                                            onPress={() => router.push({ pathname: '/social/coach/[id]', params: { id: client.client_id } })}
-                                        >
-                                            <Card variant="glass" className="mb-4 flex-row items-center p-4">
-                                                <View className="w-12 h-12 rounded-full bg-primary/20 items-center justify-center mr-4">
-                                                    <Ionicons name="person" size={24} color={Colors[theme].primary} />
-                                                </View>
-                                                <View className="flex-1">
-                                                    <AccessibleText weight="bold" className="text-text">{client.client?.name || 'Cliente'}</AccessibleText>
-                                                    <AccessibleText className="text-text-secondary text-sm">{client.status}</AccessibleText>
-                                                </View>
-                                                <TouchableOpacity className="p-2">
-                                                    <Ionicons name="chatbubbles-outline" size={24} color={Colors[theme].primary} />
-                                                </TouchableOpacity>
-                                            </Card>
-                                        </TouchableOpacity>
-                                    ))}
-                                </>
-                            ) : (
-                                <>
-                                    <AccessibleText weight="bold" className="text-text text-xl mb-4">
-                                        {t('social.coaching.title')}
-                                    </AccessibleText>
-                                    {myCoach ? (
-                                        <Card variant="glass" className="p-4 flex-row items-center">
-                                            <View className="w-16 h-16 rounded-full bg-primary/20 items-center justify-center mr-4">
-                                                <Ionicons name="person" size={32} color={Colors[theme].primary} />
-                                            </View>
-                                            <View className="flex-1">
-                                                <AccessibleText weight="bold" className="text-text text-lg">{myCoach.profiles?.name || 'Tu Coach'}</AccessibleText>
-                                                <AccessibleText className="text-text-secondary">{myCoach.profiles?.email}</AccessibleText>
-                                            </View>
-                                            <TouchableOpacity className="bg-primary/10 p-3 rounded-full">
-                                                <Ionicons name="chatbubbles" size={24} color={Colors[theme].primary} />
-                                            </TouchableOpacity>
-                                        </Card>
-                                    ) : (
-                                        <Card variant="glass" className="items-center py-10">
-                                            <Ionicons name="fitness-outline" size={48} color={Colors[theme].textMuted} className="mb-4" />
-                                            <AccessibleText className="text-text-secondary text-center mb-6">
-                                                {t('social.coaching.noCoach')}
-                                            </AccessibleText>
-                                            <TouchableOpacity
-                                                onPress={() => router.push('/social/coach/request')}
-                                                className="bg-primary px-6 py-3 rounded-2xl"
-                                            >
-                                                <AccessibleText weight="bold" className="text-white">
-                                                    {t('social.coaching.request')}
-                                                </AccessibleText>
-                                            </TouchableOpacity>
-                                        </Card>
-                                    )}
-                                </>
-                            )}
+                    {activeTab === 'squads' && (
+                        <View className="items-center py-20">
+                            <Ionicons name="construct-outline" size={48} color={colors.primary} />
+                            <AccessibleText weight="bold" className="text-text mt-4 text-lg">The Wolfpack</AccessibleText>
+                            <AccessibleText className="text-text-secondary mt-2">Próximamente en la Fase 2</AccessibleText>
+                        </View>
+                    )}
+
+                    {activeTab === 'arena' && (
+                        <View className="items-center py-20">
+                            <Ionicons name="trophy-outline" size={48} color={colors.warning} />
+                            <AccessibleText weight="bold" className="text-text mt-4 text-lg">The Arena</AccessibleText>
+                            <AccessibleText className="text-text-secondary mt-2">Próximamente en la Fase 3</AccessibleText>
                         </View>
                     )}
                 </ScrollView>
@@ -313,9 +200,9 @@ export default function SocialHub() {
                 {activeTab === 'feed' && (
                     <TouchableOpacity
                         onPress={() => setShowCreateModal(true)}
-                        className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg shadow-primary/30"
+                        className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-glow animate-pop"
                     >
-                        <Ionicons name="add" size={32} color="white" />
+                        <Ionicons name="add" size={32} color="black" />
                     </TouchableOpacity>
                 )}
 
@@ -327,84 +214,71 @@ export default function SocialHub() {
                     onRequestClose={() => setShowCreateModal(false)}
                 >
                     <View className="flex-1 justify-end bg-black/60">
-                        <View className="bg-[#1a1a2e] rounded-t-[40px] h-[80%] p-8 border-t border-blue-500/20">
-                            <View className="flex-row justify-between items-center mb-6">
+                        <View className="bg-surface rounded-t-[32px] h-[85%] p-0 border-t border-white/10">
+                            <View className="flex-row justify-between items-center p-6 border-b border-white/5">
                                 <AccessibleText variant="h2" weight="bold" className="text-white">
-                                    {t('social.feed.createPost')}
+                                    Nuevo Post
                                 </AccessibleText>
                                 <TouchableOpacity
                                     onPress={() => setShowCreateModal(false)}
-                                    className="w-10 h-10 bg-white/10 rounded-full items-center justify-center"
+                                    className="w-8 h-8 bg-surface-highlight rounded-full items-center justify-center"
                                 >
-                                    <Ionicons name="close" size={24} color="white" />
+                                    <Ionicons name="close" size={20} color={colors.textMuted} />
                                 </TouchableOpacity>
                             </View>
 
-                            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+                            <ScrollView showsVerticalScrollIndicator={false} className="flex-1 p-6">
                                 <TouchableOpacity
                                     onPress={pickImage}
-                                    className="w-full aspect-square bg-white/5 rounded-3xl border-2 border-dashed border-white/10 items-center justify-center mb-6 overflow-hidden"
+                                    className="w-full aspect-square bg-surface-highlight/30 rounded-3xl border-2 border-dashed border-white/10 items-center justify-center mb-6 overflow-hidden"
                                 >
                                     {selectedImage ? (
                                         <Image source={{ uri: selectedImage }} className="w-full h-full" />
                                     ) : (
                                         <>
-                                            <Ionicons name="camera-outline" size={48} color={Colors[theme].textMuted} />
-                                            <AccessibleText className="text-text-secondary mt-2">
-                                                {t('social.feed.addPhoto')}
+                                            <View className="w-16 h-16 bg-primary/10 rounded-full items-center justify-center mb-3">
+                                                <Ionicons name="image-outline" size={32} color={colors.primary} />
+                                            </View>
+                                            <AccessibleText weight="bold" className="text-text">
+                                                Añadir Foto
                                             </AccessibleText>
                                         </>
                                     )}
                                 </TouchableOpacity>
 
                                 <TextInput
-                                    placeholder={t('social.feed.captionPlaceholder')}
-                                    placeholderTextColor={Colors[theme].textMuted}
+                                    placeholder="Comparte tu progreso..."
+                                    placeholderTextColor={colors.textMuted}
                                     multiline
                                     value={caption}
                                     onChangeText={setCaption}
-                                    className="bg-white/5 p-4 rounded-2xl text-white text-base min-h-[100px] mb-6"
+                                    className="bg-surface-highlight/30 p-4 rounded-2xl text-white text-base min-h-[120px] mb-6"
                                     textAlignVertical="top"
                                 />
-
-                                <TouchableOpacity
-                                    onPress={() => setIsWorkoutProof(!isWorkoutProof)}
-                                    className={`flex-row items-center p-4 rounded-2xl border ${isWorkoutProof ? 'bg-green-500/10 border-green-500/50' : 'bg-white/5 border-transparent'}`}
-                                >
-                                    <View className={`w-6 h-6 rounded-full items-center justify-center mr-3 ${isWorkoutProof ? 'bg-green-500' : 'bg-white/10'}`}>
-                                        {isWorkoutProof && <Ionicons name="checkmark" size={16} color="white" />}
-                                    </View>
-                                    <View className="flex-1">
-                                        <AccessibleText weight="bold" className={isWorkoutProof ? 'text-green-500' : 'text-text'}>
-                                            {t('social.feed.workoutProof')}
-                                        </AccessibleText>
-                                        <AccessibleText className="text-text-secondary text-xs">
-                                            {t('social.feed.workoutProofDesc')}
-                                        </AccessibleText>
-                                    </View>
-                                </TouchableOpacity>
                             </ScrollView>
 
-                            <TouchableOpacity
-                                onPress={handleCreatePost}
-                                disabled={isPosting || (!caption && !selectedImage)}
-                                className="mt-4"
-                            >
-                                <LinearGradient
-                                    colors={['#3b82f6', '#60a5fa']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 0 }}
-                                    className={`rounded-2xl py-4 items-center shadow-lg shadow-blue-500/30 ${isPosting || (!caption && !selectedImage) ? 'opacity-50' : ''}`}
+                            <View className="p-6 border-t border-white/5 bg-surface pb-10">
+                                <TouchableOpacity
+                                    onPress={handleCreatePost}
+                                    disabled={isPosting || (!caption && !selectedImage)}
+                                    className="shadow-glow"
                                 >
-                                    {isPosting ? (
-                                        <ActivityIndicator color="white" />
-                                    ) : (
-                                        <AccessibleText weight="bold" className="text-white text-lg">
-                                            {t('social.feed.post')}
-                                        </AccessibleText>
-                                    )}
-                                </LinearGradient>
-                            </TouchableOpacity>
+                                    <LinearGradient
+                                        colors={Colors.gradients.primary}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 0 }}
+                                        className={`rounded-2xl py-4 items-center ${isPosting || (!caption && !selectedImage) ? 'opacity-50' : ''}`}
+                                    >
+                                        {isPosting ? (
+                                            <ActivityIndicator color="black" />
+                                        ) : (
+                                            <AccessibleText weight="black" className="text-black text-lg uppercase tracking-wider">
+                                                Publicar
+                                            </AccessibleText>
+                                        )}
+                                    </LinearGradient>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </Modal>

@@ -13,7 +13,8 @@
         "continue": "Continue",
         "success": "Success",
         "generatePlan": "Generate My Plan",
-        "ok": "OK"
+        "ok": "OK",
+        "new": "NEW"
     },
     "auth": {
         "login": "Log In",
@@ -243,10 +244,23 @@
         }
     },
     "reports": {
+        "analysis": "ANALYSIS",
+        "title": "Reports",
+        "thisWeek": "This Week",
+        "volume": "Volume",
+        "workouts": "Workouts",
+        "streak": "Streak",
+        "weeklyReport": "Weekly Report",
+        "weeklyReportDesc": "Detailed analysis of your last 7 days",
+        "monthlyReport": "Monthly Report",
+        "monthlyReportDesc": "Summary of your progress this month",
+        "advancedAnalytics": "Advanced Analytics",
+        "advancedAnalyticsDesc": "AI predictions and muscle balance",
+        "fullHistory": "Full History",
+        "fullHistoryDesc": "All your workouts and meals",
         "weeklyTitle": "Weekly Report",
         "monthlyTitle": "Monthly Report",
         "caloriesPerDay": "Calories/Day",
-        "workouts": "Workouts",
         "calorieTrend": "Calorie Trend",
         "macroDistribution": "Macro Distribution",
         "dailyAverage": "Daily Average",
@@ -263,7 +277,13 @@
         "monthlyAchievements": "Monthly Achievements",
         "workoutsCompleted": "workouts completed",
         "activeNutritionTracking": "Active nutrition tracking",
-        "startTracking": "Start tracking to see your achievements!"
+        "startTracking": "Start tracking to see your achievements!",
+        "muscleVolumeTitle": "Muscle Volume (30 days)",
+        "noMuscleData": "Not enough data in the last 30 days",
+        "volumeNote": "* Total volume in thousands of kg (tons)",
+        "oneRMTitle": "Estimated 1RM Progress",
+        "noOneRMData": "Not enough data for {{exercise}}",
+        "others": "Others"
     },
     "history": {
         "title": "History",

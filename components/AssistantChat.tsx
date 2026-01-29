@@ -374,7 +374,7 @@ export function AssistantChat() {
                                 if (!isVisible) setVisible(true);
                                 setIsMinimized(false);
                             }}
-                            className="w-24 h-24 rounded-full items-center justify-center shadow-2xl border-2"
+                            className="w-24 h-24 rounded-full items-center justify-center shadow-2xl border-2 animate-tilt"
                             style={{ backgroundColor: Colors[theme].primary, borderColor: 'rgba(255,255,255,0.2)' }}
                             accessibilityRole="button"
                             accessibilityLabel="Abrir asistente Mambo Coach"
@@ -498,7 +498,7 @@ export function AssistantChat() {
                                     </Animated.View>
                                 ))}
                                 {isLoading && (
-                                    <View className="self-start p-3 rounded-2xl rounded-tl-none border mb-4" style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }}>
+                                    <View className="self-start p-3 rounded-2xl rounded-tl-none border mb-4 animate-blink" style={{ backgroundColor: Colors[theme].surface, borderColor: Colors[theme].border }}>
                                         <ActivityIndicator color={Colors[theme].primary} />
                                     </View>
                                 )}
@@ -519,7 +519,7 @@ export function AssistantChat() {
                                             <TouchableOpacity
                                                 key={idx}
                                                 onPress={() => handleSend(item.cmd)}
-                                                className="px-4 py-2 rounded-full border"
+                                                className={`px-4 py-2 rounded-full border animate-fade-in-up animate-delay-${idx * 100}`}
                                                 style={{ backgroundColor: Colors[theme].surfaceHighlight, borderColor: Colors[theme].border }}
                                                 accessibilityRole="button"
                                                 accessibilityLabel={`Sugerencia: ${item.label}`}
