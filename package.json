@@ -9,9 +9,12 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "test:ai": "ts-node -T scripts/ai-test-runner.ts",
+    "test:ai:dry": "ts-node -T scripts/ai-test-runner.ts --dry-run"
   },
   "dependencies": {
+    "@expo/json-file": "^10.0.8",
     "@expo/vector-icons": "^15.0.3",
     "@google/genai": "^1.30.0",
     "@google/generative-ai": "^0.24.1",
@@ -26,6 +29,7 @@
     "@sentry/react-native": "~7.2.0",
     "@supabase/supabase-js": "^2.86.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "expo": "~54.0.31",
     "expo-av": "~16.0.8",
     "expo-blur": "~15.0.8",
@@ -52,6 +56,7 @@
     "expo-symbols": "~1.0.8",
     "expo-system-ui": "~6.0.9",
     "expo-web-browser": "~15.0.10",
+    "glob": "^13.0.0",
     "i18next": "^25.7.3",
     "nativewind": "^4.2.1",
     "posthog-react-native": "^4.17.0",
@@ -90,6 +95,7 @@
     "jest": "~29.7.0",
     "jest-expo": "^54.0.16",
     "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
     "typescript": "~5.9.2"
   },
   "private": true
