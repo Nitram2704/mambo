@@ -35,6 +35,9 @@ export interface Wager {
     winner_id?: string;
     end_date: string;
     created_at: string;
+    social_groups?: {
+        name: string;
+    };
 }
 
 export interface PostComment {
@@ -73,6 +76,8 @@ interface SocialState {
     activeGroup: SocialGroup | null;
     members: GroupMember[];
     wagers: Wager[];
+    challenges: any[];
+    leaderboard: any[];
     feed: SocialPost[];
     loading: boolean;
 
@@ -82,6 +87,9 @@ interface SocialState {
     joinGroup: (groupId: string) => Promise<void>;
     createWager: (groupId: string, title: string, stake: string, endDate: Date, type: Wager['type'], goal: number) => Promise<void>;
     resolveWager: (wagerId: string, winnerId: string) => Promise<void>;
+    fetchWagers: () => Promise<void>;
+    fetchChallenges: () => Promise<void>;
+    fetchLeaderboard: () => Promise<void>;
     fetchFeed: () => Promise<void>;
     fetchPostDetails: (postId: string) => Promise<SocialPost | null>;
     fetchComments: (postId: string) => Promise<PostComment[]>;
@@ -93,6 +101,7 @@ interface SocialState {
     toggleLike: (postId: string) => Promise<void>;
     uploadMedia: (uri: string) => Promise<string | null>;
     searchUsers: (query: string) => Promise<any[]>;
+    searchGroups: (query: string) => Promise<SocialGroup[]>;
     inviteMember: (groupId: string, profileId: string) => Promise<void>;
 }
 
@@ -103,6 +112,8 @@ export const useSocialStore = create<SocialState>()(
             activeGroup: null,
             members: [],
             wagers: [],
+            challenges: [],
+            leaderboard: [],
             feed: [],
             loading: false,
 
@@ -134,7 +145,7 @@ export const useSocialStore = create<SocialState>()(
                 try {
                     const [groupRes, membersRes, wagersRes] = await Promise.all([
                         supabase.from('social_groups').select('*').eq('id', groupId).maybeSingle(),
-                        supabase.from('group_members').select('*, profiles(name)').eq('group_id', groupId),
+                        supabase.from('group_members').select('*, profiles(name, avatar_url)').eq('group_id', groupId),
                         supabase.from('wagers').select('*').eq('group_id', groupId).order('created_at', { ascending: false })
                     ]);
 
@@ -230,6 +241,59 @@ export const useSocialStore = create<SocialState>()(
                     }
                 } catch (error) {
                     console.error('Error resolving wager:', error);
+                }
+            },
+
+            fetchWagers: async () => {
+                set({ loading: true });
+                try {
+                    const { data, error } = await supabase
+                        .from('wagers')
+                        .select('*, social_groups(name)')
+                        .order('created_at', { ascending: false });
+
+                    if (error) throw error;
+                    set({ wagers: data as Wager[] });
+                } catch (error) {
+                    console.error('Error fetching wagers:', error);
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            fetchChallenges: async () => {
+                set({ loading: true });
+                try {
+                    const { data, error } = await supabase
+                        .from('challenges')
+                        .select('*')
+                        .gte('end_date', new Date().toISOString())
+                        .order('end_date', { ascending: true });
+
+                    if (error) throw error;
+                    set({ challenges: data || [] });
+                } catch (error) {
+                    console.error('Error fetching challenges:', error);
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            fetchLeaderboard: async () => {
+                set({ loading: true });
+                try {
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .select('id, name, avatar_url, xp')
+                        .order('xp', { ascending: false })
+                        .limit(20);
+
+                    if (error) throw error;
+                    set({ leaderboard: data || [] });
+                } catch (error) {
+                    console.error('Error fetching leaderboard:', error);
+                } finally {
+                    set({ loading: false });
                 }
             },
 
@@ -412,6 +476,32 @@ export const useSocialStore = create<SocialState>()(
 
                     if (error) throw error;
                     await get().fetchFeed();
+
+                    // Trigger AI Social Commentator for workout posts
+                    if (workoutData && isWorkoutProof) {
+                        setTimeout(async () => {
+                            try {
+                                const prompt = `Actúa como el AI Coach Pro de Mambo.
+                                Un usuario acaba de publicar su entrenamiento: ${workoutData.workout_name}.
+                                Stats: ${workoutData.volume}kg, ${Math.floor(workoutData.duration / 60)} min, ${workoutData.pr_count} PRs.
+                                Escribe un comentario corto, experto y muy motivador (máximo 12 palabras).
+                                Responde solo con el texto.`;
+
+                                const { GeminiService } = await import('@/utils/GeminiService');
+                                const aiResponse = await GeminiService.chat(prompt);
+                                const comment = aiResponse.response || "¡Increíble trabajo! A seguir dándole. 🔥";
+
+                                // Find the post in the feed to get its fresh ID from the DB
+                                // For simplicity in this demo, we'll fetch the feed and use the first post if it's ours
+                                const { data: posts } = await supabase.from('social_posts').select('id').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(1);
+                                if (posts && posts.length > 0) {
+                                    await get().addComment(posts[0].id, comment);
+                                }
+                            } catch (error) {
+                                console.error('AI Commentator Error:', error);
+                            }
+                        }, 3000);
+                    }
                 } catch (error) {
                     console.error('Error creating post:', error);
                 }
@@ -487,6 +577,22 @@ export const useSocialStore = create<SocialState>()(
                     return data || [];
                 } catch (error) {
                     console.error('Error searching users:', error);
+                    return [];
+                }
+            },
+
+            searchGroups: async (query) => {
+                try {
+                    const { data, error } = await supabase
+                        .from('social_groups')
+                        .select('*')
+                        .ilike('name', `%${query}%`)
+                        .limit(20);
+
+                    if (error) throw error;
+                    return data as SocialGroup[];
+                } catch (error) {
+                    console.error('Error searching groups:', error);
                     return [];
                 }
             },

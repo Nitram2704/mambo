@@ -316,6 +316,25 @@ export default function SettingsScreen() {
                         />
                     </Card>
 
+                    {/* AI & Intelligence */}
+                    <SectionHeader title={t('settings.sections.aiIntelligence')} />
+                    <Card variant="glass" className="p-0 px-4">
+                        <SettingItem
+                            icon="sparkles-outline"
+                            label={t('profile.aiCoachPro')}
+                            value={profile?.aiCoachEnabled}
+                            type="switch"
+                            onPress={() => updateProfile({ aiCoachEnabled: !profile?.aiCoachEnabled })}
+                        />
+                        <SettingItem
+                            icon="flash-outline"
+                            label="Posteo Automático"
+                            value={profile?.autoPostWorkouts}
+                            type="switch"
+                            onPress={() => updateProfile({ autoPostWorkouts: !profile?.autoPostWorkouts })}
+                        />
+                    </Card>
+
                     {/* About */}
                     <SectionHeader title={t('settings.sections.about')} />
                     <Card variant="glass" className="p-0 px-4">

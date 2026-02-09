@@ -1,0 +1,104 @@
+# Preparación Convocatoria: Acción E (Universidad)
+
+Este documento aterriza la idea de MAMBO a los requisitos de la unidad de emprendimiento universitaria. Olvida el lenguaje de Silicon Valley por un momento; aquí lo que buscan es **viabilidad, orden y potencial de crecimiento**.
+
+## El Enfoque (Pivote Realista)
+En lugar de presentarte como una startup que busca $500k, preséntate como un **proyecto de base tecnológica** que ya tiene un MVP funcional y busca acompañamiento para saltar al mercado. Tu gran baza es que **la validación técnica ya está avanzada**.
+
+---
+
+## Los 4 Pilares de Validación
+
+### 1. Modelo de Negocio (Business Model)
+No es solo "vender la app". Tu modelo es híbrido (**B2C + B2B**):
+- **Suscripción Premium (B2C)**: Acceso a funciones de IA y métricas avanzadas.
+- **SaaS para Entrenadores (B2B)**: Cobrar una mensualidad a entrenadores para que gestionen sus alumnos dentro de la plataforma.
+- **Canal de Adquisición**: Alianzas con gimnasios locales y marketing de contenidos educativo.
+
+### 2. Validación Técnica (Technical Validation)
+Aquí es donde eres más fuerte. Tienes que decir:
+- **Estado actual**: MVP (Mínimo Producto Viable) desarrollado en un 80%.
+- **Tecnologías**: Expo (React Native) para multiplataforma, Supabase para base de datos y Google **Gemini 2.0 Flash** para el Coach de IA.
+- **Hito**: La app ya registra entrenos, calcula volumen y responde consultas de entrenamiento mediante IA en tiempo real.
+
+### 3. Validación Financiera (Escenarios de Crecimiento)
+Para demostrar una planificación sólida, presentamos tres escenarios de inversión basados en el número de usuarios objetivo:
+
+#### Escenario A: Piloto y Validación (0 - 500 Usuarios)
+*Ideal para el primer semestre de incubación.*
+- **Infraestructura**: $200 USD (Supabase Pro + API Gemini 2.0).
+- **Cuentas Store**: $124 USD (Apple + Google).
+- **Marketing**: $100 USD (Pruebas de anuncios locales).
+- **Total**: **~$424 USD**.
+- **Objetivo**: Validar el producto con un grupo de control y pulir el Coach de IA.
+
+#### Escenario B: Tracción y Crecimiento (500 - 5,000 Usuarios)
+*Objetivo para el primer año de operación.*
+- **Infraestructura**: $600 USD (Escalamiento de base de datos y mayor uso de IA).
+- **Marketing**: $1,200 USD ($100/mes para captación activa).
+- **Mantenimiento**: $200 USD (Herramientas de analytics y soporte).
+- **Total**: **~$2,000 USD**.
+- **Objetivo**: Establecer MAMBO como la app referente en la comunidad universitaria y regional.
+
+#### Escenario C: Escalamiento y Profesionalización (5,000 - 20,000+ Usuarios)
+*Visión a 18-24 meses.*
+- **Infraestructura**: $1,500 USD (Servidores de alta disponibilidad y volumen masivo de IA).
+- **Marketing**: $5,000 USD (Campañas nacionales y alianzas con influencers fitness).
+- **Servicios Pro**: $3,000 USD (Mejoras constantes de UI/UX y soporte técnico).
+- **Total**: **~$9,500 USD**.
+- **Objetivo**: Alcanzar el punto de equilibrio financiero y preparar el proyecto para inversión externa.
+
+### 3.1. Proyección de Rentabilidad (Márgenes)
+Para estas cifras, asumimos un **Ticket Promedio de $5 USD/mes** (Suscripción Elite) y una **Conversión del 5%** de los usuarios gratuitos a premium.
+
+| Escenario | Usuarios Totales | Usuarios Premium | Ingreso Anual (Bruto) | Costos Anuales | Margen de Utilidad |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **A (Piloto)** | 500 | 25 | $1,500 USD | $424 USD | **~71%** |
+| **B (Tracción)** | 4,000 | 200 | $12,000 USD | $2,000 USD | **~83%** |
+| **C (Escala)** | 15,000 | 750 | $45,000 USD | $9,500 USD | **~78%** |
+
+*Nota: Los márgenes en software son altísimos porque el costo de servir a un usuario adicional es marginal (casi cero). Esto es lo que hace que MAMBO sea un negocio extremadamente atractivo.*
+
+---
+
+### 4. Validación de Mercado (Market Validation)
+- **Target**: Estudiantes universitarios (nicho inicial) y entusiastas del fitness intermedios.
+- **Evidencia**: "Nace de una necesidad personal validada con otros estudiantes que usan 3 apps distintas para lo mismo".
+- **Competencia**: Identifica a Hevy o Strong, pero recalca que ninguna integra **Educación (Academia)** y **Nutrición** de forma nativa como Mambo.
+
+---
+
+### 3.2. La Propuesta de Financiación (The Ask)
+En el formulario o pitch final, debes ser directo con lo que pides. Aquí tienes la estrategia recomendada para alguien en tu posición:
+
+- **Monto solicitado**: **$1,000 USD** (Cubre el Escenario A completo + margen para imprevistos).
+- **Participación ofrecida (Si es requerida)**: Entre un **3% y un 5%**. 
+- **Valoración estimada del proyecto**: **$20,000 USD**. 
+    - *Justificación*: Se fundamenta en un producto tecnológico con validación técnica avanzada (80% del MVP), propiedad intelectual y un modelo de negocio con márgenes superiores al 70%.
+
+#### ¿Cómo redactar la petición?
+> "Solicitamos un apoyo inicial de **$1,000 USD** para ejecutar nuestra fase de validación (Escenario A). Con este capital cubriremos los costos operativos de servidores, infraestructura de IA y licencias de las tiendas durante el primer año, permitiéndonos alcanzar nuestros primeros **500 usuarios**. A cambio, ofrecemos un **5% de participación**, valorando el proyecto en **$20,000 USD**; una cifra equilibrada que reconoce el trabajo ya invertido en el desarrollo y el potencial de mercado escalable de MAMBO."
+
+### 3.3. Riesgos y Responsabilidades: ¿Tengo que devolver el dinero?
+Este es el punto que más tranquilidad debe darte: **Una inversión no es un préstamo.**
+
+- **Si el proyecto fracasa**: En el mundo de las startups y el capital de riesgo, el inversor asume el riesgo junto contigo. Si MAMBO no logra despegar y se tiene que cerrar, **no tienes que devolver el dinero** ni pagar nada de tu bolsillo. El inversor simplemente pierde su inversión (sus acciones pasan a valer cero).
+- **Responsabilidad legal**: Tu única obligación es usar el dinero para lo que dijiste que lo usarías (servidores, licencias, etc.) y actuar de "buena fe". Mientras no haya un fraude intencional, no hay deuda personal.
+- **Diferencia con un crédito**: Un banco te cobra intereses y te persigue si no pagas. Un inversor o impulsor universitario te da capital a cambio de una pieza del éxito futuro. Si no hay éxito, ellos mueren con la empresa.
+
+### 3.4. Escenario de Éxito: ¿Cómo gana el inversor?
+Si MAMBO se convierte en un éxito, el inversor gana de dos formas principales:
+
+1. **Dividendos (Reparto de Utilidades)**: Si al final del año, después de pagar todos los gastos y reinvertir para crecer, la empresa decide repartir las ganancias sobrantes, el inversor recibe el **5% de esas ganancias repartidas**. 
+   - *Importante*: Nunca es un porcentaje del total ingresado (ventas totales), sino de la utilidad neta que tú decidas repartir.
+2. **Valorización y Venta (Exit)**: Esta es la forma más común. Si dentro de unos años una empresa grande (ej: Nike o un fondo de inversión) quiere comprar MAMBO por $1,000,000 USD, el inversor cobra el **5% del valor de venta** ($50,000 USD). 
+
+**En resumen**: El inversor es tu socio, no tu cobrador. Su ganancia está ligada a que la empresa sea más valiosa mañana de lo que es hoy.
+
+---
+
+## Próximos pasos para el formulario
+
+1. **Resalta que eres estudiante**: A los evaluadores les encanta el talento interno.
+2. **Muestra el código/diseño**: Si te dejan adjuntar un video de la app funcionando, es un 10 asegurado.
+3. **Pide "Acompañamiento"**: No digas que lo sabes todo. Di que buscas la unidad de emprendimiento para profesionalizar la **validación financiera y de mercado**.

@@ -111,6 +111,7 @@ describe('socialStore', () => {
             caption: 'Test caption',
             media_url: 'media-url',
             is_proof: false,
+            workout_data: null,
         });
         expect(fetchFeedSpy).toHaveBeenCalled();
     });

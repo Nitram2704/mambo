@@ -87,14 +87,14 @@ export default function ProfileScreen() {
                         <View>
                             <AccessibleText
                                 variant="h1"
-                                weight="bold"
-                                className="text-text text-4xl font-black"
+                                weight="black"
+                                className="text-text tracking-tighter"
                                 numberOfLines={1}
                                 adjustsFontSizeToFit
                             >
                                 {t('profile.title')}
                             </AccessibleText>
-                            <AccessibleText weight="medium" className="text-text-secondary text-sm font-medium">{t('profile.subtitle')}</AccessibleText>
+                            <AccessibleText weight="medium" className="text-text-secondary text-sm">{t('profile.subtitle')}</AccessibleText>
                         </View>
                         <View className="flex-row gap-3">
                             <TouchableOpacity

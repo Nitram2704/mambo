@@ -4,15 +4,16 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenWrapper } from '@/components/ui/ScreenWrapper';
 import { AccessibleText } from '@/components/ui/AccessibleText';
-import { Button } from '@/components/ui/Button';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { Colors } from '@/constants/Colors';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 
 export default function CreateSquadScreen() {
     const router = useRouter();
     const { theme } = useAppTheme();
     const colors = Colors[theme];
+    const { t } = useTranslation();
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -21,7 +22,7 @@ export default function CreateSquadScreen() {
 
     const handleCreate = async () => {
         if (!name) {
-            Alert.alert('Error', 'Por favor, introduce un nombre para el Squad');
+            Alert.alert(t('common.error'), t('social.squads.nameRequired') || 'Por favor, introduce un nombre para el Squad');
             return;
         }
 
@@ -30,13 +31,13 @@ export default function CreateSquadScreen() {
             // Mock creation logic for now
             setTimeout(() => {
                 setLoading(false);
-                Alert.alert('¡Éxito!', 'Squad creado correctamente', [
+                Alert.alert(t('common.success'), t('social.squads.createSuccess') || 'Squad creado correctamente', [
                     { text: 'OK', onPress: () => router.back() }
                 ]);
             }, 1500);
         } catch (error) {
             setLoading(false);
-            Alert.alert('Error', 'No se pudo crear el Squad');
+            Alert.alert(t('common.error'), t('social.squads.createError') || 'No se pudo crear el Squad');
         }
     };
 
@@ -47,8 +48,8 @@ export default function CreateSquadScreen() {
                     <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 bg-surface-highlight rounded-full items-center justify-center">
                         <Ionicons name="chevron-back" size={24} color={colors.text} />
                     </TouchableOpacity>
-                    <AccessibleText weight="black" className="text-text text-xl uppercase tracking-widest">
-                        Crear Squad
+                    <AccessibleText variant="h1" weight="black" className="text-text tracking-tighter">
+                        {t('social.squads.create')}
                     </AccessibleText>
                     <View className="w-10" />
                 </View>
@@ -63,7 +64,7 @@ export default function CreateSquadScreen() {
 
                     <View className="mb-6">
                         <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest mb-2 ml-1">
-                            Nombre del Squad
+                            {t('social.squads.nameLabel') || 'Nombre del Squad'}
                         </AccessibleText>
                         <TextInput
                             value={name}
@@ -76,12 +77,12 @@ export default function CreateSquadScreen() {
 
                     <View className="mb-6">
                         <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest mb-2 ml-1">
-                            Descripción
+                            {t('social.squads.descriptionLabel') || 'Descripción'}
                         </AccessibleText>
                         <TextInput
                             value={description}
                             onChangeText={setDescription}
-                            placeholder="¿De qué trata este equipo?"
+                            placeholder={t('social.squads.descriptionPlaceholder') || '¿De qué trata este equipo?'}
                             placeholderTextColor={colors.textMuted}
                             multiline
                             numberOfLines={3}
@@ -92,7 +93,7 @@ export default function CreateSquadScreen() {
 
                     <View className="mb-8">
                         <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest mb-3 ml-1">
-                            Privacidad
+                            {t('social.squads.privacyLabel') || 'Privacidad'}
                         </AccessibleText>
                         <View className="flex-row gap-3">
                             <TouchableOpacity
@@ -100,8 +101,8 @@ export default function CreateSquadScreen() {
                                 className={`flex-1 p-4 rounded-2xl border ${privacy === 'public' ? 'bg-primary/10 border-primary' : 'bg-surface-highlight/30 border-white/5'}`}
                             >
                                 <Ionicons name="earth" size={24} color={privacy === 'public' ? colors.primary : colors.textMuted} />
-                                <AccessibleText weight="bold" className={`mt-2 ${privacy === 'public' ? 'text-primary' : 'text-text'}`}>Público</AccessibleText>
-                                <AccessibleText className="text-text-secondary text-[10px] mt-1">Cualquiera puede unirse</AccessibleText>
+                                <AccessibleText weight="bold" className={`mt-2 ${privacy === 'public' ? 'text-primary' : 'text-text'}`}>{t('social.squads.public') || 'Público'}</AccessibleText>
+                                <AccessibleText className="text-text-secondary text-[10px] mt-1">{t('social.squads.publicDesc') || 'Cualquiera puede unirse'}</AccessibleText>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -109,8 +110,8 @@ export default function CreateSquadScreen() {
                                 className={`flex-1 p-4 rounded-2xl border ${privacy === 'private' ? 'bg-primary/10 border-primary' : 'bg-surface-highlight/30 border-white/5'}`}
                             >
                                 <Ionicons name="lock-closed" size={24} color={privacy === 'private' ? colors.primary : colors.textMuted} />
-                                <AccessibleText weight="bold" className={`mt-2 ${privacy === 'private' ? 'text-primary' : 'text-text'}`}>Privado</AccessibleText>
-                                <AccessibleText className="text-text-secondary text-[10px] mt-1">Solo por invitación</AccessibleText>
+                                <AccessibleText weight="bold" className={`mt-2 ${privacy === 'private' ? 'text-primary' : 'text-text'}`}>{t('social.squads.private') || 'Privado'}</AccessibleText>
+                                <AccessibleText className="text-text-secondary text-[10px] mt-1">{t('social.squads.privateDesc') || 'Solo por invitación'}</AccessibleText>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -128,7 +129,7 @@ export default function CreateSquadScreen() {
                                 <ActivityIndicator color="black" />
                             ) : (
                                 <AccessibleText weight="black" className="text-black text-lg uppercase tracking-wider">
-                                    Crear Wolfpack
+                                    {t('social.squads.createButton') || 'Crear Wolfpack'}
                                 </AccessibleText>
                             )}
                         </LinearGradient>

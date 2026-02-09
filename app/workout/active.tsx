@@ -36,6 +36,10 @@ import { readFileAsBase64 } from '@/utils/fileSystem';
 import { generateWorkoutPost } from '@/utils/social/postGenerator';
 import { useSocialStore } from '@/store/socialStore';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GeminiService } from '@/utils/GeminiService';
+import { VoiceCoach } from '@/utils/voiceCoach';
+import { triggerNotification } from '@/utils/haptics';
+import * as Haptics from 'expo-haptics';
 
 export default function ActiveWorkoutScreen() {
     const router = useRouter();
@@ -60,6 +64,7 @@ export default function ActiveWorkoutScreen() {
     const [showShareModal, setShowShareModal] = useState(false);
     const [sharePostContent, setSharePostContent] = useState('');
     const [completedWorkoutData, setCompletedWorkoutData] = useState<any>(null);
+    const [aiCue, setAiCue] = useState<string | null>(null);
     const { createPost } = useSocialStore();
 
     const {
@@ -120,6 +125,38 @@ export default function ActiveWorkoutScreen() {
             bestReps: bestSet.reps
         };
     })();
+
+    // AI Coach Logic
+    useEffect(() => {
+        if (!profile?.aiCoachEnabled || !currentExercise) return;
+
+        const triggerCue = async () => {
+            const currentSetIndex = currentExercise.sets.findIndex(s => !s.completed);
+            if (currentSetIndex === -1) return;
+
+            const cue = await GeminiService.getWorkoutCue({
+                exerciseName: currentExercise.exerciseName,
+                currentSet: currentSetIndex + 1,
+                totalSets: currentExercise.sets.length,
+                lastWeight: previousPerformance?.bestWeight,
+                lastReps: previousPerformance?.bestReps,
+                targetReps: currentExercise.sets[currentSetIndex].reps || 10,
+            }, {
+                coachStyle: profile.coachStyle,
+                tier: subscription?.tier_id,
+            });
+
+            if (cue) {
+                setAiCue(cue);
+                VoiceCoach.speak(cue);
+                // Auto-hide cue after 8 seconds
+                setTimeout(() => setAiCue(null), 8000);
+            }
+        };
+
+        // Trigger when exercise changes or when rest timer starts (meaning a set was completed)
+        triggerCue();
+    }, [currentExerciseIndex, useActiveWorkoutStore.getState().activeRestTimer.isRunning]);
 
     useEffect(() => {
         if (!startTime) return;
@@ -203,19 +240,35 @@ export default function ActiveWorkoutScreen() {
             });
 
             // Prepare Social Post
-            const postData = generateWorkoutPost(completedWorkout);
+            const postData = await generateWorkoutPost(completedWorkout);
             setSharePostContent(postData.content);
             setCompletedWorkoutData(completedWorkout);
-            setShowShareModal(true);
+
+            // Check for Auto-Post setting
+            if (profile?.autoPostWorkouts) {
+                // Generate workout data object for the post
+                const workoutData = postData.workout_data;
+                await createPost(postData.content, undefined, true, workoutData);
+                triggerNotification(Haptics.NotificationFeedbackType.Success);
+
+                router.replace({
+                    pathname: '/workout/summary',
+                    params: { workoutId: completedWorkout.id }
+                });
+            } else {
+                setShowShareModal(true);
+            }
         } else {
             router.back();
         }
     };
 
+
     const confirmShare = async () => {
         if (completedWorkoutData) {
             // Generate workout data object for the post
-            const workoutData = generateWorkoutPost(completedWorkoutData).workout_data;
+            const postData = await generateWorkoutPost(completedWorkoutData);
+            const workoutData = postData.workout_data;
 
             await createPost(sharePostContent, undefined, true, workoutData);
             setShowShareModal(false);
@@ -1186,6 +1239,21 @@ export default function ActiveWorkoutScreen() {
                     </View>
                 </View>
             </Modal>
+            {/* AI Coach Overlay */}
+            {aiCue && (
+                <View className="absolute top-24 left-6 right-6 z-50 animate-fade-in">
+                    <Card variant="glass" className="bg-primary/90 border-primary p-4 shadow-2xl shadow-primary/40">
+                        <View className="flex-row items-center">
+                            <View className="bg-white/20 p-2 rounded-full mr-3">
+                                <Icon name="sparkles" size={20} color="white" />
+                            </View>
+                            <AccessibleText weight="bold" className="text-white flex-1 text-sm italic">
+                                "{aiCue}"
+                            </AccessibleText>
+                        </View>
+                    </Card>
+                </View>
+            )}
         </ScreenWrapper>
     );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, TouchableOpacity } from 'react-native';
+import { View, Image, TouchableOpacity, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@/components/ui/Card';
 import { AccessibleText } from '@/components/ui/AccessibleText';
@@ -21,6 +21,21 @@ export function PostCard({ post, onLike, onComment, onUserPress }: PostCardProps
     const colors = Colors[theme];
 
     const isWorkout = post.type === 'workout';
+
+    const handleShare = async () => {
+        try {
+            const message = post.workout_data
+                ? `¡He completado ${post.workout_data.workout_name} en Mambo! 🔥 ${post.workout_data.volume}kg movidos.`
+                : `${post.content || 'Mira mi progreso en Mambo!'}`;
+
+            await Share.share({
+                message,
+                url: post.media_url || undefined,
+            });
+        } catch (error) {
+            console.error('Error sharing:', error);
+        }
+    };
 
     return (
         <Animated.View entering={FadeInDown.springify()} className="mb-4">
@@ -60,54 +75,71 @@ export function PostCard({ post, onLike, onComment, onUserPress }: PostCardProps
 
                 {/* Media / Workout Data */}
                 {isWorkout && post.workout_data ? (
-                    <View className="mx-4 mb-4 rounded-2xl overflow-hidden">
+                    <View className="mx-4 mb-4 rounded-3xl overflow-hidden shadow-2xl">
                         <LinearGradient
-                            colors={[colors.primary + '20', colors.primary + '05']}
-                            className="p-4 border border-primary/20"
+                            colors={['#1a1a2e', '#16213e']}
+                            className="p-6 border border-white/10"
                         >
-                            <View className="flex-row items-center justify-between mb-4">
+                            <View className="flex-row items-center justify-between mb-6">
                                 <View className="flex-row items-center">
-                                    <View className="bg-primary/20 p-2 rounded-full mr-3">
-                                        <Ionicons name="trophy" size={20} color={colors.primary} />
+                                    <View className="bg-primary/20 p-3 rounded-2xl mr-4 border border-primary/30">
+                                        <Ionicons name="fitness" size={24} color={colors.primary} />
                                     </View>
                                     <View>
-                                        <AccessibleText weight="bold" className="text-primary text-xs uppercase tracking-widest">
-                                            Entrenamiento Completado
+                                        <AccessibleText weight="bold" className="text-primary text-[10px] uppercase tracking-[3px]">
+                                            Work It Out
                                         </AccessibleText>
-                                        <AccessibleText weight="black" className="text-text text-lg">
+                                        <AccessibleText weight="black" className="text-text text-xl">
                                             {post.workout_data.workout_name}
                                         </AccessibleText>
                                     </View>
                                 </View>
+                                <View className="bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                                    <AccessibleText weight="bold" className="text-text-secondary text-[10px]">
+                                        {new Date(post.created_at).toLocaleDateString()}
+                                    </AccessibleText>
+                                </View>
                             </View>
 
-                            <View className="flex-row justify-between">
-                                <View className="items-center flex-1">
-                                    <AccessibleText weight="bold" className="text-text text-xl">
-                                        {Math.floor(post.workout_data.duration / 60)}m
+                            <View className="flex-row justify-around bg-white/5 py-4 rounded-2xl border border-white/5">
+                                <View className="items-center">
+                                    <AccessibleText weight="black" className="text-text text-2xl">
+                                        {Math.floor(post.workout_data.duration / 60)}
                                     </AccessibleText>
-                                    <AccessibleText className="text-text-secondary text-[10px] uppercase tracking-widest">
-                                        Tiempo
-                                    </AccessibleText>
-                                </View>
-                                <View className="w-px bg-white/10" />
-                                <View className="items-center flex-1">
-                                    <AccessibleText weight="bold" className="text-text text-xl">
-                                        {post.workout_data.volume}kg
-                                    </AccessibleText>
-                                    <AccessibleText className="text-text-secondary text-[10px] uppercase tracking-widest">
-                                        Volumen
+                                    <AccessibleText weight="bold" className="text-text-secondary text-[8px] uppercase tracking-widest mt-1">
+                                        Minutos
                                     </AccessibleText>
                                 </View>
-                                <View className="w-px bg-white/10" />
-                                <View className="items-center flex-1">
-                                    <AccessibleText weight="bold" className="text-text text-xl">
-                                        {post.workout_data.pr_count}
+                                <View className="w-[1px] h-8 bg-white/10 my-auto" />
+                                <View className="items-center">
+                                    <AccessibleText weight="black" className="text-primary text-2xl">
+                                        {post.workout_data.volume}
                                     </AccessibleText>
-                                    <AccessibleText className="text-text-secondary text-[10px] uppercase tracking-widest">
-                                        PRs
+                                    <AccessibleText weight="bold" className="text-text-secondary text-[8px] uppercase tracking-widest mt-1">
+                                        KG Totales
                                     </AccessibleText>
                                 </View>
+                                <View className="w-[1px] h-8 bg-white/10 my-auto" />
+                                <View className="items-center">
+                                    <View className="flex-row items-center">
+                                        <AccessibleText weight="black" className="text-text text-2xl mr-1">
+                                            {post.workout_data.pr_count}
+                                        </AccessibleText>
+                                        {post.workout_data.pr_count > 0 && <Ionicons name="trophy" size={16} color="#fbbf24" />}
+                                    </View>
+                                    <AccessibleText weight="bold" className="text-text-secondary text-[8px] uppercase tracking-widest mt-1">
+                                        Personal Records
+                                    </AccessibleText>
+                                </View>
+                            </View>
+
+                            <View className="mt-6 h-1 bg-white/10 rounded-full overflow-hidden">
+                                <LinearGradient
+                                    colors={[colors.primary, '#60a5fa']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    className="h-full w-[85%]"
+                                />
                             </View>
                         </LinearGradient>
                     </View>
@@ -150,8 +182,11 @@ export function PostCard({ post, onLike, onComment, onUserPress }: PostCardProps
                             ) : null}
                         </TouchableOpacity>
 
-                        <TouchableOpacity className="active:scale-95">
-                            <Ionicons name="paper-plane-outline" size={22} color={colors.text} />
+                        <TouchableOpacity
+                            onPress={handleShare}
+                            className="active:scale-95"
+                        >
+                            <Ionicons name="share-social-outline" size={22} color={colors.text} />
                         </TouchableOpacity>
                     </View>
                 </View>

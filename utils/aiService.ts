@@ -383,7 +383,7 @@ export async function askAssistant(
 
         return await retryWithBackoff(async () => {
             const model = genAI.getGenerativeModel({
-                model: 'gemini-2.0-flash-exp',
+                model: 'gemini-2.5-flash',
                 tools: tools
             });
 
@@ -527,7 +527,7 @@ export async function askAssistant(
 
 export async function generateRecipe(prompt: string): Promise<any> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         const systemPrompt = `
         You are an expert nutritionist and chef. Create a recipe based on the user's request.
@@ -570,7 +570,7 @@ export async function generateRecipe(prompt: string): Promise<any> {
 
 export async function predict1RM(exerciseName: string, history: { date: string, weight: number, reps: number }[]): Promise<string> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const prompt = `
         Basado en este historial de entrenamiento para ${exerciseName}:
         ${JSON.stringify(history)}
@@ -590,7 +590,7 @@ export async function predict1RM(exerciseName: string, history: { date: string, 
 
 export async function predictWeightTrend(currentWeight: number, targetWeight: number, adherence: number): Promise<string> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const prompt = `
         Usuario actual: ${currentWeight}kg. Objetivo: ${targetWeight}kg.
         Adherencia nutricional actual: ${adherence}%.

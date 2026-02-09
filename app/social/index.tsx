@@ -15,7 +15,7 @@ import { useUserProfileStore } from '@/store/userProfileStore';
 import { PostCard } from '@/components/social/PostCard';
 import { Post } from '@/types/social';
 
-type SocialTab = 'feed' | 'squads' | 'arena';
+type SocialTab = 'feed' | 'squads' | 'arena' | 'academy';
 
 export default function SocialHub() {
     const router = useRouter();
@@ -26,7 +26,17 @@ export default function SocialHub() {
 
     const { profile } = useUserProfileStore();
     // TODO: Update store to match new types
-    const { feed, fetchFeed, createPost, uploadMedia, toggleLike, loading: socialLoading } = useSocialStore();
+    const {
+        feed,
+        fetchFeed,
+        createPost,
+        uploadMedia,
+        toggleLike,
+        loading: socialLoading,
+        groups,
+        fetchGroups,
+        wagers
+    } = useSocialStore();
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [caption, setCaption] = useState('');
@@ -35,6 +45,7 @@ export default function SocialHub() {
 
     useEffect(() => {
         if (activeTab === 'feed') fetchFeed();
+        if (activeTab === 'squads') fetchGroups();
     }, [activeTab]);
 
     const onRefresh = () => {
@@ -108,10 +119,10 @@ export default function SocialHub() {
                 <View className="px-6 py-4 flex-row justify-between items-center bg-background border-b border-white/5">
                     <View>
                         <AccessibleText variant="caption" weight="black" className="text-primary uppercase tracking-widest mb-1">
-                            Mambo Social
+                            {t('social.hub.subtitle')}
                         </AccessibleText>
-                        <AccessibleText variant="h1" weight="black" className="text-text text-3xl tracking-tight">
-                            The Pulse
+                        <AccessibleText variant="h1" weight="black" className="text-text tracking-tighter">
+                            {t('social.hub.title')}
                         </AccessibleText>
                     </View>
                     <TouchableOpacity className="w-10 h-10 rounded-full bg-surface-highlight items-center justify-center border border-white/10">
@@ -125,6 +136,7 @@ export default function SocialHub() {
                         <TabButton id="feed" label="Feed" icon="list" />
                         <TabButton id="squads" label="Squads" icon="people" />
                         <TabButton id="arena" label="Arena" icon="trophy" />
+                        <TabButton id="academy" label="Academy" icon="school" />
                     </View>
                 </View>
 
@@ -169,10 +181,10 @@ export default function SocialHub() {
                                 feed.map((post) => (
                                     <PostCard
                                         key={post.id}
-                                        post={post as unknown as Post} // Temporary cast until store is updated
+                                        post={post as unknown as Post}
                                         onLike={() => toggleLike(post.id)}
-                                        onComment={() => { }}
-                                        onUserPress={() => { }}
+                                        onComment={() => router.push({ pathname: '/social/post/[id]', params: { id: post.id } })}
+                                        onUserPress={() => { }} // Could navigate to profile
                                     />
                                 ))
                             )}
@@ -180,18 +192,128 @@ export default function SocialHub() {
                     )}
 
                     {activeTab === 'squads' && (
-                        <View className="items-center py-20">
-                            <Ionicons name="construct-outline" size={48} color={colors.primary} />
-                            <AccessibleText weight="bold" className="text-text mt-4 text-lg">The Wolfpack</AccessibleText>
-                            <AccessibleText className="text-text-secondary mt-2">Próximamente en la Fase 2</AccessibleText>
+                        <View className="pb-24">
+                            <View className="flex-row justify-between items-center mb-6">
+                                <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest pl-1">
+                                    Tus Squads
+                                </AccessibleText>
+                                <TouchableOpacity onPress={() => router.push('/social/squads/browser')}>
+                                    <AccessibleText weight="bold" className="text-primary text-xs">Explorar Todos</AccessibleText>
+                                </TouchableOpacity>
+                            </View>
+
+                            {groups.length === 0 ? (
+                                <Card variant="glass" className="py-12 items-center border-dashed border-white/10">
+                                    <Ionicons name="people-outline" size={48} color={colors.textMuted} className="mb-4" />
+                                    <AccessibleText weight="bold" className="text-text text-center text-lg">No perteneces a ningún Squad</AccessibleText>
+                                    <AccessibleText className="text-text-secondary text-center mt-2 px-10">
+                                        Únete a la manada y entrena con otros usuarios.
+                                    </AccessibleText>
+                                    <TouchableOpacity
+                                        onPress={() => router.push('/social/squads/browser')}
+                                        className="mt-6 bg-primary/10 px-6 py-2 rounded-xl border border-primary/20"
+                                    >
+                                        <AccessibleText weight="bold" className="text-primary">Descubrir Squads</AccessibleText>
+                                    </TouchableOpacity>
+                                </Card>
+                            ) : (
+                                groups.slice(0, 3).map((group) => (
+                                    <TouchableOpacity
+                                        key={group.id}
+                                        className="mb-4"
+                                        onPress={() => router.push({ pathname: '/social/squads/[id]', params: { id: group.id } })}
+                                    >
+                                        <Card variant="glass" className="p-4 flex-row items-center">
+                                            <View className="w-12 h-12 bg-surface-highlight rounded-xl items-center justify-center mr-4 border border-white/10">
+                                                <Ionicons name="people" size={24} color={colors.primary} />
+                                            </View>
+                                            <View className="flex-1">
+                                                <AccessibleText weight="bold" className="text-text text-base">{group.name}</AccessibleText>
+                                                <AccessibleText className="text-text-secondary text-xs">{group.type.toUpperCase()}</AccessibleText>
+                                            </View>
+                                            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                                        </Card>
+                                    </TouchableOpacity>
+                                ))
+                            )}
                         </View>
                     )}
 
                     {activeTab === 'arena' && (
-                        <View className="items-center py-20">
-                            <Ionicons name="trophy-outline" size={48} color={colors.warning} />
-                            <AccessibleText weight="bold" className="text-text mt-4 text-lg">The Arena</AccessibleText>
-                            <AccessibleText className="text-text-secondary mt-2">Próximamente en la Fase 3</AccessibleText>
+                        <View className="pb-24">
+                            <View className="flex-row justify-between items-center mb-6">
+                                <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest pl-1">
+                                    The Arena
+                                </AccessibleText>
+                                <TouchableOpacity onPress={() => router.push('/social/arena')}>
+                                    <AccessibleText weight="bold" className="text-primary text-xs">Ver Dashboard</AccessibleText>
+                                </TouchableOpacity>
+                            </View>
+
+                            <Card variant="glass" className="mb-6 p-6 border-primary/30">
+                                <View className="flex-row items-center mb-4">
+                                    <View className="w-12 h-12 bg-warning/20 rounded-xl items-center justify-center mr-4">
+                                        <Ionicons name="trophy" size={24} color={colors.warning} />
+                                    </View>
+                                    <View className="flex-1">
+                                        <AccessibleText weight="black" className="text-white text-lg">LIDERAZGO GLOBAL</AccessibleText>
+                                        <AccessibleText className="text-text-secondary text-xs">Ves tu posición en el ranking</AccessibleText>
+                                    </View>
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => router.push('/social/arena')}
+                                    className="bg-primary py-3 rounded-xl items-center shadow-glow"
+                                >
+                                    <AccessibleText weight="black" className="text-black uppercase tracking-widest">Entrar a la Arena</AccessibleText>
+                                </TouchableOpacity>
+                            </Card>
+
+                            <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest mb-4 pl-1">
+                                Retos Activos
+                            </AccessibleText>
+                            <Card variant="glass" className="p-10 items-center border-dashed border-white/10">
+                                <Ionicons name="flash-outline" size={32} color={colors.textMuted} className="mb-2" />
+                                <AccessibleText className="text-text-secondary text-center">No hay retos activos en este momento.</AccessibleText>
+                            </Card>
+                        </View>
+                    )}
+
+                    {activeTab === 'academy' && (
+                        <View className="pb-24">
+                            <View className="bg-surface-highlight/30 p-6 rounded-3xl mb-6 border border-white/5">
+                                <View className="flex-row items-center mb-4">
+                                    <View className="w-12 h-12 bg-secondary/20 rounded-xl items-center justify-center mr-4">
+                                        <Ionicons name="school" size={24} color={colors.secondary} />
+                                    </View>
+                                    <View className="flex-1">
+                                        <AccessibleText weight="black" className="text-white text-xl uppercase">Mambo Academy</AccessibleText>
+                                        <AccessibleText className="text-text-secondary text-sm">Domina tu entrenamiento y nutrición</AccessibleText>
+                                    </View>
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => router.push('/academy')}
+                                    className="bg-white/10 py-4 rounded-2xl items-center border border-white/5"
+                                >
+                                    <AccessibleText weight="black" className="text-white uppercase tracking-widest">Explorar Cursos</AccessibleText>
+                                </TouchableOpacity>
+                            </View>
+
+                            <AccessibleText weight="bold" className="text-text-secondary text-xs uppercase tracking-widest mb-4 pl-1">
+                                Recomendado para ti
+                            </AccessibleText>
+                            <Card variant="glass" className="p-4 mb-4 flex-row items-center">
+                                <View className="w-20 h-20 bg-surface-highlight rounded-xl mr-4 overflow-hidden">
+                                    <Ionicons name="nutrition" size={32} color={colors.primary} className="m-auto" />
+                                </View>
+                                <View className="flex-1">
+                                    <View className="bg-primary/20 self-start px-2 py-0.5 rounded-full mb-1">
+                                        <AccessibleText weight="bold" className="text-primary text-[8px]">NUTRICIÓN</AccessibleText>
+                                    </View>
+                                    <AccessibleText weight="bold" className="text-text text-base">Fundamentos de Macros</AccessibleText>
+                                    <AccessibleText className="text-text-secondary text-xs mt-1">12 Lecciones • 45 min</AccessibleText>
+                                </View>
+                                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                            </Card>
                         </View>
                     )}
                 </ScrollView>

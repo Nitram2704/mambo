@@ -269,6 +269,8 @@
         "language": "Idioma",
         "waterReminder": "Recordatorio de Agua",
         "workoutReminder": "Recordatorio de Entrenamiento",
+        "aiCoachPro": "AI Coach Pro",
+        "aiCoachProDesc": "Cues de voz y ajustes en tiempo real durante el entreno",
         "exitPlan": "Salir del Plan Actual",
         "exitPlanTitle": "Salir del Plan Actual",
         "exitPlanMessage": "Esto eliminará todos los entrenamientos futuros programados. Tu historial y racha permanecerán intactos. ¿Estás seguro?",
@@ -564,7 +566,85 @@
             "Regula la temperatura",
             "Ayuda a la digestión"
         ],
-        "waterScientific": "La deshidratación del 2% reduce el rendimiento en un 20%."
+        "waterScientific": "La deshidratación del 2% reduce el rendimiento en un 20%"
+    },
+    "social": {
+        "title": "Social",
+        "tabs": {
+            "feed": "Feed",
+            "squads": "Squads",
+            "arena": "Arena",
+            "groups": "Grupos",
+            "coaching": "Asesoría"
+        },
+        "hub": {
+            "title": "The Pulse",
+            "subtitle": "Mambo Social",
+            "feed": "Feed",
+            "squads": "Squads",
+            "arena": "Arena",
+            "noPosts": "No hay publicaciones aún",
+            "noPostsDesc": "Sé el primero en compartir tu entrenamiento o únete a un Squad.",
+            "newPost": "Nuevo Post",
+            "shareProgress": "Comparte tu progreso...",
+            "addPhoto": "Añadir Foto",
+            "publish": "Publicar"
+        },
+        "squads": {
+            "title": "The Wolfpack",
+            "create": "Crear Squad",
+            "explore": "Explorar Squads",
+            "recommended": "Squads Recomendados",
+            "search": "Buscar Squads...",
+            "about": "Sobre el Squad",
+            "members": "Miembros",
+            "activity": "Actividad Reciente",
+            "join": "Unirse",
+            "nameRequired": "Por favor, introduce un nombre para el Squad",
+            "createSuccess": "Squad creado correctamente",
+            "createError": "No se pudo crear el Squad",
+            "nameLabel": "Nombre del Squad",
+            "descriptionLabel": "Descripción",
+            "descriptionPlaceholder": "¿De qué trata este equipo?",
+            "privacyLabel": "Privacidad",
+            "public": "Público",
+            "publicDesc": "Cualquiera puede unirse",
+            "private": "Privado",
+            "privateDesc": "Solo por invitación",
+            "createButton": "Crear Wolfpack"
+        },
+        "arena": {
+            "title": "The Arena",
+            "wagers": "Wagers",
+            "leaderboard": "Leaderboard",
+            "globalChallenges": "Retos Globales",
+            "active": "ACTIVO",
+            "details": "DETALLES"
+        },
+        "groups": {
+            "title": "Mis Grupos",
+            "create": "Crear Grupo",
+            "empty": "No perteneces a ningún grupo aún.",
+            "types": {
+                "couple": "Pareja",
+                "friends": "Amigos",
+                "community": "Comunidad"
+            }
+        },
+        "coaching": {
+            "title": "Asesoría",
+            "clients": "Mis Clientes",
+            "noCoach": "No tienes un entrenador asignado.",
+            "request": "Solicitar Entrenador"
+        },
+        "feed": {
+            "createPost": "Crear Publicación",
+            "addPhoto": "Añadir Foto",
+            "captionPlaceholder": "¿Qué tal tu entrenamiento hoy?",
+            "workoutProof": "Prueba de Entrenamiento",
+            "workoutProofDesc": "Verificado por datos de actividad",
+            "post": "Publicar"
+        }
     },
     "nutrition": {
         "title": "Nutrición",
@@ -826,6 +906,7 @@
             "units": "Unidades",
             "account": "Cuenta",
             "privacy": "Privacidad y Seguridad",
+            "aiIntelligence": "IA e Inteligencia",
             "about": "Acerca de"
         },
         "notifications": {
@@ -873,38 +954,6 @@
             "title": "Eliminar Cuenta",
             "warning": "Esta acción es irreversible. Perderás todos tus datos y progreso. ¿Estás seguro?",
             "confirm": "Eliminar Definitivamente"
-        }
-    },
-    "social": {
-        "title": "Social",
-        "tabs": {
-            "feed": "Feed",
-            "groups": "Grupos",
-            "coaching": "Asesoría"
-        },
-        "groups": {
-            "title": "Mis Grupos",
-            "create": "Crear Grupo",
-            "empty": "No perteneces a ningún grupo aún.",
-            "types": {
-                "couple": "Pareja",
-                "friends": "Amigos",
-                "community": "Comunidad"
-            }
-        },
-        "coaching": {
-            "title": "Asesoría",
-            "clients": "Mis Clientes",
-            "noCoach": "No tienes un entrenador asignado.",
-            "request": "Solicitar Entrenador"
-        },
-        "feed": {
-            "createPost": "Crear Publicación",
-            "addPhoto": "Añadir Foto",
-            "captionPlaceholder": "¿Qué tal tu entrenamiento hoy?",
-            "workoutProof": "Prueba de Entrenamiento",
-            "workoutProofDesc": "Verificado por datos de actividad",
-            "post": "Publicar"
         }
     },
     "bodyScan": {

@@ -1,0 +1,40 @@
+FAIL store/__tests__/socialStore.test.ts (5.996 s)
+  socialStore
+    ÔêÜ should fetch groups successfully (5 ms)
+    ÔêÜ should fetch feed successfully (1 ms)
+    ├ù should create a post successfully (6 ms)
+    ÔêÜ should toggle like successfully (like) (1 ms)
+    ÔêÜ should toggle like successfully (unlike) (1 ms)
+
+  ÔùÅ socialStore ÔÇ║ should create a post successfully
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+        "caption": "Test caption",
+        "is_proof": false,
+        "media_url": "media-url",
+        "profile_id": "user-1",
+    +   "workout_data": null,
+      },
+
+    Number of calls: 1
+
+      107 |         await useSocialStore.getState().createPost('Test caption', 'media-url');
+      108 |
+    > 109 |         expect(insertMock).toHaveBeenCalledWith({
+          |                            ^
+      110 |             profile_id: 'user-1',
+      111 |             caption: 'Test caption',
+      112 |             media_url: 'media-url',
+
+      at Object.<anonymous> (store/__tests__/socialStore.test.ts:109:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 4 passed, 5 total
+Snapshots:   0 total
+Time:        6.407 s
+Ran all test suites matching /store\\__tests__\\socialStore.test.ts/i.

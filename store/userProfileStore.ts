@@ -57,6 +57,8 @@ export interface UserProfile {
     marketingEnabled?: boolean;
     referralCode?: string;
     referredBy?: string;
+    aiCoachEnabled?: boolean;
+    autoPostWorkouts?: boolean;
 }
 
 interface UserProfileState {
@@ -140,6 +142,8 @@ export const useUserProfileStore = create<UserProfileState>()(
                                 marketingEnabled: data.marketing_enabled,
                                 referralCode: data.referral_code,
                                 referredBy: data.referred_by,
+                                aiCoachEnabled: data.ai_coach_enabled,
+                                autoPostWorkouts: data.auto_post_workouts,
                             } as UserProfile
                         });
                     }
@@ -200,6 +204,8 @@ export const useUserProfileStore = create<UserProfileState>()(
                     marketing_enabled: newProfile.marketingEnabled,
                     referral_code: newProfile.referralCode,
                     referred_by: newProfile.referredBy,
+                    ai_coach_enabled: newProfile.aiCoachEnabled,
+                    auto_post_workouts: newProfile.autoPostWorkouts,
                     updated_at: new Date(),
                 };
 
