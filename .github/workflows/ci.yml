@@ -1,0 +1,37 @@
+name: Mambo CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: mambo
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: mambo/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run lint
+      run: npm run lint
+
+    - name: Run type check
+      run: npx tsc --noEmit
+
+    - name: Run tests
+      run: npm test

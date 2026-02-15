@@ -34,6 +34,9 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { initializeRevenueCat, identifyUser } from '@/utils/revenuecat';
+import { OnboardingGuard } from '@/components/auth/OnboardingGuard';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+
 
 // Initialize Sentry
 initSentry();
@@ -109,42 +112,6 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (!loaded || profileLoading) return;
-
-    console.log('RootLayout: segments', segments);
-    console.log('RootLayout: session', !!session);
-    console.log('RootLayout: profile', !!profile);
-
-    const inAuthGroup = segments[0] === 'auth' || segments[0] === 'welcome' || segments[0] === 'register' || segments[0] === 'forgot-password' || segments[0] === 'reset-password';
-    const inOnboarding = segments[0] === 'onboarding';
-    const inTabsGroup = segments[0] === '(tabs)';
-
-    // Only redirect if we are not already where we should be
-    if (session) {
-      if (inAuthGroup) {
-        // Allow access to forgot-password and reset-password even if logged in (to handle edge cases)
-        const isPasswordReset = segments[0] === 'forgot-password' || segments[0] === 'reset-password';
-
-        if (!isPasswordReset) {
-          if (profile && !profile.hasCompletedOnboarding) {
-            console.log('RootLayout: Redirecting to /onboarding because session exists, in auth group, and onboarding not completed');
-            router.replace('/onboarding' as any);
-          } else {
-            console.log('RootLayout: Redirecting to (tabs) because session exists and in auth group');
-            router.replace('/(tabs)');
-          }
-        }
-      } else if (!inOnboarding && profile && !profile.hasCompletedOnboarding) {
-        console.log('RootLayout: Redirecting to /onboarding because onboarding not completed');
-        router.replace('/onboarding' as any);
-      }
-    } else if (!inAuthGroup) {
-      console.log('RootLayout: Redirecting to /welcome because no session');
-      router.replace('/welcome');
-    }
-  }, [session, segments, loaded, profileLoading, profile]);
-
-  useEffect(() => {
     if (error) throw error;
   }, [error]);
 
@@ -180,35 +147,37 @@ export default function RootLayout() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <ThemeProvider value={navigationTheme}>
               <RestTimerProvider>
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    gestureEnabled: true,
-                    animation: 'slide_from_right',
-                  }}
-                >
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="welcome" />
-                  <Stack.Screen name="auth" />
-                  <Stack.Screen name="register" />
-                  <Stack.Screen name="forgot-password" />
-                  <Stack.Screen name="reset-password" />
-                  <Stack.Screen name="onboarding/index" />
-                  <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-                  <Stack.Screen name="routines/create" options={{ presentation: 'modal' }} />
-                  <Stack.Screen
-                    name="workout/active"
-                    options={{
-                      animation: 'fade',
-                      gestureEnabled: false // Disable swipe back during active workout to prevent accidental exit
+                <OnboardingGuard>
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      gestureEnabled: true,
+                      animation: 'slide_from_right',
                     }}
-                  />
-                </Stack>
-                {!isZenMode && <FloatingTimer />}
-                {!isZenMode && <AssistantButton />}
-                <Toast />
-                <AchievementUnlock />
-                <StatusBar style="auto" />
+                  >
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="welcome" />
+                    <Stack.Screen name="auth" />
+                    <Stack.Screen name="register" />
+                    <Stack.Screen name="forgot-password" />
+                    <Stack.Screen name="reset-password" />
+                    <Stack.Screen name="onboarding/index" />
+                    <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+                    <Stack.Screen name="routines/create" options={{ presentation: 'modal' }} />
+                    <Stack.Screen
+                      name="workout/active"
+                      options={{
+                        animation: 'fade',
+                        gestureEnabled: false // Disable swipe back during active workout to prevent accidental exit
+                      }}
+                    />
+                  </Stack>
+                  {!isZenMode && <FloatingTimer />}
+                  {!isZenMode && <AssistantButton />}
+                  <Toast />
+                  <AchievementUnlock />
+                  <StatusBar style="auto" />
+                </OnboardingGuard>
               </RestTimerProvider>
             </ThemeProvider>
           </GestureHandlerRootView>
