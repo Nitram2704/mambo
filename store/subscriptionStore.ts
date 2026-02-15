@@ -45,18 +45,10 @@ export const useSubscriptionStore = create<SubscriptionState>()(
                         return;
                     }
 
-                    // 1. Get RevenueCat Customer Info
-                    const customerInfo = await Purchases.getCustomerInfo();
-                    let currentTier: SubscriptionTier = 'STARTER';
+                    // BYPASS: Force ELITE tier for testing
+                    const currentTier: SubscriptionTier = 'ELITE';
 
-                    // Map RevenueCat entitlements to our tiers
-                    if (customerInfo.entitlements.active['elite_features']) {
-                        currentTier = 'ELITE';
-                    } else if (customerInfo.entitlements.active['pro_features']) {
-                        currentTier = 'PRO';
-                    }
-
-                    // 2. Get Supabase Subscription Data
+                    // 2. Sync with Supabase Subscription Data
                     const { data, error } = await supabase
                         .from('user_subscriptions')
                         .select('*')
@@ -64,8 +56,8 @@ export const useSubscriptionStore = create<SubscriptionState>()(
                         .single();
 
                     if (error && error.code === 'PGRST116') {
-                        // Create default subscription if not exists
-                        const defaultSub = {
+                        // Create ELITE subscription if not exists
+                        const eliteSub = {
                             user_id: user.id,
                             tier_id: currentTier,
                             cv_credits_used_monthly: 0,
@@ -74,7 +66,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
                         const { data: newSub } = await supabase
                             .from('user_subscriptions')
-                            .insert(defaultSub)
+                            .insert(eliteSub)
                             .select()
                             .single();
 
@@ -82,7 +74,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
                             set({ subscription: newSub as any });
                         }
                     } else if (data) {
-                        // Sync tier if it changed in RevenueCat
+                        // Force ELITE even if Supabase says otherwise
                         if (data.tier_id !== currentTier) {
                             await supabase
                                 .from('user_subscriptions')
@@ -102,35 +94,14 @@ export const useSubscriptionStore = create<SubscriptionState>()(
             },
 
             fetchOfferings: async () => {
-                try {
-                    const offerings = await Purchases.getOfferings();
-                    if (offerings.current !== null) {
-                        set({ offerings: offerings.current });
-                    }
-                } catch (e) {
-                    console.error('Error fetching offerings:', e);
-                }
+                // BYPASS: Return null to avoid RevenueCat initialization errors
+                set({ offerings: null });
             },
 
             purchasePackage: async (pkg: PurchasesPackage) => {
-                set({ loading: true });
-                try {
-                    const { customerInfo } = await Purchases.purchasePackage(pkg);
-
-                    // Check if purchase was successful
-                    if (customerInfo.entitlements.active['pro'] || customerInfo.entitlements.active['elite']) {
-                        await get().fetchSubscription();
-                        return true;
-                    }
-                    return false;
-                } catch (e: any) {
-                    if (!e.userCancelled) {
-                        console.error('Error purchasing package:', e);
-                    }
-                    return false;
-                } finally {
-                    set({ loading: false });
-                }
+                // BYPASS: Always return true as if successful
+                await get().fetchSubscription();
+                return true;
             },
 
             restorePurchases: async () => {
