@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import { loadContext } from './mambo-qa/context_loader.ts';
-import { generateMaestroTest } from './mambo-qa/llm_client.ts';
-import { runMaestroTest } from './mambo-qa/runner.ts';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { loadContext } from './mambo-qa/context_loader.js';
+import { generateMaestroTest, MaestroTestPackage } from './mambo-qa/llm_client.js';
+import { runMaestroTest } from './mambo-qa/runner.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,10 +18,7 @@ async function main() {
     const apiKey = process.env.GEMINI_API_KEY || process.env.EXPO_PUBLIC_GEMINI_API_KEY;
     if (!apiKey) {
         console.error('❌ Error: GEMINI_API_KEY (or EXPO_PUBLIC_GEMINI_API_KEY) is missing from process.env');
-        console.error('Loaded from: ' + path.resolve(process.cwd(), '.env'));
         process.exit(1);
-    } else {
-        console.log('🔑 API Key found (ends with ' + apiKey.slice(-4) + ')');
     }
 
     if (!prompt || prompt === '--dry-run') {
@@ -29,53 +26,87 @@ async function main() {
         process.exit(1);
     }
 
-    console.log(`🎯 Goal: "${prompt}"`);
+    console.log('\x1b[36m%s\x1b[0m', '══════════════════════════════════════════════════');
+    console.log('\x1b[36m%s\x1b[0m', '🚀  MAMBO AI TEST RUNNER');
+    console.log('\x1b[36m%s\x1b[0m', '══════════════════════════════════════════════════\n');
+
+    console.log(`🎯 \x1b[1mObjetivo:\x1b[0m "${prompt}"`);
     if (isDryRun) {
-        console.log('🧪 DRY-RUN MODE: Will generate YAML but skip execution\n');
+        console.log('🧪 \x1b[33mMODO DRY-RUN ACTIVADO\x1b[0m');
     }
+    console.log('');
 
     // 2. Load Context (RAG)
+    console.log('🔍 \x1b[90mEscaneando contexto de la aplicación...\x1b[0m');
     const rootDir = path.resolve(__dirname, '..');
     const context = await loadContext(rootDir);
+    console.log('✅ \x1b[32mContexto cargado correctamente.\x1b[0m\n');
 
     let currentError: string | undefined = undefined;
     const MAX_RETRIES = isDryRun ? 1 : 3;
 
     // 3. The Autonomous Loop
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        console.log(`\n🔄 Attempt ${attempt}/${MAX_RETRIES}`);
+        console.log(`\n\x1b[35m🔄 INTENTO ${attempt}/${MAX_RETRIES}\x1b[0m`);
+        console.log('─'.repeat(30));
 
-        // A. Generate
-        const yaml = await generateMaestroTest(prompt, context, currentError);
-        console.log('📝 Generated YAML:\n');
-        console.log('─'.repeat(50));
-        console.log(yaml);
-        console.log('─'.repeat(50));
+        try {
+            // A. Generate
+            console.log('🤖 \x1b[90mGenerando script con IA...\x1b[0m');
+            const testPackage: MaestroTestPackage = await generateMaestroTest(prompt, context, currentError);
 
-        if (isDryRun) {
-            console.log('\n✅ DRY-RUN: YAML generated successfully. Skipping execution.');
-            console.log('💡 To run for real, remove --dry-run flag and ensure Maestro is installed.');
-            process.exit(0);
-        }
+            const explanationStr = Array.isArray(testPackage.explanation)
+                ? testPackage.explanation.join('\n')
+                : String(testPackage.explanation);
 
-        // B. Execute
-        const result = await runMaestroTest(yaml);
+            console.log('\n\x1b[1m\x1b[34m📋 PLAN DE PRUEBA GENERADO\x1b[0m');
+            console.log(`\x1b[34m🆔 Categoría:\x1b[0m ${testPackage.testType}`);
+            console.log(`\x1b[34m📝 Resumen:\x1b[0m   ${testPackage.summary}`);
+            console.log(`\x1b[34m💡 Pasos a seguir:\x1b[0m\n   ${explanationStr.replace(/\n/g, '\n   ')}\n`);
 
-        // C. Check Result
-        if (result.success) {
-            console.log('\n🎉 SUCCESS! The test passed.');
-            process.exit(0);
-        } else {
-            console.error(`\n⚠️ Attempt ${attempt} failed.`);
-            console.error(`Error: ${result.error?.slice(0, 300)}...`); // Log first 300 chars of error
+            if (isDryRun) {
+                console.log('\x1b[32m📄 SCRIPT MAESTRO (YAML):\x1b[0m');
+                console.log('\x1b[90m' + '─'.repeat(50) + '\x1b[0m');
+                console.log('\x1b[37m' + testPackage.yaml + '\x1b[0m');
+                console.log('\x1b[90m' + '─'.repeat(50) + '\x1b[0m');
+                console.log('\n✅ \x1b[1m\x1b[32mDRY-RUN COMPLETADO CON ÉXITO\x1b[0m');
+                process.exit(0);
+            }
 
-            // Feed error back to loop
-            currentError = result.error;
+            // C. Execute
+            console.log('🚀 \x1b[1mEJECUTANDO EN DISPOSITIVO...\x1b[0m\n');
+            const result = await runMaestroTest(testPackage.yaml);
+
+            // D. Check Result
+            if (result.success) {
+                console.log('\n' + '═'.repeat(50));
+                console.log('\x1b[1m\x1b[32m   ✅  PRUEBA SUPERADA CON ÉXITO\x1b[0m');
+                console.log('═'.repeat(50));
+                console.log(`\x1b[32mLa suite "${testPackage.testType}" ha finalizado correctamente.\x1b[0m\n`);
+                process.exit(0);
+            } else {
+                console.log('\n' + '─'.repeat(50));
+                console.log('\x1b[1m\x1b[31m   ❌  LA PRUEBA HA FALLADO\x1b[0m');
+                console.log('─'.repeat(50));
+                console.log(`\n\x1b[31mMotivo del fallo:\x1b[0m\n${result.error?.slice(0, 500)}...\n`);
+
+                if (attempt < MAX_RETRIES) {
+                    console.log('\x1b[33m🔄 Re-intentando ajuste inteligente del script...\x1b[0m');
+                }
+                currentError = result.error;
+            }
+        } catch (error: any) {
+            console.error(`\n❌ \x1b[31mError fatal en el intento ${attempt}:\x1b[0m`, error.message);
+            if (attempt === MAX_RETRIES) throw error;
         }
     }
 
-    console.error('\n💥 strictMaxRetriesExceeded: Could not fix the test after multiple attempts.');
+    console.log('\n\x1b[41m\x1b[37m 💥 LÍMITE DE INTENTOS ALCANZADO \x1b[0m');
+    console.log('No se pudo generar un test funcional después de múltiples intentos.');
     process.exit(1);
 }
 
-main().catch(e => console.error(e));
+main().catch(e => {
+    console.error('\n\x1b[31m🔴 Proceso abortado inesperadamente:\x1b[0m');
+    console.error(e.message);
+});

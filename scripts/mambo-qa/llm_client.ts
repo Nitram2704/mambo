@@ -1,58 +1,81 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import type { AppContext } from './context_loader.ts';
+import { AppContext } from './context_loader.js';
+import { callLLM, createLLMClient } from './llm_mcp.js';
+import { modelsOPenRouter } from './models.js';
 
-// IMPORTANT: Requires GEMINI_API_KEY in .env
-const apiKey = process.env.GEMINI_API_KEY || process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
-const genAI = new GoogleGenerativeAI(apiKey);
+/**
+ * Interface for the structured response from the LLM.
+ */
+export interface MaestroTestPackage {
+    yaml: string;
+    testType: string;
+    summary: string;
+    explanation: string;
+}
 
+/**
+ * Generates a Maestro test script and metadata using LLM via MCP.
+ */
 export async function generateMaestroTest(
     prompt: string,
     context: AppContext,
-    previousError?: string
-): Promise<string> {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    errorFeedback?: string
+): Promise<MaestroTestPackage> {
+    const { client: llmClient } = await createLLMClient();
 
-    const availableIDs = context.testIDs.join(', ');
-
-    // Construct System Prompt
-    let systemInstruction = `
-    You are an expert QA Automation Engineer for a React Native app called "Mambo".
-    Your goal is to write a Maestro YAML test based on the user's request.
+    const systemPrompt = `
+    Eres un experto en QA Automation con Maestro. Tu objetivo es generar scripts YAML para Maestro que prueben una aplicación móvil React Native.
     
-    CONTEXT:
-    - Available testIDs in the app: [${availableIDs}]
-    - The app uses Expo Router.
-    - If you need to tap text, use "tapOn: 'Text'" but prefer "tapOn: { id: '...' }" if a matching testID exists.
-    
-    RULES:
-    1. Output ONLY the raw YAML content. No markdown blocks, no explanations.
-    2. Use the provided testIDs. Do not invent new ones unless strictly necessary (and warn about it).
-    3. Keep it simple.
-    
-    mimic the style of these examples:
+    Contexto de la aplicación:
+    - TestIDs disponibles: ${context.testIDs.join(', ')}
+    - Ejemplos de tests existentes:
     ${context.exampleTests}
+
+    Instrucciones CRÍTICAS:
+    1. Genera un objeto JSON válido. NO incluyas markdown.
+    2. El campo "yaml" debe ser código Maestro puro (empezando con appId: com.mambo.app).
+    3. EL YAML DEBE COINCIDIR EXACTAMENTE con la explicación proporcionada.
+    4. El campo "explanation" debe ser una lista numerada con iconos que describa qué hace CADA sección del YAML.
+    5. Estructura del JSON:
+       {
+         "yaml": "código maestro...",
+         "testType": "Categoría (ej: 🔐 Autenticación)",
+         "summary": "Resumen rápido",
+         "explanation": "1️⃣ Paso uno... \n2️⃣ Paso dos..."
+       }
+
+    ${errorFeedback ? `\nERROR PREVIO: El test falló con este error:\n${errorFeedback}\nPor favor, genera una solución alternativa coherente.` : ''}
     `;
 
-    // Add error context for self-correction
-    if (previousError) {
-        systemInstruction += `
-        \n🚨 PREVIOUS EXECUTION FAILED:
-        The last YAML you generated failed with this error:
-        "${previousError}"
-        
-        Fix the YAML to resolve this specific error.
-        `;
+    const userPrompt = `Objetivo de la prueba: ${prompt}`;
+
+    try {
+        const rawContent = await callLLM(llmClient, modelsOPenRouter.claude, systemPrompt, userPrompt);
+
+        // Extract JSON (search for the first { and last })
+        const firstBrace = rawContent.indexOf('{');
+        const lastBrace = rawContent.lastIndexOf('}');
+
+        if (firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace) {
+            console.error('❌ Raw LLM Response:', rawContent);
+            throw new Error(`Could not find a valid JSON object in LLM response.`);
+        }
+
+        const jsonStr = rawContent.substring(firstBrace, lastBrace + 1);
+
+        try {
+            const testPackage = JSON.parse(jsonStr) as MaestroTestPackage;
+
+            // Clean up YAML just in case
+            testPackage.yaml = testPackage.yaml.replace(/^```yaml/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
+
+            return testPackage;
+        } catch (parseError: any) {
+            console.error('❌ Failed to parse JSON:', jsonStr);
+            console.error('❌ Error Detail:', parseError.message);
+            throw new Error(`Invalid JSON format in LLM response.`);
+        }
+    } catch (error: any) {
+        console.error('Error generating Maestro test package via MCP:', error);
+        throw error;
     }
-
-    console.log(previousError ? '🤖 Analyzing error and re-planning...' : '🤖 Generating test plan...');
-
-    const result = await model.generateContent([
-        systemInstruction,
-        `Task: "${prompt}"`
-    ]);
-
-    const response = result.response.text();
-
-    // Cleanup markdown if existing
-    return response.replace(/```yaml/g, '').replace(/```/g, '').trim();
 }

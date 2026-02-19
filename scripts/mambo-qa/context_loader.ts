@@ -1,6 +1,6 @@
 import fs from 'fs';
-import path from 'path';
 import { glob } from 'glob';
+import path from 'path';
 
 import { fileURLToPath } from 'url';
 
@@ -64,8 +64,6 @@ function getExampleTests(rootDir: string): string {
 }
 
 export async function loadContext(rootDir: string): Promise<AppContext> {
-    console.log('🔍 Scanning app context (testIDs & examples)...');
-
     // In v1 we scan every time, later we can implement cache check
     const testIDs = await scanTestIDs(rootDir);
     const exampleTests = getExampleTests(rootDir);
@@ -76,6 +74,5 @@ export async function loadContext(rootDir: string): Promise<AppContext> {
         filesSummary: [] // Future: list of key Screens
     };
 
-    console.log(`✅ Found ${testIDs.length} testIDs and ${context.exampleTests.length} chars of examples.`);
     return context;
 }

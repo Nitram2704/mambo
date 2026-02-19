@@ -2,6 +2,7 @@
   "name": "mambo",
   "main": "expo-router/entry",
   "version": "1.2.0",
+  "type": "module",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -10,8 +11,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "test:ai": "ts-node -T scripts/ai-test-runner.ts",
-    "test:ai:dry": "ts-node -T scripts/ai-test-runner.ts --dry-run"
+    "test:ai": "npx tsx scripts/ai-test-runner.ts",
+    "test:ai:dry": "npx tsx scripts/ai-test-runner.ts --dry-run",
+    "mcp": "npx tsx scripts/mambo-qa/mcpClient.ts"
   },
   "dependencies": {
     "@expo/json-file": "^10.0.8",
@@ -19,6 +21,7 @@
     "@google/genai": "^1.30.0",
     "@google/generative-ai": "^0.24.1",
     "@midudev/tailwind-animations": "^0.2.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
     "@react-native-community/slider": "5.0.1",
@@ -82,7 +85,7 @@
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
     "tailwindcss": "^3.4.1",
-    "zod": "^4.2.1",
+    "zod": "^3.25.76",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -94,6 +97,7 @@
     "eslint-config-expo": "~10.0.0",
     "jest": "~29.7.0",
     "jest-expo": "^54.0.16",
+    "react-test-renderer": "19.1.0",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2"
