@@ -1,6 +1,6 @@
 import { AppContext } from './context_loader.js';
 import { callLLM, createLLMClient } from './llm_mcp.js';
-import { modelsOPenRouter } from './models.js';
+import { modelsOPenRouter, modelPriority } from './models.js';
 
 /**
  * Interface for the structured response from the LLM.
@@ -49,7 +49,35 @@ export async function generateMaestroTest(
     const userPrompt = `Objetivo de la prueba: ${prompt}`;
 
     try {
-        const rawContent = await callLLM(llmClient, modelsOPenRouter.claude, systemPrompt, userPrompt);
+        let rawContent = "";
+        let modelUsed = "";
+
+        // Usar lista de prioridad centralizada
+        for (const model of modelPriority) {
+            // Saltamos modelos que no son de OpenRouter en este cliente
+            if (!model.includes('/') && model !== 'openrouter/free') continue;
+
+            try {
+                console.log(`📡 Intentando generar test con: ${model}...`);
+                rawContent = await callLLM(llmClient, model, systemPrompt, userPrompt);
+
+                // Validar que la respuesta tenga al menos una llave de JSON
+                if (rawContent.includes('{') && rawContent.includes('}')) {
+                    modelUsed = model;
+                    break;
+                }
+                console.warn(`⚠️ Respuesta de ${model} no parece JSON válido, reintentando con el siguiente...`);
+            } catch (error: any) {
+                console.error(`❌ Falló modelo ${model}: ${error.message}`);
+                continue;
+            }
+        }
+
+        if (!rawContent) {
+            throw new Error("Todos los modelos fallaron para generar el test. Revisa tu conexión o API Key.");
+        }
+
+        console.log(`✅ Test generado exitosamente por: ${modelUsed}`);
 
         // Extract JSON (search for the first { and last })
         const firstBrace = rawContent.indexOf('{');
@@ -57,7 +85,7 @@ export async function generateMaestroTest(
 
         if (firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace) {
             console.error('❌ Raw LLM Response:', rawContent);
-            throw new Error(`Could not find a valid JSON object in LLM response.`);
+            throw new Error(`Could not find a valid JSON object in LLM response from ${modelUsed}.`);
         }
 
         const jsonStr = rawContent.substring(firstBrace, lastBrace + 1);

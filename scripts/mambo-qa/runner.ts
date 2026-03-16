@@ -22,7 +22,18 @@ export async function runMaestroTest(yamlContent: string): Promise<RunResult> {
 
     try {
         // 2. Run Maestro
-        const { stdout, stderr } = await execAsync(`maestro test ${tempFile}`);
+        const isWindows = process.platform === 'win32';
+        const maestroPath = isWindows ? 'C:\\Users\\marti\\maestro\\maestro\\bin\\maestro' : 'maestro';
+
+        // Ensure Android SDK is in path for Maestro and fix Java 25 warnings
+        const env = {
+            ...process.env,
+            ANDROID_HOME: 'C:\\Users\\marti\\AppData\\Local\\Android\\Sdk',
+            PATH: `${process.env.PATH}${isWindows ? ';' : ':'}C:\\Users\\marti\\AppData\\Local\\Android\\Sdk\\platform-tools`,
+            JAVA_OPTS: '--enable-native-access=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED -Dorg.fusesource.jansi.Ansi.disable=true'
+        };
+
+        const { stdout, stderr } = await execAsync(`${maestroPath} test ${tempFile}`, { env });
 
         return {
             success: true,

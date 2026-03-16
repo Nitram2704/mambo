@@ -1,33 +1,57 @@
-# PLAN: Mambo Social & AI Enhancements (Fase 1)
+# PLAN: Orchestrated Integration of `1-autoqa`
 
-## 🎼 Visión de Orquestación
-Este plan coordina a 4 agentes especializados para implementar el sistema **Proof of Workout Automático (POW)** e integrar al **AI Social Commentator**.
-
----
-
-## 🛠️ Desglose Técnico por Agente
-
-### 1. 🏗️ Backend Specialist (@backend-specialist)
-- **Supabase:** Asegurar que la tabla `social_posts` soporte campos de metadatos de workout.
-- **AI Integration:** Implementar función `generateSmartWorkoutCaption(workoutData)` usando Gemini 2.5 Flash para crear textos motivadores únicos.
-- **AI Commentator:** Crear un "trigger" (o lógica en el store) que, 5-10 minutos después de un post manual/automático, genere un comentario automático del "Mambo AI Coach" analizando los logros.
-
-### 2. 🎨 Frontend Specialist (@frontend-specialist)
-- **User Settings:** Añadir toggle "Publicación Automática" en la configuración de perfil.
-- **PostCard Enhancement:** Rediseñar la sección de workout en `PostCard.tsx` para que parezca una "Story" premium (gradientes dinámicos, iconos de PR relucientes).
-- **Haptics:** Integrar feedback táctil al completar la publicación automática.
-
-### 3. 🧪 Test Engineer (@test-engineer)
-- **Integration Tests:** Verificar que al terminar un workout se cree la entrada en `social_posts`.
-- **Validation:** Asegurar que los datos de volumen y duración sean correctos.
+## Goal
+Integrate the `1-autoqa` branch changes, finalize the ESM transition (Option A), and securely configure the OpenRouter AI service.
 
 ---
 
-## 📅 Cronograma de Ejecución (Fase 2)
-Una vez aprobado, los agentes trabajarán en **PARALELO** sobre sus archivos asignados para minimizar el tiempo de entrega.
+## 👥 Roles & Responsibilities
+
+### 1. `devops-engineer` (Infrastructure & Git)
+- **Task**: Finalize the configuration migration.
+- **Actions**: 
+  - Verify existing `.cjs` files (`babel`, `metro`, `jest`, `eslint`, `tailwind`).
+  - Delete legacy `.js` config files.
+  - Stage and commit the transition.
+  - Run `npm install` to ensure ESM/QA dependencies are locked.
+
+### 2. `backend-specialist` (API & Connectivity)
+- **Task**: Secure API integration.
+- **Actions**:
+  - Add `OPENROUTER_API_KEY` to `.env`.
+  - Verify `aiService.ts` correctly reads from environment variables.
+  - Perform a connectivity smoke test for OpenRouter.
+
+### 3. `test-engineer` (Quality Assurance)
+- **Task**: Stability verification.
+- **Actions**:
+  - Run `npm test` (Jest) to ensure the `.cjs` config works.
+  - Run `npx expo lint` for code quality.
+  - Run Mambo-QA runner (`npm run test:ai`) to verify the new branch features.
 
 ---
 
-## ⏸️ CHECKPOINT DE APROBACIÓN
-- **Meta:** Pasar de publicación manual con modal a publicación inteligente y automática.
-- **Impacto:** Un feed social activo al 100% sin fricción para el usuario.
+## 🛠️ Proposed Workflow
+
+### Phase 1: Planning (Current)
+- [x] Select Approach A.
+- [x] Document this Plan.
+- [ ] User Approval.
+
+### Phase 2: Implementation (Parallel)
+- **Step 1**: DevOps & Backend work in parallel to stabilize environment.
+- **Step 2**: Test-engineer validates the resulting build.
+
+---
+
+## ✅ Verification Criteria
+1. `npm test` passing with zero ESM resolution errors.
+2. `expo start` (Metro) loading successfully.
+3. OpenRouter API responding to test requests.
+4. Orchestration Report generated with all agent contributions.
+
+---
+
+**Onaylıyor musunuz? (Y/N)**
+- Y: Implementation başlatılır
+- N: Planı düzeltirim

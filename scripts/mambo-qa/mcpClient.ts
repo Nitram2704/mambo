@@ -35,9 +35,32 @@ async function agentLoop() {
       const systemPrompt = "Eres un experto en QA. Puedes usar herramientas de filesystem (read_file, write_file, list_directory) y de shell (execute_command).";
       const userPrompt = context;
 
-      const rawContent = await callLLM(llmClient, modelsOPenRouter.deepseek, systemPrompt, userPrompt);
+      let rawContent = "";
+      let modelUsed = "";
 
-      // LIMPIEZA DE JSON (Para evitar errores de parsing)
+      // Usar lista de prioridad centralizada
+      const { modelPriority } = await import('./models.js');
+
+      for (const model of modelPriority) {
+        // En este cliente (MCP), solo usamos los de OpenRouter por ahora
+        if (!model.includes('/') && model !== 'openrouter/free') continue;
+
+        try {
+          console.log(`📡 Intentando con modelo: ${model}...`);
+          rawContent = await callLLM(llmClient, model, systemPrompt, userPrompt);
+          modelUsed = model;
+          break;
+        } catch (error: any) {
+          console.error(`❌ Falló modelo ${model}: ${error.message}`);
+          continue;
+        }
+      }
+
+      if (!rawContent) {
+        throw new Error("Todos los modelos fallaron. Revisa tu API Key o cuota.");
+      }
+
+      console.log(`✅ Respuesta obtenida de: ${modelUsed}`);
       const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         context += "\nError: No enviaste un JSON válido. Intenta de nuevo.";

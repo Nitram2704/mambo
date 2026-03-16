@@ -1,50 +1,36 @@
-# Welcome to your Expo app 👋
+# Mambo Fitness
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Una aplicación integral de fitness basada en IA para gestionar entrenamientos, nutrición y recuperación.
 
-## Get started
+## 🚀 Inicio Rápido
 
-1. Install dependencies
-
+1. **Instalar dependencias:**
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Configurar entorno:**
+   Asegúrate de configurar las variables de entorno necesarias (claves de Supabase y Google GenAI).
 
+3. **Iniciar la aplicación:**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## ✨ Características Principales
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **Registro de Entrenamientos:** Crea rutinas, registra series (Peso, Reps, RIR/RPE) y controla los tiempos de descanso.
+- **Asistente Inteligente (IA):** Integración con Google GenAI para análisis de progreso y sugerencias.
+- **Módulo de Nutrición:** Registro diario y seguimiento de calorías y macronutrientes.
+- **Módulo de Recuperación:** Monitoreo avanzado de calidad y cantidad de sueño.
+- **Modo Offline-First:** Caché local robusta impulsada por Zustand para gimnasios sin buena conexión.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🛠️ Stack Tecnológico
 
-## Get a fresh project
+- **Frontend:** React Native, Expo, Tailwind CSS (NativeWind)
+- **Backend & DB:** Supabase (PostgreSQL)
+- **Estado Local:** Zustand
+- **Inteligencia Artificial:** Google GenAI, Model Context Protocol (MCP)
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+*Para detalles profundos sobre el esquema de base de datos y decisiones de arquitectura, revisa el archivo `technical_spec.md` en la raíz del proyecto.*
